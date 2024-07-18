@@ -20,9 +20,6 @@ jobs:
         with:
           path: /nix
           key: nix-${{ env.cache-name }}-${{ hashFiles('flake.lock') }}
-          restore-keys: |
-            nix-${{ env.cache-name }}-${{ hashFiles('flake.lock') }}
-            nix-${{ env.cache-name }}-
 
       - uses: cachix/install-nix-action@v27
 
@@ -37,9 +34,6 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
-            build-${{ env.cache-name }}
       - name: Install node dependencies
         run: nix develop --ignore-environment --command pnpm install
       - name: Build assets
@@ -54,9 +48,6 @@ jobs:
         with:
           path: ~/.composer-store
           key: build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
-            build-${{ env.cache-name }}
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
         env:
