@@ -15,12 +15,41 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v27
+
+      # Node Setup
+      - name: Set pnpm cache store
+        run: pnpm config set store-dir ~/.pnpm-store
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.pnpm-store
+          key: build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
+            build-${{ env.cache-name }}
       - name: Install node dependencies
         run: nix develop --ignore-environment --command pnpm install
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
+
+      - name: Cache composer packages
+        id: cache-composer
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-composer-packages
+        with:
+          path: ~/.composer-store
+          key: build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
+            build-${{ env.cache-name }}
       - name: Install PHP dependencies
-        run: nix develop --ignore-environment --keep HOME --command composer install --no-dev -o
+        run: nix develop --ignore-environment --command composer install --no-dev -o
+        env:
+          COMPOSER_HOME: ~/.composer-store
       - name: Copy .env
         run: cp .env.example .env
       - name: Generate secret key
