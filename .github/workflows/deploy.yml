@@ -20,6 +20,8 @@ jobs:
         run: nix develop --ignore-environment --command pnpm install
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
+      - name: Install PHP dependencies
+        run: nix develop --ignore-environment --command composer install --no-dev -o
       - name: Build website
         run: nix develop --ignore-environment --command php artisan export
       - name: Deploy website
