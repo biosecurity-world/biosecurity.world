@@ -1,0 +1,2 @@
+* text=auto
+data/data.json filter=lfs diff=lfs merge=lfs -text
