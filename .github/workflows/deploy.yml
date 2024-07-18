@@ -1,5 +1,4 @@
 name: deploy
-run-name: "Deploy biosecurity.world on Cloudflare Pages"
 on:
   push:
     branches:
