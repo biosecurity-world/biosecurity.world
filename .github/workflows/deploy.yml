@@ -65,7 +65,7 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
       - name: Build website
-        run: nix develop --ignore-environment --command php artisan export
+        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
         env:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
