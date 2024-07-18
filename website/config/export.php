@@ -15,7 +15,7 @@ return [
      * For example: "about", "posts/featured"
      */
     'paths' => [
-        'data.json'
+        '/data.json'
     ],
 
     /*

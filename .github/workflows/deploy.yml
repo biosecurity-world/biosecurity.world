@@ -64,12 +64,13 @@ jobs:
           COMPOSER_HOME: ~/.composer-store
       - name: Copy .env
         run: cp .env.example .env
-      - name: Generate secret key
-        run: nix develop --ignore-environment --command php artisan key:generate
       - name: Build website
         run: nix develop --ignore-environment --command php artisan export
+        env:
+          NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       - name: Deploy website
-        run: nix develop --ignore-environment --command wrangler deploy ./dist --project-name biosecurity-world --branch master
+        run: nix develop --ignore-environment --command wrangler deploy ./dist --project-name biosecurity-world
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
