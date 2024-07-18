@@ -30,6 +30,7 @@
           # Add dependencies here
           nodejs
           pnpm
+          wrangler
         ]);
     };
   };

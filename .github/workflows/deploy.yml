@@ -1,0 +1,24 @@
+name: deploy
+run-name: "Deploy biosecurity.world on Cloudflare Pages"
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
+      - name: Install node dependencies
+        uses: nix develop --ignore-environment --command pnpm install
+      - name: Build assets
+        uses: nix develop --ignore-environment --command pnpm build
+      - name: Build website
+        uses: nix develop --ignore-environment --command php artisan export
+      - name: Deploy website
+        uses: nix develop --ignore-environment --command wrangler deploy ./dist --project-name biosecurity-world --branch master
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

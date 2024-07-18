@@ -29,11 +29,16 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
             'throw' => false,
+        ],
+
+        'export' => [
+            'driver' => 'local',
+            'root' => base_path('dist/'),
+            'throw' => false
         ],
 
         'public' => [

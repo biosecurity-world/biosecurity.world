@@ -15,7 +15,7 @@ return [
      * For example: "about", "posts/featured"
      */
     'paths' => [
-        '/graph.json',
+        'data.json'
     ],
 
     /*
@@ -34,7 +34,7 @@ return [
      */
     'exclude_file_patterns' => [
         '/\.php$/',
-        '/mix-manifest\.json$/',
+        '/^hot$/'
     ],
 
     /*
