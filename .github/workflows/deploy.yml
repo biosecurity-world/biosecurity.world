@@ -21,6 +21,10 @@ jobs:
         run: nix develop --ignore-environment --command pnpm build
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep HOME --command composer install --no-dev -o
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Generate secret key
+        run: php artisan key:generate
       - name: Build website
         run: nix develop --ignore-environment --command php artisan export
       - name: Deploy website
