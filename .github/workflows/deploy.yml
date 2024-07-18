@@ -65,7 +65,7 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
       - name: Generate secret key
-        run: php artisan key:generate
+        run: nix develop --ignore-environment --command php artisan key:generate
       - name: Build website
         run: nix develop --ignore-environment --command php artisan export
       - name: Deploy website
