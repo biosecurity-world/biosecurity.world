@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - dev
   workflow_dispatch:
 
 jobs:
@@ -47,6 +48,7 @@ jobs:
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
 
+      # PHP Setup
       - name: Cache composer packages
         id: cache-composer
         uses: actions/cache@v4
@@ -62,6 +64,7 @@ jobs:
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
         env:
           COMPOSER_HOME: ~/.composer-store
+
       - name: Copy .env
         run: cp .env.example .env
       - name: Build website
@@ -69,6 +72,8 @@ jobs:
         env:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+
+      # Deployment
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --command wrangler pages deploy ./dist --project-name biosecurity-world
         env:
