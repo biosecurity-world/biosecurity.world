@@ -14,29 +14,6 @@ const STATE_SUCCESS: AppState = "success"
 const STATE_ERROR: AppState = "error"
 const STATE_LOADING: AppState = "loading"
 
-
-;(async function () {
-    switchAppState(STATE_LOADING, {})
-
-    try {
-        const mapDataResponse = await fetch('/data.json')
-        const rawMapData = await mapDataResponse.json()
-
-        switchAppState(STATE_SUCCESS, {
-            mapData: rawMapData
-        })
-    } catch (e) {
-        if (IN_PRODUCTION) {
-            Sentry.captureException(e)
-        }
-
-        switchAppState(STATE_ERROR, {
-            message: "It looks like we are having trouble accessing the map.",
-            showReloadButton: true
-        })
-    }
-})()
-
 function switchAppState<S extends AppState>(
     newState: S,
     args: (S extends "success" ? {
@@ -46,11 +23,11 @@ function switchAppState<S extends AppState>(
             message: string,
             showReloadButton: boolean
         } : (
-            S extends "loading" ? {
-                //
-            } : {})))
+        S extends "loading" ? {
+            //
+        } : {})))
 ): void {
-    let allStates = document.querySelectorAll("#app > [data-state]")
+    let allStates = document.querySelectorAll("[data-state]")
 
     switch (newState) {
         case "loading":
@@ -123,5 +100,25 @@ function renderSuccessState(mapData: any) {
             [-mapWidth * 0.5, -mapHeight * 0.5],
             [mapWidth * 1.5, mapHeight * 1.5]
         ])
+    })
+}
+
+
+try {
+    const mapDataResponse = await fetch('/data.json')
+    const mapData = await mapDataResponse.json()
+
+    switchAppState(STATE_SUCCESS, {
+        mapData: mapData
+
+    })
+} catch (e) {
+    if (IN_PRODUCTION) {
+        Sentry.captureException(e)
+    }
+
+    switchAppState(STATE_ERROR, {
+        message: "It looks like we are having trouble accessing the map.",
+        showReloadButton: true
     })
 }
