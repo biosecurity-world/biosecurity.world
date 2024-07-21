@@ -8,11 +8,13 @@ We use a default Laravel app as a static site generator.
 This brings many advantages compared to any other static site generator:
 
 * It's not a static site generator. It's a dumb server.
+  
   It can do _anything_ a regular server can do, and we can tap into a huge ecosystem of packages and integrations.
   Traditional SSGs don't make it easy to have complex build phases (like making HTTP requests), at least not without
   screwing up
   caching in development. We have a lot of logic that we can put in the build phase, so it would have been annoying.
-* It's stable
+* It's stable.
+  
   The frontend ecosystem is a mess and changes too frequently to be relied upon for projects meant to last years.
 * We get all the features we could possible need without the added annoyances SSGs bring with them:
     * Different pages
