@@ -7,3 +7,4 @@ The goal is to remove indecision during development and have some uniformity. If
     Variables that hold a D3 selection should start with a `$`.
 * No variable named "width", "height", "size", etc.
   Always be very specific, even if the variable's scope is ridiculously small.
+* DOM Element, not selections, should end with "El"
