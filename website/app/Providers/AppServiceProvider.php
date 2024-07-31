@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\NotionData\NotionWrapper;
+use App\Services\NotionData\Notion;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(NotionWrapper::class, function() {
+        $this->app->bind(Notion::class, function() {
             $database = config('services.notion.database');
             $token = config('services.notion.token');
 
@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
                 throw new \Exception("No notion token specified, please set the environment variable NOTION_TOKEN.");
             }
 
-            return new NotionWrapper($database, $token);
+            return new Notion($database, $token);
         });
     }
 

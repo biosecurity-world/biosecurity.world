@@ -2,9 +2,9 @@
 
 namespace App\Services\NotionData\Enums;
 
-enum NodeType: string
+enum PageType: string
 {
     case Entry = 'entry';
     case Category = 'category';
-    case EntryGroup = 'entry_group';
+    case EntryGroup = 'entryGroup';
 }

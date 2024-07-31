@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\NotionData\Support;
+namespace App\Services\Iconsnatch;
 
 class Icon
 {

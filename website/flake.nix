@@ -11,7 +11,7 @@
       nativeBuildInputs = let
         php = pkgs.php83.buildEnv {
           extraConfig = ''
-            memory_limit = 1G
+            memory_limit = 5G
             xdebug.mode=coverage
           '';
 

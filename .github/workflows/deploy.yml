@@ -23,7 +23,7 @@ jobs:
 
       - uses: cachix/install-nix-action@v27
 
-      # Node Setup
+      # Vertex Setup
       - name: Set pnpm cache store
         run: nix develop --ignore-environment --command pnpm config set store-dir ~/.pnpm-store
       - name: Cache node modules
