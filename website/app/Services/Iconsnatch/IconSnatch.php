@@ -3,6 +3,9 @@
 namespace App\Services\Iconsnatch;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class IconSnatch
 {
@@ -20,9 +23,15 @@ class IconSnatch
     }
 
     public static function downloadFrom(string $url): ?Icon {
-        $body = static::client()
-            ->get(urlencode($url))
-            ->getBody()->getContents();
+        try {
+            $body = static::client()
+                ->get(urlencode($url))
+                ->getBody()->getContents();
+        } catch (GuzzleException $e) {
+            report($e);
+
+            return null;
+        }
 
         $data = json_decode($body, false, flags: JSON_THROW_ON_ERROR);
 

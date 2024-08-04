@@ -3,7 +3,7 @@
 namespace App\Services\NotionData;
 
 use App\Services\NotionData\Enums\Color;
-use App\Services\NotionData\Enums\PageType;
+use App\Services\NotionData\Enums\NodeType;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +23,7 @@ class Notion
         $this->client = NotionWrapper::create($notionToken);
     }
 
-    /** @return Collection<string, Page> */
+    /** @return Collection<Page> */
     public function pages(): Collection
     {
         $database = $this->database();
@@ -34,7 +34,8 @@ class Notion
 
         return collect($pages)
             ->filter(fn(NotionPage $page) => !$page->archived)
-            ->mapWithKeys(fn(NotionPage $page) => [$page->id => Hydrator::hydrate($page, $database)]);
+            ->pipe(fn ($pages) => (new Hydrator($database))->hydrate($pages))
+            ->flatten(1);
     }
 
     protected function database(): Database
@@ -47,12 +48,12 @@ class Notion
         );
     }
 
-    protected function getMultiSelectOptions(string $localSchemaName): array
+    protected function getMultiSelectOptions(string $localPropertyName): array
     {
         $database = $this->database();
         $options = collect(
             $database->properties()->getMultiSelectById(
-                Schema::schemaForDatabase($database->id)[$localSchemaName]
+                Hydrator::SCHEMA[$localPropertyName]
             )->options
         )
             ->mapWithKeys(fn ($option) => [$option->id => array_merge(
@@ -63,12 +64,12 @@ class Notion
 
         $pages = $this->pages();
         foreach ($pages as $page) {
-            if ($page->type !== PageType::Entry) {
+            if ($page->type !== NodeType::Entry) {
                 continue;
             }
 
-            foreach ($page->data[$localSchemaName] as $opt) {
-                $options[$opt]['count']++;
+            foreach ($page->data[$localPropertyName] as $opt) {
+                $options[$opt->id]['count']++;
             }
         }
 
@@ -77,6 +78,22 @@ class Notion
 
     public function lastEditedAt(): Carbon {
         return Carbon::create($this->database()->lastEditedTime);
+    }
+
+    public function getOrganizationTypeNoun(string $organizationType): string
+    {
+        return match($organizationType) {
+            'For-profit company' => 'company',
+            'Think tank' => 'think tank',
+            'Government' => 'governmental organization',
+            'Intergovernmental agency' => 'intergovernmental agency',
+            'National non-profit organization' => 'national NGO',
+            'International non-profit organization' => 'international NGO',
+            'Media' => 'media organization',
+            'Research institute / lab / network' => 'research institute',
+            default => 'organization',
+        };
+//        dd(collect($this->database()->properties()->getSelectById(Hydrator::SCHEMA["organizationType"])->options)->pluck('name')->filter(fn ($name) => !(str_starts_with($name, '[') && str_ends_with($name, ']')))->toArray());
     }
 
     public function activityTypes(): array

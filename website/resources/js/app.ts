@@ -1,161 +1,158 @@
-import * as Sentry from "@sentry/browser";
-import {D3ZoomEvent, select, zoom} from "d3"
-import {Graph} from "./index";
-import {LAYER_CATEGORY, LayerContext, LayerSwitchEventParams, renderMapLayer} from "./layers";
-
-const IN_PRODUCTION = import.meta.env.PROD === true
-if (IN_PRODUCTION) {
-    Sentry.init({
-        dsn: import.meta.env.VITE_SENTRY_DSN_PUBLIC
-    })
-}
+import {D3ZoomEvent, Selection, select, zoom} from "d3"
+import {IN_PRODUCTION, PI, PI_3, PI_4, PI_6, shortestDistanceBetweenRectangles, switchState} from "./utils";
+import {PVertex} from "./index";
+import {fitToSector, prepare, sectorize} from "./data";
+import debug from "@/debug";
 
 
 type AppState = "error" | "success" | "loading"
 const STATE_SUCCESS: AppState = "success"
 const STATE_ERROR: AppState = "error"
-const STATE_LOADING: AppState = "loading"
 
+let switchAppState = (newState: AppState) => switchState(newState, '.app-state', 'state')
 
-function switchAppState<S extends AppState>(
-    newState: S,
-    args: (S extends "success" ? {
-        rawGraph: Graph
-    } : (
-        S extends "error" ? {
-            message: string,
-            showReloadButton: boolean
-        } : (
-            S extends "loading" ? {
-                //
-            } : {})))
-): void {
-    let allStates = document.querySelectorAll("[data-state]")
+const SHOW_RELOAD_BUTTON = 1
 
-    switch (newState) {
-        case "loading":
-            //
-            break
-        case "error":
-            renderErrorState(args.message, args.showReloadButton)
-            break
-        case "success":
-            try {
-                renderSuccessState(args.rawGraph)
-            } catch (e) {
-                if (IN_PRODUCTION) {
-                    Sentry.captureException(e)
-                }
-
-                console.error(e)
-
-                // We want to be careful not to create an infinite loop here.
-                // This is fine for now.
-                return switchAppState(STATE_ERROR, {
-                    message: "It looks like we are having trouble rendering the map.",
-                    showReloadButton: false
-                })
-            }
-            break
-    }
-
-    allStates.forEach((state: HTMLElement) => {
-        let isActive = newState === state.dataset.state
-
-        state.ariaHidden = isActive ? "false" : "true"
-        state.style.pointerEvents = isActive ? 'initial' : 'none'
-        state.style.opacity = newState === state.dataset.state ? '1' : '0'
-    })
-}
-
-function renderErrorState(message: string, showReloadButton: boolean) {
-    const stateEl = document.querySelector("[data-state='error']")
-
-    stateEl.querySelector('.reason').innerHTML = message
-    stateEl.querySelector('.reload-button').hidden = showReloadButton === false
-}
-
-
-function renderSuccessState(rawGraph: Graph) {
+try {
     let $map = select<SVGElement, {}>('#map')
     let $zoomWrapper = select<SVGGElement, {}>('#zoom-wrapper')
     let $centerWrapper = select<SVGGElement, {}>('#center-wrapper')
+    let $background = select<SVGGElement, {}>('#background')
 
     // Resize-, zoom-dependent variables
-    let mapWidth = $map.node().clientWidth
-    let mapHeight = $map.node().clientHeight
+    let mapWidth = $map.node()!.clientWidth
+    let mapHeight = $map.node()!.clientHeight
     let computeMapCenter = () => [mapWidth / 2, mapHeight / 2]
 
     $centerWrapper.attr('transform', `translate(${computeMapCenter()})`)
 
-    let layerCtx: LayerContext = {
-        $map,
-        $zoomWrapper,
-        $centerWrapper: $centerWrapper,
-
-        graph: rawGraph,
-        current: LAYER_CATEGORY
-    }
-
     let zoomHandler = zoom()
-        .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => {
-            $zoomWrapper.attr('transform', e.transform.toString());
-
-            // We'd want to switch layers based on the zoom here ideally.
-        })
+        .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr('transform', e.transform.toString()))
         .scaleExtent(IN_PRODUCTION ? [0.5, 4] : [0.5, 10])
         .translateExtent([
             [-mapWidth * 0.5, -mapHeight * 0.5],
             [mapWidth * 1.5, mapHeight * 1.5]
         ])
-
     $map.call(zoomHandler)
+
     window.addEventListener('resize', () => {
-        mapWidth = $map.node().clientWidth
-        mapHeight = $map.node().clientHeight
+        mapWidth = $map.node()!.clientWidth
+        mapHeight = $map.node()!.clientHeight
         let mapCenter = computeMapCenter()
 
         $centerWrapper.attr('transform', `translate(${mapCenter})`)
 
-        zoomHandler.translateTo($map, mapCenter[0], mapCenter[1])
         zoomHandler.translateExtent([
             [-mapWidth * 0.5, -mapHeight * 0.5],
             [mapWidth * 1.5, mapHeight * 1.5]
         ])
+        zoomHandler.translateTo($map, mapCenter[0], mapCenter[1])
     })
 
-    let allLayers = document.querySelectorAll("[data-layer]")
+    let tree: PVertex = window.rawMap
+    prepare(tree)
+    sectorize(tree, [0, 2 * PI], 0)
+    draw($background, tree)
 
-    window.addEventListener('layerswitch', (e: CustomEvent<LayerSwitchEventParams>) => {
-        layerCtx = renderMapLayer(layerCtx, e.detail.layer, e.detail.args)
+    // debug().ray({angle: PI_3})
+    // debug().ray({angle: PI_6 * 4})
+    //
+    // let p =  { id: 0, sector: [PI_3, PI_6 * 4], size: [250, 35], children: []} as PVertex
+    // debug().vertex({ vertex: p})
+    // debug().vertex({
+    //     vertex: { id: 1, sector: [PI_3 + 0.1, PI_6 * 4 -0.1], size: [200, 35], children: []} as PVertex,
+    //     parent: p,
+    //     minDistance: 100
+    // })
 
-        allLayers.forEach((state: SVGGElement) => {
-            let isActive = e.detail.layer === state.dataset.layer
+    // debug().cartesianPlane()
+    debug().flush($background)
 
-
-            state.ariaHidden = isActive ? "false" : "true"
-            state.style.pointerEvents = isActive ? 'initial' : 'none'
-            state.style.opacity = isActive ? '1' : '0'
-        })
-    })
-
-    layerCtx = renderMapLayer(layerCtx, LAYER_CATEGORY)
-}
-
-
-try {
-    const rawGraph = await fetch('/data.json').then(res => res.json())
-
-    switchAppState(STATE_SUCCESS, {rawGraph})
+    switchAppState(STATE_SUCCESS)
 } catch (e) {
     if (IN_PRODUCTION) {
-        Sentry.captureException(e)
+        // Report the error to the server
     }
 
     console.error(e)
 
-    switchAppState(STATE_ERROR, {
-        message: "It looks like we are having trouble accessing the map.",
-        showReloadButton: true
-    })
+    updateErrorState(e, "It looks like we are having trouble rendering the map.")
+    switchAppState(STATE_ERROR)
+}
+
+function draw(
+    $g: Selection<SVGGElement, {}, HTMLElement, unknown>,
+    vertex: PVertex,
+    parent: PVertex | null = null
+) {
+    debug().ray({ angle: vertex.sector[0] })
+    debug().ray({ angle: vertex.sector[1] })
+    vertex.position = fitToSector(vertex, parent, vertex.depth === 1 ? 50 : 0)
+
+    vertex.el.classList.remove('invisible')
+    vertex.el.ariaHidden = 'false'
+    vertex.el.style.transform = `translate(${vertex.position[0]}px, ${vertex.position[1]}px)`
+
+
+    if (parent) {
+        let [l, w] = vertex.size
+        let [x, y] = vertex.position
+
+        let [Pl, Pw] = parent.size
+        let [Px, Py] = parent.position
+
+        let closestPoint = [
+            [x, y + w/2],
+            [x + l, y + w/2],
+            [x + l/2, y + w],
+            [x + l/2, y]
+        ].reduce((prev, curr) => {
+            return distance(prev, parent.position) < distance(curr, parent.position) ? prev : curr
+        })
+
+        let closestPointToParent = [
+            [Px, Py + Pw/2],
+            [Px + Pl, Py + Pw/2],
+            [Px + Pl/2, Py + Pw],
+            [Px + Pl/2, Py]
+        ].reduce((prev, curr) => {
+            return distance(prev, vertex.position) < distance(curr, vertex.position) ? prev : curr
+        })
+
+
+        vertex.edge = closestPoint
+
+        $g.append('path')
+            .attr('d', `M${closestPointToParent} L${closestPoint}`)
+            .attr('stroke', '#ddd')
+            .attr('stroke-width', 2)
+    }
+
+    for (const child of vertex.children) {
+        draw($g, child, vertex)
+    }
+}
+
+function updateErrorState(
+    e: Error,
+    message: string,
+    flags: number = 0
+) {
+    const elStateContainer = document.querySelector("#app > [data-state='error']")
+
+    let reason = elStateContainer.querySelector('.reason') as HTMLParagraphElement
+    let reloadButton = elStateContainer.querySelector('.reload-button') as HTMLButtonElement
+    let debug = elStateContainer.querySelector('.debug') as HTMLPreElement
+
+    if (!IN_PRODUCTION) {
+        debug.hidden = false
+        debug.textContent = `${e.name}: ${e.message}\n${e.stack}`
+    }
+
+    reason.innerHTML = message
+    reloadButton.hidden = (flags & SHOW_RELOAD_BUTTON) === 0
+}
+
+function distance(a: [number, number], b: [number, number]) {
+    return Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 }

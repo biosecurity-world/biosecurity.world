@@ -2,6 +2,7 @@
     "type": "project",
     "require": {
         "php": "^8.3",
+        "beyondcode/laravel-visual-diff": "dev-master",
         "blade-ui-kit/blade-heroicons": "^2.4",
         "blade-ui-kit/blade-icons": "^1.6",
         "laravel/framework": "^11.9",
@@ -15,7 +16,7 @@
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
-        "pestphp/pest": "^2.34"
+        "phpunit/phpunit": "^11"
     },
     "autoload": {
         "psr-4": {
@@ -47,6 +48,11 @@
             "dont-discover": []
         }
     },
+    "repositories": [{
+        "type": "path",
+        "url": "../packages/*"
+    }
+    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
