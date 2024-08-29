@@ -23,7 +23,7 @@ jobs:
 
       - uses: cachix/install-nix-action@v27
 
-      # Node Setup
+      # Vertex Setup
       - name: Set pnpm cache store
         run: nix develop --ignore-environment --command pnpm config set store-dir ~/.pnpm-store
       - name: Cache node modules
@@ -38,6 +38,19 @@ jobs:
         run: nix develop --ignore-environment --command pnpm install
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
+
+      - name: Iconsnatch setup
+        run: |
+          curl -L "https://github.com/forevue/iconsnatch/releases/download/0.0.0-alpha/faviconapi" -o /tmp/faviconapi
+          chmod +x /tmp/faviconapi
+          /tmp/faviconapi &
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+            AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
+            ASSET_URL_FOR_BUCKET: cdn.forevue.org
 
       # PHP Setup
       - name: Cache composer packages
@@ -55,6 +68,8 @@ jobs:
 
       - name: Copy .env
         run: cp .env.example .env
+      - name: Start server
+        run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
       - name: Build website
         run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
         env:
@@ -68,3 +83,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+

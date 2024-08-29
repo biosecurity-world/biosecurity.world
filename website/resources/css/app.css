@@ -1,0 +1,73 @@
+@tailwind base;
+
+@font-face {
+    font-family: "Gilroy";
+    font-display: swap;
+    src: url("./../fonts/Gilroy-Bold.woff2");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+.app-state {
+    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100;
+}
+
+.state-active {
+    pointer-events: initial;
+    opacity: 1;
+}
+
+.state-inactive {
+    pointer-events: none;
+    opacity: 0;
+}
+
+/*#cartesian-flip {*/
+/*    transform: scaleY(-1);*/
+/*}*/
+
+
+.invisible {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+#entry-aside:not(:has(> .entry)) {
+    display: none;
+}
+
+#entry-aside:has(> .entry) {
+    display: block;
+}
+
+#entry-aside:has(> .entry) + .filters-sidebar {
+    background: linear-gradient(180deg, white 50%, theme('colors.gray.50') 50%);
+}
+
+
+/** Style the 'focus on' filter **/
+input[name="focus"]:checked + label > .check {
+    display: block;
+}
+
+input[name="focus"]:not(:checked) + label > .check {
+    display: none;
+}
+
+input[name="focus"]:checked + label[for="focus_technical"] {
+    @apply border-technical;
+}
+
+input[name="focus"]:checked + label[for="focus_governance"] {
+    @apply border-governance;
+}
+
+input[name="focus"]:checked + label[for="focus_technical"] > .at-technical,
+input[name="focus"]:checked + label[for="focus_governance"] > .at-governance {
+    color: white;
+}
+

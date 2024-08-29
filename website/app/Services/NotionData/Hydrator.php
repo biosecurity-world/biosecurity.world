@@ -2,65 +2,112 @@
 
 namespace App\Services\NotionData;
 
-use Exception;
+use App\Services\Iconsnatch\IconSnatch;
+use App\Services\NotionData\Enums\NodeType;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Notion\Databases\Database;
-use Notion\Pages\Page;
-use App\Services\NotionData\Models\Category;
-use App\Services\NotionData\Models\Entry;
-use App\Services\NotionData\Support\IconSnatch;
+use Notion\Databases\Properties\SelectOption;
+use Notion\Pages\Page as NotionPage;
 
 class Hydrator
 {
+    // The IDs are hardcoded (no other way is much better) but they do not change,
+    // even if the database is duplicated or the column changes, so they are _very_ stable.
     public const array SCHEMA = [
-        "0f5d415db7b4410e9e9bab814c37af8e" => [ // Félix's Test database
-            "organizationType" => "%3EfkD",
-            "link" => "BEe%7D",
-            "description" => "C%3Fc%3A",
-            "interventionFocus" => "L%3FRx",
-            "parent" => "QTQ%5D",
-            "location" => "VQ%5B%7D",
-            "activityType" => "Wmi~",
-            "gcbrFocus" => "kC%5Cr",
-            "name" => "title",
-            "isCategory" => "uR%3DA",
-        ]
+        "organizationType" => "%3EfkD",
+        "link" => "BEe%7D",
+        "description" => "C%3Fc%3A",
+        "interventionFocuses" => "L%3FRx",
+        "parent" => "QTQ%5D",
+        "locationHints" => "VQ%5B%7D",
+        "activityTypes" => "Wmi~",
+        "gcbrFocus" => "kC%5Cr",
+        "name" => "title",
+        "isCategory" => "uR%3DA",
     ];
 
-    public static function hydrate(Page $page, Database $notionDatabase): Category|Entry
+    public function pageFromRawCategory(NotionPage $page, string $id,?string $parent): Page
     {
-        $databaseId = str_replace('-', '', $notionDatabase->id);
-        if (!array_key_exists($databaseId, self::SCHEMA)) {
-            throw new Exception("Could not find a schema for the database `" . $notionDatabase->id . "`");
-        }
-
-        $schema = self::SCHEMA[$databaseId];
-
-        $isCategory = $page->properties()->getCheckboxById($schema["isCategory"])->checked;
-
-        if ($isCategory) {
-            return new Category(
-                id: $page->id,
-                label: $page->title()->toString(),
-                parents: $page->properties()->getRelationById($schema["parent"])->pageIds
-            );
-        }
-
-        return new Entry(
-            id: $page->id,
-            label: $page->title()->toString(),
-            link: $link = $page->properties()->getUrlById($schema["link"])->url,
-            description: $page->properties()->getRichTextById($schema["description"])->toString(),
-            organizationType: $page->properties()->getSelectById($schema["organizationType"])->option?->name,
-            interventionFocuses: $page->properties()->getMultiSelectById($schema["interventionFocus"])->options,
-            activityTypes: $page->properties()->getMultiSelectById($schema["activityType"])->options,
-            locationHints: $page->properties()->getMultiSelectById($schema["location"])->options,
-            gcbrFocus: $page->properties()->getCheckboxById($schema["gcbrFocus"])->checked,
-            logo: Cache::rememberForever(
-                'iconsnatch-download-' . str_replace(str_split('{}()/\@:'), '', $link),
-                fn () => IconSnatch::downloadFrom($link),
-            ),
-            parents: $page->properties()->getRelationById($schema["parent"])->pageIds
-        );
+        return new Page(NodeType::Category, $id, $parent, [
+            "label" => $page->title()->toString(),
+        ]);
     }
+
+    public function pageFromCategoryOrEntry(NotionPage $page, string $id, ?string $parent): ?Page
+    {
+        $isCategory = $page->properties()->getCheckboxById(self::SCHEMA["isCategory"])->checked;
+        if ($isCategory) {
+            return $this->pageFromRawCategory($page, $id, $parent);
+        }
+
+        return $this->pageFromRawEntry($page, $id, $parent);
+    }
+
+    public function pageFromRawEntry(NotionPage $entry, string $id, ?string $parent): ?Page
+    {
+        $link = $entry->properties()->getUrlById(self::SCHEMA["link"])->url;
+        if (is_null($link)) {
+            return null;
+        }
+
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            if (!filter_var("https://$link", FILTER_VALIDATE_URL)) {
+                return null;
+            }
+
+            $link = "https://$link";
+        }
+
+        $logo = Cache::rememberForever(
+            'iconsnatch-download-' . str_replace(str_split('{}()/\@:'), '', $link),
+            // Returning null would prevent Laravel from caching the icon.
+            fn() => IconSnatch::downloadFrom($link) ?? false,
+        );
+
+        if ($logo === false) {
+            $logo = null;
+        }
+
+        return new Page(NodeType::Entry, $id, $parent, [
+            "label" => $entry->title()->toString(),
+            "link" => $link,
+            "description" => $entry->properties()->getRichTextById(self::SCHEMA["description"])->toString(),
+            "organizationType" => $entry->properties()->getSelectById(self::SCHEMA["organizationType"])->option?->name,
+            "interventionFocuses" =>                 $entry->properties()->getMultiSelectById(self::SCHEMA["interventionFocuses"])->options,
+            "activityTypes" => $entry->properties()->getMultiSelectById(self::SCHEMA["activityTypes"])->options,
+            "locationHints" => $entry->properties()->getMultiSelectById(self::SCHEMA["locationHints"])->options,
+            "gcbrFocus" => $entry->properties()->getCheckboxById(self::SCHEMA["gcbrFocus"])->checked,
+            "logo" => $logo
+        ]);
+    }
+
+
+    public function __construct(protected Database $database)
+    {
+    }
+
+    public function hydrate(Collection $pages): Collection
+    {
+        $hydrated = collect();
+
+        /** @var NotionPage $page */
+        foreach ($pages as $page) {
+            $parents = $page->properties()->getRelationById(self::SCHEMA["parent"])->pageIds;
+            if (count($parents) === 0) {
+                $parents = [null];
+            }
+
+            foreach ($parents as $parent) {
+                $hydratedPage = $this->pageFromCategoryOrEntry($page, $page->id, $parent);
+                if ($hydratedPage) {
+                    $hydrated[] = $hydratedPage;
+                }
+            }
+
+        }
+
+        return $hydrated;
+    }
+
 }

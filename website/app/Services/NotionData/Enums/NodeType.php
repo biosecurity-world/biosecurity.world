@@ -2,9 +2,10 @@
 
 namespace App\Services\NotionData\Enums;
 
-enum NodeType: string
+enum NodeType: int
 {
-    case Entry = 'entry';
-    case Category = 'category';
-    case EntryGroup = 'entry_group';
+    case Entry = 1;
+    case Category = 2;
+    case EntryGroup = 3;
+    case Root = 4;
 }

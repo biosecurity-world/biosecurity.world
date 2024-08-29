@@ -1,0 +1,53 @@
+{
+    "name": "beyondcode/laravel-visual-diff",
+    "description": "Create visual diffs in your application tests.",
+    "keywords": [
+        "beyondcode",
+        "visual regression",
+        "laravel-visual-diff"
+    ],
+    "homepage": "https://github.com/beyondcode/laravel-visual-diff",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marcel Pociot",
+            "email": "marcel@beyondco.de",
+            "homepage": "https://beyondcode.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^11",
+        "symfony/process": "^7",
+        "spatie/browsershot": "^4.3"
+    },
+    "require-dev": {
+        "orchestra/testbench-dusk": "9.7",
+        "phpunit/phpunit": "^11"
+    },
+    "autoload": {
+        "psr-4": {
+            "BeyondCode\\VisualDiff\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BeyondCode\\VisualDiff\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BeyondCode\\VisualDiff\\VisualDiffServiceProvider"
+            ]
+        }
+    }
+}

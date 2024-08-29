@@ -3,11 +3,28 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "test": "mocha resources/js/tests --colors true"
     },
     "devDependencies": {
-        "axios": "^1.6.4",
+        "@sentry/vite-plugin": "^2.22.2",
+        "@types/d3": "^7.4.3",
+        "@types/mocha": "^10.0.7",
+        "autoprefixer": "^10.4.19",
         "laravel-vite-plugin": "^1.0",
+        "mocha": "^10.7.3",
+        "pixelmatch": "^6.0.0",
+        "pngjs": "^7.0.0",
+        "postcss": "^8.4.39",
+        "puppeteer": "^23.1.1",
+        "tailwindcss": "^3.4.6",
         "vite": "^5.0"
+    },
+    "dependencies": {
+        "@types/assert": "^1.5.10",
+        "d3": "^7.9.0",
+        "esm": "^3.2.25",
+        "ts-mocha": "^10.0.0",
+        "typescript": "^5.5.4"
     }
 }
