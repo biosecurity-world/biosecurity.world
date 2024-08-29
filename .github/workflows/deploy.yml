@@ -39,6 +39,14 @@ jobs:
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
 
+      - name: Iconsnatch setup
+        run: |
+          curl -L "https://github.com/forevue/iconsnatch/releases/download/0.0.0-alpha/faviconapi" -o /tmp/faviconapi
+          chmod +x /tmp/faviconapi
+          /tmp/faviconapi &
+        env:
+            ASSET_URL_FOR_BUCKET: cdn.forevue.org
+
       # PHP Setup
       - name: Cache composer packages
         id: cache-composer
@@ -70,3 +78,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+

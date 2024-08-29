@@ -56,7 +56,7 @@
                     <div class="flex flex-col max-w-sm">
                         <div class="flex-grow p-6">
                             <h3 class="text-xl font-display">Filters</h3>
-                            <div class="relative mt-2"s>
+                            <div class="relative mt-2">
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                                     <x-heroicon-s-magnifying-glass class="size-5 text-gray-500"/>
                                 </div>
