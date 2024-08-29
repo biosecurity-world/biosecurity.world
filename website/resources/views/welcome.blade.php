@@ -28,13 +28,13 @@
                             <span class="sr-only">Menu items</span>
 
                             <ul class="flex space-x-6">
-                                <li><a href="{{ route('give-feedback') }}" class="underline">
+                                <li><a href="{{ route('give-feedback', absolute: false) }}" class="underline">
                                         Give feedback
                                     </a></li>
-                                <li><a href="{{ route('how-to-contribute') }}" class="underline">
+                                <li><a href="{{ route('how-to-contribute', absolute: false) }}" class="underline">
                                         How to contribute?
                                     </a></li>
-                                <li><a href="{{ route('about') }}" class="underline">
+                                <li><a href="{{ route('about', absolute: false) }}" class="underline">
                                         About
                                     </a></li>
                             </ul>

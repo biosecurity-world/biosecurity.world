@@ -9,7 +9,7 @@
 } }}</h4>
             <div class="grid grid-cols-6 gap-2 mt-0.5">
                 @foreach($entries as $k => $entry)
-                    <button hx-get="{{ route('entries.show', ['id' => $id, 'entryId' => $entry['@id']]) }}"
+                    <button hx-get="{{ route('entries.show', ['id' => $id, 'entryId' => $entry['@id']], absolute: false) }}"
                             hx-trigger="click"
                             hx-target="#entry-aside"
                     >
