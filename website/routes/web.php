@@ -30,9 +30,9 @@ Route::get('/', function (Notion $notion) {
     ]);
 })->name('welcome');
 
-Route::get('/about')->name('about');
-Route::get('/give-feedback')->name('give-feedback');
-Route::get('/how-to-contribute')->name('how-to-contribute');
+Route::get('/about', fn () => '')->name('about');
+Route::get('/give-feedback', fn () => '')->name('give-feedback');
+Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 
 
 Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $entryId) {
