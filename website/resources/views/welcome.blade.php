@@ -197,5 +197,7 @@
         </div>
     </div>
     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+
+    <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
 </body>
 </html>

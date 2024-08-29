@@ -79,31 +79,40 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $en
 })->name('entries.show');
 
 
+Route::get('/_/entries', function (Notion $notion) {
+    $pages = $notion->pages();
+    $tree = (new TreeBuilder())->build($pages);
+
+    $links = [];
+
+    $traverse = function (Node $node) use ($tree, &$traverse, &$links) {
+        if ($tree['lookup'][$node->id]['@type'] === NodeType::EntryGroup) {
+          foreach ($tree['lookup'][$node->id]['entries'] as $entry) {
+            $links[] = route('entries.show', ['id' => $node->id, 'entryId' => $entry]);
+          }
+        }
+
+        foreach ($node->children as $child) {
+            $traverse($child);
+        }
+    };
+
+    $traverse($tree['tree']);
+
+    $links = collect($links)->map(fn ($link) => "<a href=\"$link\">$link</a>")->implode('<br>');
+
+    return <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<body>
+$links
+</body>
+</html>
+HTML;
+});
+
+
 if (!app()->isProduction()) {
-    Route::get('/entries', function (Notion $notion) {
-        $pages = $notion->pages();
-        $tree = (new TreeBuilder())->build($pages);
-
-        $entrygroups = [];
-
-        $traverse = function (Node $node) use ($tree, &$traverse, &$entrygroups) {
-            if ($tree['lookup'][$node->id]['@type'] === NodeType::EntryGroup) {
-                $entrygroups[] = array_map(
-                    fn ($entryId) => $tree['lookup'][$entryId],
-                    $tree['lookup'][$node->id]['entries']
-                );
-            }
-
-            foreach ($node->children as $child) {
-                $traverse($child);
-            }
-        };
-
-        $traverse($tree['tree']);
-
-        return view('test', ['entrygroups' => $entrygroups]);
-    });
-
     // The code for rendering the tree could be an independent library
 // but this isn't a priority for now, so some code is mixed with
 // the code for the website which includes the code for testing the tree

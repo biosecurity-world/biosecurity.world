@@ -50,6 +50,15 @@ class Hydrator
         if (is_null($link)) {
             return null;
         }
+
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            if (!filter_var("https://$link", FILTER_VALIDATE_URL)) {
+                return null;
+            }
+
+            $link = "https://$link";
+        }
+
         $logo = Cache::rememberForever(
             'iconsnatch-download-' . str_replace(str_split('{}()/\@:'), '', $link),
             // Returning null would prevent Laravel from caching the icon.
