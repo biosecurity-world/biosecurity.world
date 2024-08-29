@@ -55,6 +55,8 @@ jobs:
 
       - name: Copy .env
         run: cp .env.example .env
+      - name: Start server
+        run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
       - name: Build website
         run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
         env:
