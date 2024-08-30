@@ -55,9 +55,9 @@ const colors = [
             let color = colors[i % colors.length]
 
             debug().vertex({
-                sector: box.sector,
-                size: [box.length, box.width],
-            } as PVertex, color)
+                vertex: {sector: box.sector, size: [box.length, box.width]} as PVertex,
+                color
+            })
         }
 
         debug().flush($root)

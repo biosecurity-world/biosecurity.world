@@ -6,13 +6,13 @@ use App\Services\NotionData\Enums\NodeType;
 
 class Node
 {
-    /** @var Node[] $children */
-    public array $children = [];
-
-    public function __construct(
+        public function __construct(
         public string $id,
         public string $parentId,
-        public array $trail = []
+        /** @var string[] $trail */
+        public array $trail = [],
+        /** @var Node[] $children */
+        public array $children = []
     )
     {
     }

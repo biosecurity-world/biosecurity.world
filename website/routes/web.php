@@ -21,9 +21,7 @@ Route::get('/', function (Notion $notion) {
         'categories' => $dataByType[NodeType::Category->value],
         'entrygroups' => $dataByType[NodeType::EntryGroup->value]
             ->map(function ($entrygroup) use ($lookup) {
-                $entrygroup['entries'] = array_map(function ($entryId) use ($lookup) {
-                    return $lookup[$entryId];
-                }, $entrygroup['entries']);
+                $entrygroup['entries'] = array_map(fn($id) => $lookup[$id], $entrygroup['entries']);
 
                 return $entrygroup;
             })
@@ -33,7 +31,6 @@ Route::get('/', function (Notion $notion) {
 Route::get('/about', fn () => '')->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
-
 
 Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $entryId) {
     $pages = $notion->pages();
@@ -65,7 +62,6 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $en
     $location = $locations->isNotEmpty() ?
         ($locations->contains('Global') ? 'Global' : $locations->implode(', ')) :
         null;
-
 
 
     return view('entry', [

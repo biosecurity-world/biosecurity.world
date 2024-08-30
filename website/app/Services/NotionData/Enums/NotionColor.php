@@ -2,7 +2,7 @@
 
 namespace App\Services\NotionData\Enums;
 
-enum Color: string
+enum NotionColor: string
 {
     case Default = "default";
     case Gray = "gray";

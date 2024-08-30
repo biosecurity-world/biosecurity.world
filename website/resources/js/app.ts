@@ -87,7 +87,7 @@ function draw(
 ) {
     debug().ray({ angle: vertex.sector[0] })
     debug().ray({ angle: vertex.sector[1] })
-    vertex.position = fitToSector(vertex, parent, vertex.depth === 1 ? 50 : 0)
+    vertex.position = fitToSector(vertex, parent, 0)
 
     vertex.el.classList.remove('invisible')
     vertex.el.ariaHidden = 'false'

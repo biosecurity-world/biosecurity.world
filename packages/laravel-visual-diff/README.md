@@ -1,5 +1,7 @@
 **This is a fork of https://github.com/beyondcode/laravel-visual-diff to make it compatible with Laravel 11. The original repo is archived.**
 
+**The original code is a mess, but it works fine.**
+
 # Laravel Visual Diff
 
 This package can create a visual diff of two screenshots of your Laravel application. It works for both - regular HTTP tests, as well as tests using Laravel Dusk.

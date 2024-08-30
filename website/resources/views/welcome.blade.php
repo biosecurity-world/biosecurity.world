@@ -182,8 +182,8 @@
                                             <g>
                                                 @foreach($entrygroups as $entrygroup)
                                                     <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true"
-                                                                   data-vertex="{{ $entrygroup['@id']}}">
-                                                        <x-entrygroup :entries="$entrygroup['entries']" :id="$entrygroup['@id']"/>
+                                                                   data-vertex="{{ $entrygroup['id']}}">
+                                                        <x-entrygroup :entries="$entrygroup['entries']" :id="$entrygroup['id']"/>
                                                     </foreignObject>
                                                 @endforeach
                                             </g>

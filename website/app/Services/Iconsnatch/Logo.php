@@ -2,7 +2,7 @@
 
 namespace App\Services\Iconsnatch;
 
-class Icon
+class Logo
 {
     protected function __construct(
         public string $url,
@@ -12,8 +12,16 @@ class Icon
     {
     }
 
-    public static function fromResponse(object $data): Icon
+    /**
+     * @param \stdClass $data
+     * @return Logo|null
+     */
+    public static function fromResponse(\stdClass $data): ?Logo
     {
+        if (!$data->success || $data->value === "") {
+            return null;
+        }
+
         return new self(
             url: $data->value,
             filled: $data->meta->filled === "yes",

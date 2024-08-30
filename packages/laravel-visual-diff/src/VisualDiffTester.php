@@ -51,11 +51,9 @@ class VisualDiffTester
 
             $this->currentResolution = $resolution;
 
-            $createDiff = $this->shouldCreateDiff();
-
             $this->createScreenshot();
 
-            if ($createDiff) {
+            if ($this->shouldCreateDiff()) {
                 $this->createDiff($url);
             }
 
@@ -70,7 +68,7 @@ class VisualDiffTester
 
     protected function shouldCreateDiff(): bool
     {
-        return file_exists($this->screenshotOutputPath . DIRECTORY_SEPARATOR . $this->currentResolution['width'] . '_x_' . $this->currentResolution['height'] . '_' . $this->name . '.png');
+        return file_exists($this->screenshotOutputPath . DIRECTORY_SEPARATOR . $this->getComparisonFilename());
     }
 
     protected function getDiffFilename()

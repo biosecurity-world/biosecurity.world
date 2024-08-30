@@ -62,8 +62,6 @@ export function sectorize(
         vertex.sector = [0, PIPI]
     } else {
         vertex.sector =[
-            // deltaFromSiblings + 0.01,
-            // deltaFromSiblings + (vertex.weight / siblingsWeight) * (parentSector[1] - parentSector[0]) - 0.01
             deltaFromSiblings,
             deltaFromSiblings + (vertex.weight / siblingsWeight) * (parentSector[1] - parentSector[0])
         ]

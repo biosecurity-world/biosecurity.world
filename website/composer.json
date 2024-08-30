@@ -2,7 +2,7 @@
     "type": "project",
     "require": {
         "php": "^8.3",
-        "beyondcode/laravel-visual-diff": "dev-master",
+        "beyondcode/laravel-visual-diff": "dev-main",
         "blade-ui-kit/blade-heroicons": "^2.4",
         "blade-ui-kit/blade-icons": "^1.6",
         "laravel/framework": "^11.9",
@@ -13,6 +13,7 @@
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "itsgoingd/clockwork": "^5.2",
+        "larastan/larastan": "^2.0",
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
@@ -29,6 +30,15 @@
         }
     },
     "scripts": {
+        "lint": "pint",
+        "test:lint": "pint --test",
+        "test:types": "phpstan analyse --ansi --memory-limit=-1",
+        "test:unit": "phpunit --order-by=defects",
+        "test": [
+            "@test:lint",
+            "@test:types",
+            "@test:unit"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -38,9 +48,6 @@
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "test": [
-            "pest --colors=always"
         ]
     },
     "extra": {
@@ -48,10 +55,11 @@
             "dont-discover": []
         }
     },
-    "repositories": [{
+    "repositories": [
+        {
         "type": "path",
         "url": "../packages/*"
-    }
+        }
     ],
     "config": {
         "optimize-autoloader": true,

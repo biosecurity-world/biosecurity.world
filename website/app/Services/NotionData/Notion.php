@@ -2,14 +2,17 @@
 
 namespace App\Services\NotionData;
 
-use App\Services\NotionData\Enums\Color;
+use App\Services\NotionData\Enums\NotionColor;
 use App\Services\NotionData\Enums\NodeType;
+use App\Services\NotionData\Enums\PageType;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Notion\Common\Color;
 use Notion\Databases\Database;
+use Notion\Databases\Properties\SelectOption;
 use Notion\Notion as NotionWrapper;
-use Notion\Pages\Page as NotionPage;
+use Notion\Pages\Page;
 
 
 class Notion
@@ -23,61 +26,44 @@ class Notion
         $this->client = NotionWrapper::create($notionToken);
     }
 
-    /** @return Collection<Page> */
-    public function pages(): Collection
+    /** @return array<Entry|Category> */
+    public function pages(): array
     {
-        $database = $this->database();
-        $pages = Cache::rememberForever(
-            'pages',
-            fn() => $this->client->databases()->queryAllPages($database),
-        );
+        return Cache::rememberForever('hydrated-pages', function () {
+            $database = $this->database();
 
-        return collect($pages)
-            ->filter(fn(NotionPage $page) => !$page->archived)
-            ->pipe(fn ($pages) => (new Hydrator($database))->hydrate($pages))
-            ->flatten(1);
+            /** @var Page[] $pages */
+            $pages = Cache::rememberForever('pages', fn() => $this->client->databases()->queryAllPages($database));
+
+            return (new Hydrator($database))->hydrate(
+                array_filter($pages, fn(Page $page) => !$page->archived)
+            );
+        });
     }
 
     protected function database(): Database
     {
-        return Cache::rememberForever(
-            'database',
-            function () {
-                return $this->client->databases()->find($this->databaseId);
-            },
-        );
+        /** @phpstan-ignore-next-line */
+        return Cache::rememberForever('database', fn() => $this->client->databases()->find($this->databaseId));
     }
 
+    /** @return array{id: ?string, color: ?Color, name: ?string, description: ?string, count: int}[] */
     protected function getMultiSelectOptions(string $localPropertyName): array
     {
-        $database = $this->database();
-        $options = collect(
-            $database->properties()->getMultiSelectById(
-                Hydrator::SCHEMA[$localPropertyName]
-            )->options
-        )
-            ->mapWithKeys(fn ($option) => [$option->id => array_merge(
-                $option->toArray(),
-                ['count' => 0]
-            )])->toArray();
+        $options = collect($this->pages())
+            ->filter(fn(Entry|Category $page) => $page instanceof Entry)
+            ->flatMap(fn(Entry $page) => $page->{$localPropertyName})
+            ->groupBy(fn(SelectOption $opt) => $opt->id)
+            ->map(fn($group) => array_merge($group->first()->toArray(), ['count' => count($group)]))
+            ->values()
+            ->toArray();
 
-
-        $pages = $this->pages();
-        foreach ($pages as $page) {
-            if ($page->type !== NodeType::Entry) {
-                continue;
-            }
-
-            foreach ($page->data[$localPropertyName] as $opt) {
-                $options[$opt->id]['count']++;
-            }
-        }
-
+        /** @phpstan-ignore-next-line */
         return $options;
     }
 
     public function lastEditedAt(): Carbon {
-        return Carbon::create($this->database()->lastEditedTime);
+        return Carbon::instance($this->database()->lastEditedTime);
     }
 
     public function getOrganizationTypeNoun(string $organizationType): string
@@ -93,9 +79,9 @@ class Notion
             'Research institute / lab / network' => 'research institute',
             default => 'organization',
         };
-//        dd(collect($this->database()->properties()->getSelectById(Hydrator::SCHEMA["organizationType"])->options)->pluck('name')->filter(fn ($name) => !(str_starts_with($name, '[') && str_ends_with($name, ']')))->toArray());
     }
 
+    /** @return array[] */
     public function activityTypes(): array
     {
         $options =  $this->getMultiSelectOptions("activityTypes");
@@ -113,10 +99,10 @@ class Notion
                 default => null,
             };
 
-            $color = Color::tryFrom($option['color']);
+            $color = NotionColor::tryFrom($option['color']);
             if (!$color) {
                 report(new \Exception("Unexpected color from Notion: " . $option['color']));
-                $color = Color::Default;
+                $color = NotionColor::Default;
             }
 
             $options[$k]['fg'] = $color->foreground();
@@ -126,11 +112,11 @@ class Notion
         return  $options;
     }
 
+    /** @return array[] */
     public function interventionFocuses(): array
     {
         return $this->getMultiSelectOptions("interventionFocuses");
     }
-
 
     public function databaseUrl(): string
     {
