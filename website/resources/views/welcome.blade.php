@@ -196,8 +196,8 @@
             </main>
         </div>
     </div>
-    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
 
+    {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
     <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
 </body>
 </html>

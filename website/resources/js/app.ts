@@ -1,3 +1,4 @@
+import 'htmx.org'
 import {D3ZoomEvent, Selection, select, zoom} from "d3"
 import {IN_PRODUCTION, PI, PI_3, PI_4, PI_6, shortestDistanceBetweenRectangles, switchState} from "./utils";
 import {PVertex} from "./index";

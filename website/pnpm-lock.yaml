@@ -17,6 +17,9 @@ importers:
       esm:
         specifier: ^3.2.25
         version: 3.2.25
+      htmx.org:
+        specifier: 2.0.2
+        version: 2.0.2
       ts-mocha:
         specifier: ^10.0.0
         version: 10.0.0(mocha@10.7.3)
@@ -1124,6 +1127,9 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  htmx.org@2.0.2:
+    resolution: {integrity: sha512-eUPIpQaWKKstX393XNCRCMJTrqPzikh36Y9RceqsUZLTtlFjFaVDgwZLUsrFk8J2uzZxkkfiy0TE359j2eN6hA==}
 
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
@@ -2933,6 +2939,8 @@ snapshots:
       function-bind: 1.1.2
 
   he@1.2.0: {}
+
+  htmx.org@2.0.2: {}
 
   http-proxy-agent@7.0.2:
     dependencies:
