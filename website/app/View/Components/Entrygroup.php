@@ -8,19 +8,14 @@ use Illuminate\View\Component;
 
 class Entrygroup extends Component
 {
-    /** @var Collection<string, array>  */
+    /** @var Collection<string, array> */
     public Collection $groups;
 
-    /**
-     * @param array $entries
-     * @param string $id
-     */
     public function __construct(array $entries, public string $id)
     {
         $this->groups = collect($entries)
             ->groupBy('organizationType')
-            ->sortKeysDesc()
-        ;
+            ->sortKeysDesc();
     }
 
     public function render(): View

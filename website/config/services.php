@@ -36,12 +36,12 @@ return [
     ],
 
     'iconsnatch' => [
-        'endpoint' => env("ICONSNATCH_ENDPOINT", "https://iconsnatch.forevue.org"),
-        'useragent' => env("ICONSNATCH_USERAGENT", "Unknown")
+        'endpoint' => env('ICONSNATCH_ENDPOINT', 'https://iconsnatch.forevue.org'),
+        'useragent' => env('ICONSNATCH_USERAGENT', 'Unknown'),
     ],
 
     'notion' => [
         'database' => env('NOTION_DATABASE'),
         'token' => env('NOTION_TOKEN'),
-    ]
+    ],
 ];

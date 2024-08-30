@@ -13,9 +13,7 @@ class Category implements Arrayable
         public string $id,
         public ?string $parentId,
         public string $label,
-    )
-    {
-    }
+    ) {}
 
     public function toArray()
     {

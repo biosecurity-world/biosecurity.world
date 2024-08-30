@@ -38,7 +38,7 @@ return [
         'export' => [
             'driver' => 'local',
             'root' => base_path('dist/'),
-            'throw' => false
+            'throw' => false,
         ],
 
         'public' => [

@@ -21,10 +21,10 @@ Route::get('/', function (Notion $notion) {
         'categories' => $dataByType[NodeType::Category->value],
         'entrygroups' => $dataByType[NodeType::EntryGroup->value]
             ->map(function ($entrygroup) use ($lookup) {
-                $entrygroup['entries'] = array_map(fn($id) => $lookup[$id], $entrygroup['entries']);
+                $entrygroup['entries'] = array_map(fn ($id) => $lookup[$id], $entrygroup['entries']);
 
                 return $entrygroup;
-            })
+            }),
     ]);
 })->name('welcome');
 
@@ -41,6 +41,7 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $en
     $traverse = function (Node $current) use (&$traverse, $id, &$entrygroup) {
         if ($current->id === $id) {
             $entrygroup = $current;
+
             return;
         }
 
@@ -63,17 +64,15 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, string $id, string $en
         ($locations->contains('Global') ? 'Global' : $locations->implode(', ')) :
         null;
 
-
     return view('entry', [
         'entry' => $entry,
         'host' => parse_url($entry['link'], PHP_URL_HOST),
         'breadcrumbs' => $breadcrumbs,
         'organizationTypeNoun' => $notion->getOrganizationTypeNoun($entry['organizationType']),
-        'notionUrl' => 'https://notion.so/' . str_replace('-', '', $entryId),
+        'notionUrl' => 'https://notion.so/'.str_replace('-', '', $entryId),
         'location' => $location,
     ]);
 })->name('entries.show');
-
 
 Route::get('/_/entries', function (Notion $notion) {
     $pages = $notion->pages();
@@ -83,9 +82,9 @@ Route::get('/_/entries', function (Notion $notion) {
 
     $traverse = function (Node $node) use ($tree, &$traverse, &$links) {
         if ($tree['lookup'][$node->id]['@type'] === NodeType::EntryGroup) {
-          foreach ($tree['lookup'][$node->id]['entries'] as $entry) {
-            $links[] = route('entries.show', ['id' => $node->id, 'entryId' => $entry]);
-          }
+            foreach ($tree['lookup'][$node->id]['entries'] as $entry) {
+                $links[] = route('entries.show', ['id' => $node->id, 'entryId' => $entry]);
+            }
         }
 
         foreach ($node->children as $child) {
@@ -107,17 +106,16 @@ $links
 HTML;
 });
 
-
-if (!app()->isProduction()) {
+if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library
-// but this isn't a priority for now, so some code is mixed with
-// the code for the website which includes the code for testing the tree
-// These routes are ignored by the crawler that builds the static version
-// of this website.
+    // but this isn't a priority for now, so some code is mixed with
+    // the code for the website which includes the code for testing the tree
+    // These routes are ignored by the crawler that builds the static version
+    // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {
-        abort_if(!Cache::has('tree-' . $caseId), 404);
+        abort_if(! Cache::has('tree-'.$caseId), 404);
 
-        $case = Cache::get('tree-'  . $caseId);
+        $case = Cache::get('tree-'.$caseId);
 
         return view('render-testcase', ['case' => $case]);
     })->name('tree-rendering');

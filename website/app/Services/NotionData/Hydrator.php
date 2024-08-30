@@ -2,10 +2,7 @@
 
 namespace App\Services\NotionData;
 
-use App\Rules\CachedActiveUrlRule;
 use App\Services\Iconsnatch\IconSnatch;
-use App\Services\Iconsnatch\Logo;
-use Exception;
 use Illuminate\Support\Facades\Validator;
 use Notion\Databases\Database;
 use Notion\Pages\Page;
@@ -17,24 +14,22 @@ class Hydrator
      * even if the database is duplicated or the column changes, so they are _very_ stable.
      */
     public const array SCHEMA = [
-        "organizationType" => "%3EfkD",
-        "link" => "BEe%7D",
-        "description" => "C%3Fc%3A",
-        "interventionFocuses" => "L%3FRx",
-        "parent" => "QTQ%5D",
-        "locationHints" => "VQ%5B%7D",
-        "activityTypes" => "Wmi~",
-        "gcbrFocus" => "kC%5Cr",
-        "name" => "title",
-        "isCategory" => "uR%3DA",
+        'organizationType' => '%3EfkD',
+        'link' => 'BEe%7D',
+        'description' => 'C%3Fc%3A',
+        'interventionFocuses' => 'L%3FRx',
+        'parent' => 'QTQ%5D',
+        'locationHints' => 'VQ%5B%7D',
+        'activityTypes' => 'Wmi~',
+        'gcbrFocus' => 'kC%5Cr',
+        'name' => 'title',
+        'isCategory' => 'uR%3DA',
     ];
 
-    public function __construct(protected Database $database)
-    {
-    }
+    public function __construct(protected Database $database) {}
 
     /**
-     * @param Page[] $pages
+     * @param  Page[]  $pages
      * @return array<Category|Entry>
      */
     public function hydrate(array $pages): array
@@ -42,11 +37,11 @@ class Hydrator
         $hydrated = [];
 
         foreach ($pages as $page) {
-            $parents = $page->properties()->getRelationById(self::SCHEMA["parent"])->pageIds;
-            $isCategory = $page->properties()->getCheckboxById(self::SCHEMA["isCategory"])->checked;
+            $parents = $page->properties()->getRelationById(self::SCHEMA['parent'])->pageIds;
+            $isCategory = $page->properties()->getCheckboxById(self::SCHEMA['isCategory'])->checked;
 
             if (count($parents) === 0) {
-                if (!$isCategory) {
+                if (! $isCategory) {
                     continue;
                 }
 
@@ -55,6 +50,7 @@ class Hydrator
                     continue;
                 }
                 $hydrated[] = $category;
+
                 continue;
             }
 
@@ -74,7 +70,6 @@ class Hydrator
 
         }
 
-
         return $hydrated;
     }
 
@@ -89,17 +84,17 @@ class Hydrator
             return null;
         }
 
-        return new Category($page->id, $parentId, $validator->validated()["title"]);
+        return new Category($page->id, $parentId, $validator->validated()['title']);
     }
 
     public function entryFromPage(Page $entry, string $parentId): ?Entry
     {
-        $link = $entry->properties()->getUrlById(self::SCHEMA["link"])->url;
-        $organizationType = $entry->properties()->getSelectById(self::SCHEMA["organizationType"])->option;
+        $link = $entry->properties()->getUrlById(self::SCHEMA['link'])->url;
+        $organizationType = $entry->properties()->getSelectById(self::SCHEMA['organizationType'])->option;
 
         $validator = Validator::make(
             [
-                'link' => !str_starts_with($link ?? '', 'http') ? 'https://' . $link : $link,
+                'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
                 'title' => $entry->title()?->toString(),
                 'organizationType' => $organizationType?->name,
             ],
@@ -119,16 +114,15 @@ class Hydrator
         return new Entry(
             id: $entry->id,
             parentId: $parentId,
-            label: $validData["title"],
-            link: $validData["link"],
-            description: $entry->properties()->getRichTextById(self::SCHEMA["description"])->toString(),
-            organizationType: $validData["organizationType"],
-            interventionFocuses: $entry->properties()->getMultiSelectById(self::SCHEMA["interventionFocuses"])->options,
-            activityTypes: $entry->properties()->getMultiSelectById(self::SCHEMA["activityTypes"])->options,
-            locationHints: $entry->properties()->getMultiSelectById(self::SCHEMA["locationHints"])->options,
-            gcbrFocus: $entry->properties()->getCheckboxById(self::SCHEMA["gcbrFocus"])->checked,
-            logo: IconSnatch::downloadFrom($validData["link"]),
+            label: $validData['title'],
+            link: $validData['link'],
+            description: $entry->properties()->getRichTextById(self::SCHEMA['description'])->toString(),
+            organizationType: $validData['organizationType'],
+            interventionFocuses: $entry->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options,
+            activityTypes: $entry->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options,
+            locationHints: $entry->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+            gcbrFocus: $entry->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
+            logo: IconSnatch::downloadFrom($validData['link']),
         );
     }
-
 }

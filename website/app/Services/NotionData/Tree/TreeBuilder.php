@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 
 class TreeBuilder
 {
-    /** @var array<string, array<string, mixed>>  */
+    /** @var array<string, array<string, mixed>> */
     protected array $lookup = [];
 
     /** @var array<string, Node[]> A map from a parent ID to its children's IDs */
@@ -18,21 +18,21 @@ class TreeBuilder
 
     /** @var Node[] */
     protected array $nodes = [];
+
     protected string $rootNodeId;
 
-
     /**
-     * @param array<Category|Entry> $pages
+     * @param  array<Category|Entry>  $pages
      * @return array{tree: Node|null, lookup: array<string, array<string, mixed>>}
      */
     public function build(array $pages): array
     {
         // Normalize the map, so it has a single root node.
         $this->rootNodeId = 'root';
-        $rootNodes = collect($pages)->filter(fn(Category|Entry $page) => $page->parentId === null);
+        $rootNodes = collect($pages)->filter(fn (Category|Entry $page) => $page->parentId === null);
         if (count($rootNodes) === 1) {
             $rootNodes->first()->parent = $this->rootNodeId;
-        } else if (count($rootNodes) > 1) {
+        } elseif (count($rootNodes) > 1) {
             // We want to connect the forest to a single root node.
             foreach ($rootNodes as $root) {
                 $root->parent = $this->rootNodeId;
@@ -58,6 +58,7 @@ class TreeBuilder
             // This is true only if the raw pages already had a single root.
             if ($page->id === $this->rootNodeId) {
                 $this->nodes[] = new Node($page->id, $page->id);
+
                 continue;
             }
             $this->nodes[] = new Node($page->id, $page->parentId ?? $this->rootNodeId);
@@ -74,12 +75,12 @@ class TreeBuilder
                     /** @var Collection<string> $entryIds */
                     $entryIds = $entries->pluck('id');
 
-                    $entryGroupId = sha1($parentId . '-' . $entryIds->sort()->join(''));
+                    $entryGroupId = sha1($parentId.'-'.$entryIds->sort()->join(''));
                     $rest->push(new Node($entryGroupId, $parentId));
                     $this->lookup[$entryGroupId] = [
                         '@type' => NodeType::EntryGroup,
                         'id' => $entryGroupId,
-                        'entries' => $entryIds->toArray()
+                        'entries' => $entryIds->toArray(),
                     ];
                 }
 
@@ -88,24 +89,23 @@ class TreeBuilder
             ->flatten(1)
             ->toArray();
 
-
         $this->parentToChildrenMap = collect($this->nodes)->groupBy('parentId')->toArray();
 
         return [
             'tree' => $this->buildTree(id: $this->rootNodeId, parentId: $this->rootNodeId),
-            'lookup' => $this->lookup
+            'lookup' => $this->lookup,
         ];
     }
 
     /**
-     * @param array<string> $trail
+     * @param  array<string>  $trail
      */
     public function buildTree(string $id, string $parentId, array $trail = []): ?Node
     {
         if ($id === $this->rootNodeId) {
             $node = new Node($id, $parentId, []);
         } else {
-            $matches = collect($this->nodes)->where('id', $id)->where(fn(Node $node) => $node->parentId === $parentId);
+            $matches = collect($this->nodes)->where('id', $id)->where(fn (Node $node) => $node->parentId === $parentId);
             if (count($matches) !== 1) {
                 throw new Exception("Should not happen: The vertex represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
             }
@@ -114,7 +114,7 @@ class TreeBuilder
             $node = $matches->first();
         }
 
-        if (!array_key_exists($id, $this->parentToChildrenMap) && $this->lookup[$id]['@type'] === NodeType::Category) {
+        if (! array_key_exists($id, $this->parentToChildrenMap) && $this->lookup[$id]['@type'] === NodeType::Category) {
             return null;
         }
 
@@ -127,7 +127,7 @@ class TreeBuilder
         $children = [];
         foreach (($this->parentToChildrenMap[$id] ?? []) as $child) {
             $subtree = $this->buildTree($child->id, $id, $trail);
-            if (!$subtree) {
+            if (! $subtree) {
                 continue;
             }
 

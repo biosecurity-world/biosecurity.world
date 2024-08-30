@@ -19,16 +19,14 @@ class Entry implements Arrayable
         public string $description,
         public string $organizationType,
         /** @var SelectOption[] */
-        public array  $interventionFocuses,
+        public array $interventionFocuses,
         /** @var SelectOption[] */
-        public array  $activityTypes,
+        public array $activityTypes,
         /** @var SelectOption[] */
-        public array  $locationHints,
-        public bool   $gcbrFocus,
-        public ?Logo   $logo,
-    )
-    {
-    }
+        public array $locationHints,
+        public bool $gcbrFocus,
+        public ?Logo $logo,
+    ) {}
 
     public function toArray(): array
     {
