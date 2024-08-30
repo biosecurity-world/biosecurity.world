@@ -1,15 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\NotionData\Tree;
 
 class Node
 {
+    public int $depth;
+
+    /** @var array<int> */
+    public array $trail = [];
+
+    public int $od;
+
+    public int $order;
+
     public function __construct(
-        public string $id,
-        public string $parentId,
-        /** @var string[] $trail */
-        public array $trail = [],
-        /** @var Node[] $children */
-        public array $children = []
+        public int $id,
+        public int $parentId
     ) {}
 }

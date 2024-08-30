@@ -1,7 +1,9 @@
-import {MapData} from "./index";
+import {Vertex} from "@/index";
+
+export {};
 
 declare global {
     interface Window {
-        mapData: MapData
+        nodes: Vertex[]
     }
 }

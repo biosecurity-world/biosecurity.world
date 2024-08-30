@@ -1,47 +1,41 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
 use App\Services\Iconsnatch\Logo;
-use Illuminate\Contracts\Support\Arrayable;
-use Notion\Databases\Properties\SelectOption;
+use Notion\Pages\Properties\RichTextProperty;
 
-/**
- * @implements Arrayable<string, mixed>
- */
-class Entry implements Arrayable
+#[\AllowDynamicProperties]
+class Entry
 {
     public function __construct(
         public string $id,
         public string $parentId,
         public string $label,
         public string $link,
-        public string $description,
+        public RichTextProperty $description,
         public string $organizationType,
-        /** @var SelectOption[] */
+        /** @var array<InterventionFocus> */
         public array $interventionFocuses,
-        /** @var SelectOption[] */
-        public array $activityTypes,
-        /** @var SelectOption[] */
-        public array $locationHints,
+        /** @var array<Activity> */
+        public array $activities,
+        public Location $location,
         public bool $gcbrFocus,
         public ?Logo $logo,
     ) {}
 
-    public function toArray(): array
+    public function nounForOrganizationType(): string
     {
-        return [
-            'id' => $this->id,
-            'parentId' => $this->parentId,
-            'label' => $this->label,
-            'link' => $this->link,
-            'description' => $this->description,
-            'organizationType' => $this->organizationType,
-            'interventionFocuses' => $this->interventionFocuses,
-            'activityTypes' => $this->activityTypes,
-            'locationHints' => $this->locationHints,
-            'gcbrFocus' => $this->gcbrFocus,
-            'logo' => $this->logo,
-        ];
+        return match ($this->organizationType) {
+            'For-profit company' => 'company',
+            'Think tank' => 'think tank',
+            'Government' => 'governmental organization',
+            'Intergovernmental agency' => 'intergovernmental agency',
+            'National non-profit organization' => 'national NGO',
+            'International non-profit organization' => 'international NGO',
+            'Media' => 'media organization',
+            'Research institute / lab / network' => 'research institute',
+            default => 'organization',
+        };
     }
 }

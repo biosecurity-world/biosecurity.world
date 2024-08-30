@@ -10,9 +10,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
-    <script>
-        window.rawMap = @json($tree);
-    </script>
+    <script>window.nodes = @json($nodes);</script>
 
     @vite('resources/js/app.ts')
     @vite('resources/css/app.css')
@@ -51,7 +49,7 @@
         <div class="w-full h-full flex border-t">
             <aside class="order-1 bg-gray-100 w-full max-w-md" id="entry-aside">
             </aside>
-            <aside class="order-0 h-full max-w-[calc((100%-80rem)/2+22rem)] filters-sidebar bg-gray-100 w-full">
+            <aside class="order-0 h-full filters-sidebar bg-gray-100 w-full">
                 <div class="w-full h-full rounded-r-3xl border-r bg-gray-50 flex justify-end">
                     <div class="flex flex-col max-w-sm">
                         <div class="flex-grow p-6">
@@ -97,22 +95,22 @@
                                 <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the map.</p>
 
                                 <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
-                                    @foreach($activityTypes as $activityType)
+                                    @foreach($activities as $activity)
                                         <li>
                                             <button
                                                 class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap"
-                                                style="color: {{ $activityType['fg'] }}; background-color: {{ $activityType['bg'] }}"
+                                                style="color: {{ $activity->color->foreground() }}; background-color: {{ $activity->color->background() }}"
                                                 type="button"
                                             >
                                                 <span class="sr-only">Remove filter</span>
 
-                                                @unless(empty($activityType['icon']))
-                                                    <x-activity-type-icon :icon="$activityType['icon']"
+                                                @unless(empty($activity->iconName()))
+                                                    <x-activity-type-icon :icon="$activity->iconName()"
                                                                           aria-hidden="true"
                                                                           class="size-[1.125rem] group-hover:opacity-75"/>
                                                 @endunless
                                                 <span class="ml-1 leading-none group-hover:opacity-75">
-                                                                                        {{ Str::limit($activityType['name'], 35) }}
+                                                                                        {{ Str::limit($activity->label, 35) }}
                                                                                     </span>
                                             </button>
                                         </li>
@@ -171,19 +169,30 @@
                                 <g id="center-wrapper">
                                     <g id="cartesian-flip">
                                             <g id="background"></g>
-                                            <rect width="8" height="8" rx="2" ry="2" data-vertex="{{ $tree->id }}"
+
+                                            <rect width="8" height="8" rx="2" ry="2" data-vertex="{{ \App\Support\IdHash::hash($root->id) }}"
                                                   class="invisible" aria-hidden="true"
-                                                  stroke="#e5e7eb" fill="white"></rect>
+                                                  stroke="#e5e7eb" fill="white" />
+
                                             <g>
                                                 @foreach($categories as $category)
-                                                    <x-category :category="$category"/>
+                                                    <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true" data-vertex="{{ \App\Support\IdHash::hash($category->id) }}">
+                                                        <x-category :category="$category"/>
+                                                    </foreignObject>
                                                 @endforeach
                                             </g>
+
                                             <g>
                                                 @foreach($entrygroups as $entrygroup)
-                                                    <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true"
-                                                                   data-vertex="{{ $entrygroup['id']}}">
-                                                        <x-entrygroup :entries="$entrygroup['entries']" :id="$entrygroup['id']"/>
+                                                    <foreignObject width="100%"
+                                                                   height="100%"
+                                                                   class="invisible"
+                                                                   aria-hidden="true"
+                                                                   data-vertex="{{ \App\Support\IdHash::hash($entrygroup->id) }}">
+                                                        <x-entrygroup
+                                                            :entries="array_map(fn (string $id) => $lookup[$id], $entrygroup->entries)"
+                                                            :entrygroup="$entrygroup"
+                                                        />
                                                     </foreignObject>
                                                 @endforeach
                                             </g>

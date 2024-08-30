@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\NotionData;
 
 use App\Services\Iconsnatch\IconSnatch;
+use App\Services\NotionData\Enums\NotionColor;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\In;
 use Notion\Databases\Database;
+use Notion\Databases\Properties\SelectOption;
 use Notion\Pages\Page;
 
 class Hydrator
@@ -87,21 +93,34 @@ class Hydrator
         return new Category($page->id, $parentId, $validator->validated()['title']);
     }
 
-    public function entryFromPage(Page $entry, string $parentId): ?Entry
+    public function entryFromPage(Page $page, string $parentId): ?Entry
     {
-        $link = $entry->properties()->getUrlById(self::SCHEMA['link'])->url;
-        $organizationType = $entry->properties()->getSelectById(self::SCHEMA['organizationType'])->option;
+        $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
 
         $validator = Validator::make(
             [
+                'id' => $page->id,
                 'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
-                'title' => $entry->title()?->toString(),
-                'organizationType' => $organizationType?->name,
+                'label' => $page->title()?->toString(),
+                'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
+                'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
+                'activities' => $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options,
+                'interventionFocuses' => $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options,
+                'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+                'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
             ],
             [
+                'id' => ['required', 'string'],
+                'label' => ['required', 'string'],
+                'description' => ['required'],
+                'gcbrFocus' => ['required', 'boolean'],
                 'link' => ['required', 'string', 'url'],
-                'title' => ['required', 'string'],
                 'organizationType' => ['required', 'string'],
+                ...collect(['activities', 'interventionFocuses', 'location'])->mapWithKeys(fn (string $multiSelect) => [$multiSelect => [
+                    "$multiSelect.*.id" => ['required', 'string'],
+                    "$multiSelect.*.name" => ['required', 'string'],
+                    "$multiSelect.*.color" => ['required', 'string', new In(Arr::pluck(NotionColor::cases(), 'value'))],
+                ]]),
             ]
         );
 
@@ -109,20 +128,13 @@ class Hydrator
             return null;
         }
 
-        $validData = $validator->validated();
+        $data = $validator->validated();
+        $data['parentId'] = $parentId;
+        $data['activities'] = array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $data['activities']);
+        $data['interventionFocuses'] = array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $data['interventionFocuses']);
+        $data['location'] = Location::fromNotionOptions($data['location']);
+        $data['logo'] = IconSnatch::downloadFrom($data['link']);
 
-        return new Entry(
-            id: $entry->id,
-            parentId: $parentId,
-            label: $validData['title'],
-            link: $validData['link'],
-            description: $entry->properties()->getRichTextById(self::SCHEMA['description'])->toString(),
-            organizationType: $validData['organizationType'],
-            interventionFocuses: $entry->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options,
-            activityTypes: $entry->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options,
-            locationHints: $entry->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
-            gcbrFocus: $entry->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
-            logo: IconSnatch::downloadFrom($validData['link']),
-        );
+        return new Entry(...$data);
     }
 }

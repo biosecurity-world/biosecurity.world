@@ -1,88 +1,7 @@
 import {PVertex, Sector} from "./index";
-import {getQuadrant, eq, gt, gte, inEI, inIE, lt, PI, PI_2, PIPI, shortestDistanceBetweenRectangles} from "@/utils"
-import debug from "@/debug";
-export enum NodeType {
-    Entry = 1,
-    Category = 2,
-    Entrygroup = 3,
-    Root = 4
-}
+import {eq, getQuadrant, gt, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
 
-export function prepare(
-    vertex: PVertex,
-    depth: number = 0
-) {
-    let el = document.querySelector(`[data-vertex="${vertex.id}"]`) as SVGElement | null
-    if (!el) {
-        throw new Error(`Vertex with id ${vertex.id} has no corresponding element in the DOM`)
-    }
-    vertex.el = el
-
-    let bounds: DOMRect
-    // We set the <foreignObject> with a height of 100% and a w of 100%
-    // because we don't want to compute the size of the elements server-side
-    // but this means that if we do vertex.el.getBoundingClientRect()
-    // we get the wrong bounds.
-    if (vertex.el instanceof SVGForeignObjectElement) {
-        if (vertex.el.childElementCount !== 1) {
-            throw new Error("It is expected that the foreignObject representing the vertex has a single child to compute its real bounding box, not the advertised (100%, 100%)")
-        }
-
-        bounds = vertex.el.firstElementChild!.getBoundingClientRect()
-        // We resize the foreignObject to match the bounding box of its child.
-        // This is only useful when inspecting the page.
-        vertex.el.setAttribute('width', bounds.width + 'px')
-        vertex.el.setAttribute('height', bounds.height + 'px')
-    } else {
-        bounds = vertex.el.getBoundingClientRect()
-    }
-
-    vertex.size = [Math.ceil(bounds.width), Math.ceil(bounds.height)]
-    vertex.depth = depth
-    vertex.weight = vertex.size[0] * vertex.size[1]
-
-    for (const child of vertex.children) {
-        vertex.weight += prepare(child as PVertex, depth + 1)
-    }
-
-    vertex.children.sort((a, b) => {
-        return (b as PVertex).weight - (a as PVertex).weight
-    })
-
-    return vertex.weight
-}
-
-export function sectorize(
-    vertex: PVertex,
-    parentSector: [number, number],
-    deltaFromSiblings: number,
-    siblingsWeight: number = 0
-) {
-    if (vertex.id === vertex.parentId) {
-        vertex.sector = [0, PIPI]
-    } else {
-        vertex.sector =[
-            deltaFromSiblings,
-            deltaFromSiblings + (vertex.weight / siblingsWeight) * (parentSector[1] - parentSector[0])
-        ]
-    }
-
-    if (lt(vertex.sector[0], 0) || gt(vertex.sector[1], PIPI)) {
-        throw new Error(`Sector ${vertex.sector} is not in the range [0, 2*PI]`)
-    }
-
-    let sumOfChildrenWeight = vertex.weight - (vertex.size[0] * vertex.size[1])
-
-    let childrenDelta = 0
-    for (const child of vertex.children) {
-        childrenDelta += sectorize(child as PVertex, vertex.sector, vertex.sector[0] + childrenDelta, sumOfChildrenWeight)
-    }
-
-    return vertex.sector[1] - vertex.sector[0]
-}
-
-
-export function fitToSector(vertex: PVertex, parent: PVertex | null, minDistance: number = 0): [number, number] {
+export function fitToSector(vertex: PVertex): [number, number] {
     if (gt(vertex.sector[1] - vertex.sector[0], PI) && !eq(vertex.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -91,29 +10,7 @@ export function fitToSector(vertex: PVertex, parent: PVertex | null, minDistance
         return [-vertex.size[0] / 2, -vertex.size[1] / 2]
     }
 
-    let [x, y]: [number, number] = findPositionForRect(vertex)
-    let [l, w] = vertex.size
-
-    if (parent === null) {
-        return [x, y]
-    }
-
-    let [Pl, Pw] = parent.size
-    let [Px, Py] = parent.position
-
-    let offset = 1
-    while (
-        shortestDistanceBetweenRectangles(
-            [x, y, l, w],
-            [Px, Py, Pl, Pw]
-        ) < minDistance
-    ) {
-        [x, y] = findPositionForRect(vertex, offset)
-
-        offset+= 1;
-    }
-
-    return [x, y]
+    return findPositionForRect(vertex)
 }
 
 export function findPositionForRect(vertex: PVertex, offsetX: number | null = null): [number, number] {
@@ -126,7 +23,7 @@ export function findPositionForRect(vertex: PVertex, offsetX: number | null = nu
     let tan_t = Math.tan(t)
 
     if (eq(d, 0) && inIE(t, PI, PIPI)) {
-        return [-l/2 + offsetX, 0]
+        return [-l / 2 + offsetX, 0]
 
     }
 

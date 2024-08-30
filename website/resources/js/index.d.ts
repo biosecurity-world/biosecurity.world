@@ -1,35 +1,3 @@
-import {SectorType, NodeType} from "./data";
-
-
-export type Entrygroup = {
-    "@type": NodeType.Entrygroup
-    entries: number[]
-}
-
-export type Category = {
-    label: string
-    "@notionId" : string
-    "@type": NodeType.Category
-}
-
-export type Entry = {
-    id: string
-    label: string
-    link: string
-    description: string
-    organizationType: string
-    interventionFocuses: string[]
-    activityType: string[]
-    locationHints: string[]
-    gcbrFocus: boolean
-    logo: {
-        url: string
-        filled: boolean
-    }
-    "@notionId": string
-    "@type": NodeType.Entry
-}
-
 export type Vertex = {
     id: number
     parentId: number
@@ -43,6 +11,7 @@ export type PVertex = {
     parentId: number
     depth: number
     weight: number
+    od: number
     children: PVertex[]
     el: SVGElement
 
