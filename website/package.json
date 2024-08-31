@@ -30,7 +30,6 @@
         "d3": "^7.9.0",
         "htmx.org": "2.0.2"
     },
-
     "prettier": {
         "arrowParens": "always",
         "semi": false,

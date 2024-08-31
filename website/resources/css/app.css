@@ -63,7 +63,7 @@ input[name="focus"]:checked + label[for="focus_governance"] > .at-governance {
 
 label[for^="activity_"].inactive {
     background: #ffffff !important;
-    color: theme('colors.gray.500') !important;
+    color: theme("colors.gray.500") !important;
 }
 
 .htmx-indicator {
@@ -75,17 +75,17 @@ label[for^="activity_"].inactive {
 }
 
 [data-toggle="off"] {
-    @apply bg-gray-200
+    @apply bg-gray-200;
 }
 
-[data-toggle="off"]  > span {
-    @apply translate-x-0
+[data-toggle="off"] > span {
+    @apply translate-x-0;
 }
 
 [data-toggle="on"] {
-    @apply bg-emerald-600
+    @apply bg-emerald-600;
 }
 
-[data-toggle="on"]  > span {
-    @apply translate-x-5
+[data-toggle="on"] > span {
+    @apply translate-x-5;
 }

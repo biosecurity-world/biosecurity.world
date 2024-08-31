@@ -57,8 +57,8 @@
     },
     "repositories": [
         {
-        "type": "path",
-        "url": "../packages/*"
+            "type": "path",
+            "url": "../packages/*"
         }
     ],
     "config": {
