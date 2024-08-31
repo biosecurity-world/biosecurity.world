@@ -27,11 +27,13 @@ class InterventionFocus
         );
     }
 
-    public function isTechnical(): bool {
+    public function isTechnical(): bool
+    {
         return $this->label === '[TECHNICAL]';
     }
 
-    public function isGovernance(): bool {
+    public function isGovernance(): bool
+    {
         return $this->label === '[GOVERNANCE]';
     }
 }

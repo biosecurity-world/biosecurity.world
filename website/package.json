@@ -4,7 +4,9 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test": "mocha resources/js/tests --colors true"
+        "test": "mocha resources/js/tests --colors true",
+        "lint": "prettier --write resources/js/**/*.ts resources/css/**/*.css",
+        "test:lint": "prettier --check resources/js/**/*.ts resources/css/**/*.css"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.8",
@@ -17,6 +19,7 @@
         "pixelmatch": "^6.0.0",
         "pngjs": "^7.0.0",
         "postcss": "^8.4.39",
+        "prettier": "^3.3.3",
         "puppeteer": "^23.1.1",
         "tailwindcss": "^3.4.6",
         "ts-mocha": "^10.0.0",
@@ -26,5 +29,13 @@
     "dependencies": {
         "d3": "^7.9.0",
         "htmx.org": "2.0.2"
+    },
+
+    "prettier": {
+        "arrowParens": "always",
+        "semi": false,
+        "experimentalTernaries": true,
+        "trailingComma": "all",
+        "bracketSpacing": false
     }
 }

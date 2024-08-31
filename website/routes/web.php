@@ -63,7 +63,7 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
     return view('entry', [
         'entry' => $entry,
         'host' => parse_url($entry->link, PHP_URL_HOST),
-        'notionUrl' => sprintf("https://notion.so/%s", $entry->id),
+        'notionUrl' => sprintf('https://notion.so/%s', $entry->id),
         'breadcrumbs' => array_map(fn ($id) => $lookup[$id]->label, $entrygroup->trail),
     ]);
 })->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
@@ -77,7 +77,7 @@ Route::get('/_/entries', function (Notion $notion) {
         ->flatMap(function (Node $node) use ($lookup) {
             $group = $lookup[$node->id];
 
-            return collect($group->entries)->map(function (int $entryId) use ($node, $group) {
+            return collect($group->entries)->map(function (int $entryId) use ($node) {
                 return route('entries.show', ['id' => $node->id, 'entryId' => $entryId]);
             });
         });

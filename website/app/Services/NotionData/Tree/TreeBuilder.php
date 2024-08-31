@@ -85,9 +85,11 @@ class TreeBuilder
                 id: $this->rootNodeId,
                 parentId: $this->rootNodeId
             ) as $node
-        ) { $nodes[] = $node; }
+        ) {
+            $nodes[] = $node;
+        }
 
-        return ['nodes' => $nodes, 'lookup' => $this->nodeToPage,];
+        return ['nodes' => $nodes, 'lookup' => $this->nodeToPage];
     }
 
     /**
