@@ -1,4 +1,4 @@
-import {Node} from "@/index";
+import {Node} from "@/types/index";
 
 export {};
 

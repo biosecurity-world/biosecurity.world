@@ -228,13 +228,13 @@
                                 <g id="cartesian-flip">
                                     <g id="background"></g>
 
-                                    <rect width="8" height="8" rx="2" ry="2" data-vertex="{{ \App\Support\IdHash::hash($root->id) }}"
+                                    <rect width="8" height="8" rx="2" ry="2" data-node="{{ \App\Support\IdHash::hash($root->id) }}"
                                           class="invisible" aria-hidden="true"
                                           stroke="#e5e7eb" fill="white" />
 
                                     <g>
                                         @foreach($categories as $category)
-                                            <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true" data-vertex="{{ \App\Support\IdHash::hash($category->id) }}">
+                                            <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true" data-node="{{ \App\Support\IdHash::hash($category->id) }}">
                                                 <x-category :category="$category"/>
                                             </foreignObject>
                                         @endforeach
@@ -246,7 +246,7 @@
                                                            height="100%"
                                                            class="invisible"
                                                            aria-hidden="true"
-                                                           data-vertex="{{ \App\Support\IdHash::hash($entrygroup->id) }}">
+                                                           data-node="{{ \App\Support\IdHash::hash($entrygroup->id) }}">
                                                 <x-entrygroup
                                                     :entries="array_map(fn (string $id) => $lookup[$id], $entrygroup->entries)"
                                                     :entrygroup="$entrygroup"

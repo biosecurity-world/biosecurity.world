@@ -103,7 +103,7 @@ class TreeBuilder
         } else {
             $matches = collect($this->nodes)->where('id', $id)->where(fn (Node $node) => $node->parentId === $parentId);
             if (count($matches) !== 1) {
-                throw new Exception("Should not happen: The vertex represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
+                throw new Exception("Should not happen: The node represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
             }
 
             /** @var Node $node */

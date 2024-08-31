@@ -1,6 +1,6 @@
 import {Selection} from "d3";
 import {fitToSector} from "@/data";
-import {ProcessedNode} from "@/index";
+import {ProcessedNode} from "@/types";
 import {PI, PI_2} from "@/utils";
 
 let _debugInstance: Debug|null = null
@@ -71,21 +71,21 @@ class Debug {
         this.buffer = []
     }
 
-    vertex(options: {vertex: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
-        if (!options.vertex.position) {
-            options.vertex.position = fitToSector(options.vertex, options.parent ?? null, options.minDistance ?? 0)
+    node(options: {node: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
+        if (!options.node.position) {
+            options.node.position = fitToSector(options.node, options.parent ?? null, options.minDistance ?? 0)
         }
 
-        debug().ray({angle: options.vertex.sector[0], color: 'black'})
-        debug().ray({angle: options.vertex.sector[1], color: 'black'})
+        debug().ray({angle: options.node.sector[0], color: 'black'})
+        debug().ray({angle: options.node.sector[1], color: 'black'})
         debug().rect({
-            p: options.vertex.position,
-            length: options.vertex.size[0],
-            width: options.vertex.size[1],
+            p: options.node.position,
+            length: options.node.size[0],
+            width: options.node.size[1],
             color: options.color ?? 'red',
-            cb: ($rect) => $rect.attr('data-debug-id', options.vertex.id),
+            cb: ($rect) => $rect.attr('data-debug-id', options.node.id),
         })
 
-        debug().point({p: options.vertex.position, color: options.color ?? 'red'})
+        debug().point({p: options.node.position, color: options.color ?? 'red'})
     }
 }

@@ -1,11 +1,23 @@
 import 'htmx.org'
 import {D3ZoomEvent, select, zoom} from "d3"
 import {gt, IN_PRODUCTION, lt, PIPI} from "./utils";
-import {ProcessedNode} from "./index";
+import {ProcessedNode} from "./types";
 import {fitToSector} from "./data";
 import debug from "@/debug";
 
 type AppState = "error" | "success" | "loading"
+
+function switchAppState(newState: AppState): void {
+    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
+        let isActive = newState === state.dataset.state
+
+        state.ariaHidden = isActive ? "false" : "true"
+        state.classList.toggle('state-active', isActive)
+        state.classList.toggle('state-inactive', !isActive)
+    })
+}
+
+const router = new Router()
 
 try {
     let $map = select<SVGElement, {}>('#map')
@@ -54,20 +66,19 @@ try {
     for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i]
 
-        let el = document.querySelector(`[data-vertex="${node.id}"]`) as SVGElement | null
+        let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
         if (!el) {
-            throw new Error(`Vertex with id ${node.id} has no corresponding element in the DOM`)
+            throw new Error(`Node with id ${node.id} has no corresponding element in the DOM`)
         }
         node.el = el
 
         let bounds: DOMRect
         // We set the <foreignObject> with a height of 100% and a w of 100%
         // because we don't want to compute the size of the elements server-side
-        // but this means that if we do vertex.el.getBoundingClientRect()
-        // we get the wrong bounds.
+        // but this means that node.el.getBoundingClientRect() returns the wrong bounds.
         if (node.el instanceof SVGForeignObjectElement) {
             if (node.el.childElementCount !== 1) {
-                throw new Error("It is expected that the foreignObject representing the vertex has a single child to compute its real bounding box, not the advertised (100%, 100%)")
+                throw new Error("It is expected that the foreignObject representing the node has a single child to compute its real bounding box, not the advertised (100%, 100%)")
             }
 
             bounds = node.el.firstElementChild!.getBoundingClientRect()
@@ -165,18 +176,4 @@ try {
     switchAppState('error')
 }
 
-function switchAppState(newState: AppState): void {
-    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
-        let isActive = newState === state.dataset.state
 
-        state.ariaHidden = isActive ? "false" : "true"
-        if (isActive) {
-            state.classList.add('state-active')
-            state.classList.remove('state-inactive')
-        } else {
-            state.classList.add('state-inactive')
-            state.classList.remove('state-active')
-        }
-    })
-
-}

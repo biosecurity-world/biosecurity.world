@@ -1,6 +1,6 @@
 import {getEffectiveSector} from "@/data"
 import assert = require("assert")
-import {Sector} from "@/index"
+import {Sector} from "@/types"
 import {eq, PI, PI_2, PI_3} from "@/utils"
 
 it("finds the correct effective sector for side-bound sectors", () => {
