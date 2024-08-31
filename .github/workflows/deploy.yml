@@ -1,6 +1,8 @@
 name: deploy
 on:
   push:
+    paths:
+      - 'website/**'
   workflow_dispatch:
 
 jobs:
