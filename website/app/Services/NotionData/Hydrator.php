@@ -1,108 +1,77 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\NotionData;
 
 use App\Services\Iconsnatch\IconSnatch;
-use App\Services\NotionData\Enums\NodeType;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
+use App\Services\NotionData\Enums\NotionColor;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\In;
 use Notion\Databases\Database;
 use Notion\Databases\Properties\SelectOption;
-use Notion\Pages\Page as NotionPage;
+use Notion\Pages\Page;
 
 class Hydrator
 {
-    // The IDs are hardcoded (no other way is much better) but they do not change,
-    // even if the database is duplicated or the column changes, so they are _very_ stable.
+    /*
+     * The IDs are hardcoded (no other way is much better) but they do not change,
+     * even if the database is duplicated or the column changes, so they are _very_ stable.
+     */
     public const array SCHEMA = [
-        "organizationType" => "%3EfkD",
-        "link" => "BEe%7D",
-        "description" => "C%3Fc%3A",
-        "interventionFocuses" => "L%3FRx",
-        "parent" => "QTQ%5D",
-        "locationHints" => "VQ%5B%7D",
-        "activityTypes" => "Wmi~",
-        "gcbrFocus" => "kC%5Cr",
-        "name" => "title",
-        "isCategory" => "uR%3DA",
+        'organizationType' => '%3EfkD',
+        'link' => 'BEe%7D',
+        'description' => 'C%3Fc%3A',
+        'interventionFocuses' => 'L%3FRx',
+        'parent' => 'QTQ%5D',
+        'locationHints' => 'VQ%5B%7D',
+        'activityTypes' => 'Wmi~',
+        'gcbrFocus' => 'kC%5Cr',
+        'name' => 'title',
+        'isCategory' => 'uR%3DA',
     ];
 
-    public function pageFromRawCategory(NotionPage $page, string $id,?string $parent): Page
+    public function __construct(protected Database $database) {}
+
+    /**
+     * @param  Page[]  $pages
+     * @return array<Category|Entry>
+     */
+    public function hydrate(array $pages): array
     {
-        return new Page(NodeType::Category, $id, $parent, [
-            "label" => $page->title()->toString(),
-        ]);
-    }
+        $hydrated = [];
 
-    public function pageFromCategoryOrEntry(NotionPage $page, string $id, ?string $parent): ?Page
-    {
-        $isCategory = $page->properties()->getCheckboxById(self::SCHEMA["isCategory"])->checked;
-        if ($isCategory) {
-            return $this->pageFromRawCategory($page, $id, $parent);
-        }
+        foreach ($pages as $page) {
+            $parents = $page->properties()->getRelationById(self::SCHEMA['parent'])->pageIds;
+            $isCategory = $page->properties()->getCheckboxById(self::SCHEMA['isCategory'])->checked;
 
-        return $this->pageFromRawEntry($page, $id, $parent);
-    }
+            if (count($parents) === 0) {
+                if (! $isCategory) {
+                    continue;
+                }
 
-    public function pageFromRawEntry(NotionPage $entry, string $id, ?string $parent): ?Page
-    {
-        $link = $entry->properties()->getUrlById(self::SCHEMA["link"])->url;
-        if (is_null($link)) {
-            return null;
-        }
+                $category = $this->categoryFromPage($page, null);
+                if (is_null($category)) {
+                    continue;
+                }
+                $hydrated[] = $category;
 
-        if (!filter_var($link, FILTER_VALIDATE_URL)) {
-            if (!filter_var("https://$link", FILTER_VALIDATE_URL)) {
-                return null;
+                continue;
             }
 
-            $link = "https://$link";
-        }
+            $item = $isCategory ?
+                $this->categoryFromPage($page, '') :
+                $this->entryFromPage($page, '');
 
-        $logo = Cache::rememberForever(
-            'iconsnatch-download-' . str_replace(str_split('{}()/\@:'), '', $link),
-            // Returning null would prevent Laravel from caching the icon.
-            fn() => IconSnatch::downloadFrom($link) ?? false,
-        );
-
-        if ($logo === false) {
-            $logo = null;
-        }
-
-        return new Page(NodeType::Entry, $id, $parent, [
-            "label" => $entry->title()->toString(),
-            "link" => $link,
-            "description" => $entry->properties()->getRichTextById(self::SCHEMA["description"])->toString(),
-            "organizationType" => $entry->properties()->getSelectById(self::SCHEMA["organizationType"])->option?->name,
-            "interventionFocuses" =>                 $entry->properties()->getMultiSelectById(self::SCHEMA["interventionFocuses"])->options,
-            "activityTypes" => $entry->properties()->getMultiSelectById(self::SCHEMA["activityTypes"])->options,
-            "locationHints" => $entry->properties()->getMultiSelectById(self::SCHEMA["locationHints"])->options,
-            "gcbrFocus" => $entry->properties()->getCheckboxById(self::SCHEMA["gcbrFocus"])->checked,
-            "logo" => $logo
-        ]);
-    }
-
-
-    public function __construct(protected Database $database)
-    {
-    }
-
-    public function hydrate(Collection $pages): Collection
-    {
-        $hydrated = collect();
-
-        /** @var NotionPage $page */
-        foreach ($pages as $page) {
-            $parents = $page->properties()->getRelationById(self::SCHEMA["parent"])->pageIds;
-            if (count($parents) === 0) {
-                $parents = [null];
+            if (is_null($item)) {
+                continue;
             }
 
             foreach ($parents as $parent) {
-                $hydratedPage = $this->pageFromCategoryOrEntry($page, $page->id, $parent);
-                if ($hydratedPage) {
-                    $hydrated[] = $hydratedPage;
-                }
+                $clone = clone $item;
+                $clone->parentId = $parent;
+                $hydrated[] = $clone;
             }
 
         }
@@ -110,4 +79,62 @@ class Hydrator
         return $hydrated;
     }
 
+    public function categoryFromPage(Page $page, ?string $parentId): ?Category
+    {
+        $validator = Validator::make(
+            ['title' => $page->title()?->toString()],
+            ['title' => ['required', 'string']]
+        );
+
+        if ($validator->fails()) {
+            return null;
+        }
+
+        return new Category($page->id, $parentId, $validator->validated()['title']);
+    }
+
+    public function entryFromPage(Page $page, string $parentId): ?Entry
+    {
+        $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
+
+        $validator = Validator::make(
+            [
+                'id' => $page->id,
+                'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
+                'label' => $page->title()?->toString(),
+                'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
+                'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
+                'activities' => $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options,
+                'interventionFocuses' => $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options,
+                'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+                'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
+            ],
+            [
+                'id' => ['required', 'string'],
+                'label' => ['required', 'string'],
+                'description' => ['required'],
+                'gcbrFocus' => ['required', 'boolean'],
+                'link' => ['required', 'string', 'url'],
+                'organizationType' => ['required', 'string'],
+                ...collect(['activities', 'interventionFocuses', 'location'])->mapWithKeys(fn (string $multiSelect) => [$multiSelect => [
+                    "$multiSelect.*.id" => ['required', 'string'],
+                    "$multiSelect.*.name" => ['required', 'string'],
+                    "$multiSelect.*.color" => ['required', 'string', new In(Arr::pluck(NotionColor::cases(), 'value'))],
+                ]]),
+            ]
+        );
+
+        if ($validator->fails()) {
+            return null;
+        }
+
+        $data = $validator->validated();
+        $data['parentId'] = $parentId;
+        $data['activities'] = array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $data['activities']);
+        $data['interventionFocuses'] = array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $data['interventionFocuses']);
+        $data['location'] = Location::fromNotionOptions($data['location']);
+        $data['logo'] = IconSnatch::downloadFrom($data['link']);
+
+        return new Entry(...$data);
+    }
 }

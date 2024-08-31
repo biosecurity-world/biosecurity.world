@@ -1,12 +1,5 @@
 {
     "name": "beyondcode/laravel-visual-diff",
-    "description": "Create visual diffs in your application tests.",
-    "keywords": [
-        "beyondcode",
-        "visual regression",
-        "laravel-visual-diff"
-    ],
-    "homepage": "https://github.com/beyondcode/laravel-visual-diff",
     "license": "MIT",
     "authors": [
         {

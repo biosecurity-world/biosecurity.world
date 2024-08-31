@@ -1,21 +1,5 @@
 export const IN_PRODUCTION = import.meta.env.PROD === true
 
-export function switchState(newState: string, selector: string, datasetKey: string): void {
-    document.querySelectorAll(selector).forEach((state: HTMLElement) => {
-        let isActive = newState === state.dataset[datasetKey]
-
-        state.ariaHidden = isActive ? "false" : "true"
-        if (isActive) {
-            state.classList.add('state-active')
-            state.classList.remove('state-inactive')
-        } else {
-            state.classList.add('state-inactive')
-            state.classList.remove('state-active')
-        }
-    })
-
-}
-
 export const PI = Math.PI
 export const PI_4 = PI / 4
 export const PI_6 = PI / 6

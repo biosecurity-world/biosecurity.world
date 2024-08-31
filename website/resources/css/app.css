@@ -12,7 +12,7 @@
 @tailwind utilities;
 
 .app-state {
-    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100;
+    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100 rounded-r-3xl  flex items-center justify-center;
 }
 
 .state-active {
@@ -24,11 +24,6 @@
     pointer-events: none;
     opacity: 0;
 }
-
-/*#cartesian-flip {*/
-/*    transform: scaleY(-1);*/
-/*}*/
-
 
 .invisible {
     position: absolute;
@@ -43,11 +38,6 @@
 #entry-aside:has(> .entry) {
     display: block;
 }
-
-#entry-aside:has(> .entry) + .filters-sidebar {
-    background: linear-gradient(180deg, white 50%, theme('colors.gray.50') 50%);
-}
-
 
 /** Style the 'focus on' filter **/
 input[name="focus"]:checked + label > .check {
@@ -71,3 +61,13 @@ input[name="focus"]:checked + label[for="focus_governance"] > .at-governance {
     color: white;
 }
 
+/*#cartesian-flip {*/
+/*    transform: scaleY(-1);*/
+/*}*/
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}

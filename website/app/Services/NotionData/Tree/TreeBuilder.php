@@ -1,141 +1,142 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\NotionData\Tree;
 
-use App\Services\NotionData\Enums\NodeType;
-use App\Services\NotionData\Page;
-use App\Services\NotionData\Utils\IdPool;
+use App\Services\NotionData\Category;
+use App\Services\NotionData\Entry;
+use App\Services\NotionData\Entrygroup;
+use App\Services\NotionData\Root;
+use App\Support\IdHash;
+use Exception;
 use Illuminate\Support\Collection;
 
 class TreeBuilder
 {
-    protected array $vertexData = [];
+    /** @var array<int, Category|Entrygroup|Entry|Root> */
+    protected array $nodeToPage = [];
+
+    /** @var array<int, Node[]> A map from a parent ID to its children's IDs */
     protected array $parentToChildrenMap = [];
-    protected string $rootNodeId;
+
+    /** @var Node[] */
     protected array $nodes = [];
 
+    protected int $rootNodeId;
 
     /**
-     * @param Collection<Page> $pages
-     * @return array
-     * @throws \Exception
+     * @param  array<Category|Entry>  $pages
+     * @return array{nodes: Node[], lookup: array<int, Category|Entrygroup|Root|Entry>}
      */
-    public function build(Collection $pages): array
+    public function build(array $pages): array
     {
-        // Normalize the map, so it has a single root node.
-        $this->rootNodeId = 'root';
-        /** @var Collection<Page> $rootNodes */
-        $rootNodes = collect($pages)->filter(fn(Page $page) => $page->parent === null);
-        if (count($rootNodes) === 1) {
-            $rootNodes->first()->parents = [$this->rootNodeId];
-        } else if (count($rootNodes) > 1) {
-            // We want to connect the forest to a single root node.
-            foreach ($rootNodes as $root) {
-                $root->parent = $this->rootNodeId;
-            }
-
-            $this->vertexData[$this->rootNodeId] = [
-                '@type' => NodeType::Root,
-            ];
-        } else {
-            throw new \Exception("Should not happen: the map is empty.");
-        }
-
+        $this->rootNodeId = IdHash::hash('root');
         $this->nodes = [];
-        foreach ($pages as $page) {
-            // Pages have a lot of data associated with them (title, link...) and we are possibly
-            // duplicating them 10 or 15 times. We don't want to send this data more than once,
-            // so we separate the relational data (id, parent) from the page data (title...)
-            $page->data['@type'] = $page->type;
-            $page->data['@id'] = $page->id;
-            $this->vertexData[$page->id] = $page->data;
 
-            // This is true only if the raw pages already had a single root.
-            if ($page->id === $this->rootNodeId) {
-                $this->nodes[] = new Node($page->id, $page->id);
-                continue;
-            }
-            $this->nodes[] = new Node($page->id, $page->parent);
+        foreach ($pages as $page) {
+            $reducedId = IdHash::hash($page->id);
+
+            $this->nodeToPage[$reducedId] = $page;
+            $this->nodes[] = new Node($reducedId, $page->parentId !== null ? IdHash::hash($page->parentId) : $this->rootNodeId);
         }
 
-        // Squash all entries into entrygroups
-        $this->nodes = collect($this->nodes)->groupBy('parentId')
-            ->map(function (Collection $children, string $parentId) {
-                [$entries, $rest] = $children->partition(function (Node $vertex) {
-                    return $this->vertexData[$vertex->id]['@type'] === NodeType::Entry;
-                });
+        $rootNodes = collect($this->nodes)->filter(fn (Node $node) => $node->parentId === $this->rootNodeId);
+        if (count($rootNodes) >= 1) {
+            foreach ($rootNodes as $root) {
+                $root->parentId = $this->rootNodeId;
+            }
 
-                if ($entries->isNotEmpty()) {
-                    /** @var Collection<string> $entryIds */
-                    $entryIds = $entries->pluck('id');
+            $this->nodeToPage[$this->rootNodeId] = new Root('root');
+        } else {
+            return ['nodes' => [], 'lookup' => []];
+        }
 
-                    $entryGroupId = sha1($parentId . '-' . $entryIds->sort()->join(''));
-                    $rest->push(new Node($entryGroupId, $parentId));
-                    $this->vertexData[$entryGroupId] = [
-                        '@type' => NodeType::EntryGroup,
-                        '@id' => $entryGroupId,
-                        'entries' => $entryIds->toArray()
-                    ];
+        $this->nodes = collect($this->nodes)
+            ->groupBy('parentId')
+            ->flatMap(function (Collection $children, int $parentId) {
+                [$entries, $rest] = $children->partition(fn (Node $node) => $this->nodeToPage[$node->id] instanceof Entry);
+
+                if ($entries->isEmpty()) {
+                    return $rest;
                 }
 
-                return $rest;
-            })
-            ->flatten(1)
-            ->toArray();
+                /** @var Collection<string> $entryIds */
+                $entryIds = $entries->pluck('id');
 
+                $id = sha1($parentId.'-'.$entryIds->sort()->join('-'));
+                $reducedId = IdHash::hash($id);
+
+                $rest->push(new Node($reducedId, $parentId));
+                $this->nodeToPage[$reducedId] = new Entrygroup(
+                    id: $id,
+                    entries: $entryIds->toArray(),
+                );
+
+                return $rest;
+            })->toArray();
 
         $this->parentToChildrenMap = collect($this->nodes)->groupBy('parentId')->toArray();
 
-        $tree = $this->buildTree(id: $this->rootNodeId, parentId: $this->rootNodeId);
+        $nodes = [];
 
+        foreach (
+            $this->buildTree(
+                id: $this->rootNodeId,
+                parentId: $this->rootNodeId
+            ) as $node
+        ) {
+            $nodes[] = $node;
+        }
 
-        return [
-            'tree' => $tree,
-            'lookup' => $this->vertexData
-        ];
+        return ['nodes' => $nodes, 'lookup' => $this->nodeToPage];
     }
 
-    public function buildTree(string $id, string $parentId, array $trail = []): ?Node
+    /**
+     * @param  array<int>  $trail
+     * @return \Generator<Node>
+     */
+    public function buildTree(int $id, int $parentId, array $trail = [], int $depth = 0): \Generator
     {
         if ($id === $this->rootNodeId) {
-            $node = new Node($id, $parentId, []);
+            $node = new Node($id, $parentId);
         } else {
-            $matches = collect($this->nodes)->where('id', $id)->where(fn(Node $node) => $node->parentId === $parentId);
-            if ($matches->count() !== 1) {
-                throw new \Exception("Should not happen: The vertex represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
+            $matches = collect($this->nodes)->where('id', $id)->where(fn (Node $node) => $node->parentId === $parentId);
+            if (count($matches) !== 1) {
+                throw new Exception("Should not happen: The vertex represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
             }
 
+            /** @var Node $node */
             $node = $matches->first();
         }
 
-        if (!array_key_exists($id, $this->parentToChildrenMap) && $this->vertexData[$id]['@type'] === NodeType::Category) {
-            return null;
+        if (! array_key_exists($id, $this->parentToChildrenMap) && $this->nodeToPage[$id] instanceof Category) {
+            return;
         }
 
         $node->trail = $trail;
+        $node->depth = $depth;
 
         if ($id !== $this->rootNodeId) {
             $trail[] = $id;
         }
 
-        $children = [];
+        $od = 0;
         foreach (($this->parentToChildrenMap[$id] ?? []) as $child) {
-            $subtree = $this->buildTree($child->id, $id, $trail);
-            if (!$subtree) {
-                continue;
+            foreach (
+                $this->buildTree($child->id, $id, $trail, $depth + 1) as $c
+            ) {
+                if ($c->depth === $depth + 1) {
+                    $od++;
+                }
+
+                yield $c;
             }
 
-            $children[] = $subtree;
         }
 
-        $node->children = $children;
+        $node->od = $od;
 
-//        if ($id === "4ff9bf16-3eff-48cd-9f75-6c646d334fcb") {
-//            dd($this->vertexData[$id], array_map(fn ($c) => $this->vertexData[$c->id], $node->children));
-//        }
-
-
-
-        return $node;
+        yield $node;
     }
 }

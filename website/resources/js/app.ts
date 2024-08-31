@@ -1,17 +1,11 @@
-import {D3ZoomEvent, Selection, select, zoom} from "d3"
-import {IN_PRODUCTION, PI, PI_3, PI_4, PI_6, shortestDistanceBetweenRectangles, switchState} from "./utils";
-import {PVertex} from "./index";
-import {fitToSector, prepare, sectorize} from "./data";
+import 'htmx.org'
+import {D3ZoomEvent, select, zoom} from "d3"
+import {gt, IN_PRODUCTION, lt, PIPI} from "./utils";
+import {ProcessedNode} from "./index";
+import {fitToSector} from "./data";
 import debug from "@/debug";
 
-
 type AppState = "error" | "success" | "loading"
-const STATE_SUCCESS: AppState = "success"
-const STATE_ERROR: AppState = "error"
-
-let switchAppState = (newState: AppState) => switchState(newState, '.app-state', 'state')
-
-const SHOW_RELOAD_BUTTON = 1
 
 try {
     let $map = select<SVGElement, {}>('#map')
@@ -28,12 +22,15 @@ try {
 
     let zoomHandler = zoom()
         .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr('transform', e.transform.toString()))
-        .scaleExtent(IN_PRODUCTION ? [0.5, 4] : [0.5, 10])
+        .scaleExtent([0.5, 2.5])
         .translateExtent([
-            [-mapWidth * 0.5, -mapHeight * 0.5],
-            [mapWidth * 1.5, mapHeight * 1.5]
+            [-mapWidth * 2, -mapHeight * 2],
+            [mapWidth * 2, mapHeight * 2]
         ])
     $map.call(zoomHandler)
+
+    window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
+    window.zoomOut = () => zoomHandler.scaleBy($map, 0.8)
 
     window.addEventListener('resize', () => {
         mapWidth = $map.node()!.clientWidth
@@ -42,103 +39,116 @@ try {
 
         $centerWrapper.attr('transform', `translate(${mapCenter})`)
 
+        zoomHandler.translateTo($map, mapCenter[0], mapCenter[1])
         zoomHandler.translateExtent([
             [-mapWidth * 0.5, -mapHeight * 0.5],
             [mapWidth * 1.5, mapHeight * 1.5]
         ])
-        zoomHandler.translateTo($map, mapCenter[0], mapCenter[1])
     })
 
-    let tree: PVertex = window.rawMap
-    prepare(tree)
-    sectorize(tree, [0, 2 * PI], 0)
-    draw($background, tree)
+    let nodes: ProcessedNode[] = window.nodes as ProcessedNode[]
+    let sortedNodes: ProcessedNode[] = []
 
-    // debug().ray({angle: PI_3})
-    // debug().ray({angle: PI_6 * 4})
-    //
-    // let p =  { id: 0, sector: [PI_3, PI_6 * 4], size: [250, 35], children: []} as PVertex
-    // debug().vertex({ vertex: p})
-    // debug().vertex({
-    //     vertex: { id: 1, sector: [PI_3 + 0.1, PI_6 * 4 -0.1], size: [200, 35], children: []} as PVertex,
-    //     parent: p,
-    //     minDistance: 100
-    // })
+    let stack = []
 
-    // debug().cartesianPlane()
+    for (let i = 0; i < nodes.length; i++) {
+        let node = nodes[i]
+
+        let el = document.querySelector(`[data-vertex="${node.id}"]`) as SVGElement | null
+        if (!el) {
+            throw new Error(`Vertex with id ${node.id} has no corresponding element in the DOM`)
+        }
+        node.el = el
+
+        let bounds: DOMRect
+        // We set the <foreignObject> with a height of 100% and a w of 100%
+        // because we don't want to compute the size of the elements server-side
+        // but this means that if we do vertex.el.getBoundingClientRect()
+        // we get the wrong bounds.
+        if (node.el instanceof SVGForeignObjectElement) {
+            if (node.el.childElementCount !== 1) {
+                throw new Error("It is expected that the foreignObject representing the vertex has a single child to compute its real bounding box, not the advertised (100%, 100%)")
+            }
+
+            bounds = node.el.firstElementChild!.getBoundingClientRect()
+            // We resize the foreignObject to match the bounding box of its child.
+            // This is only useful when inspecting the page.
+            node.el.setAttribute('width', bounds.width + 'px')
+            node.el.setAttribute('height', bounds.height + 'px')
+        } else {
+            bounds = node.el.getBoundingClientRect()
+        }
+
+        node.size = [Math.ceil(bounds.width), Math.ceil(bounds.height)]
+        node.weight = node.size[0] * node.size[1]
+
+        let children = []
+
+        if (node.od > 0) {
+            for (let i = 0; i < node.od; i++) {
+                let child = stack.pop()
+                children.push(child)
+                node.weight += child.weight
+            }
+
+            children.sort((a, b) => a.weight - b.weight)
+            for (const child of children) {
+                sortedNodes.push(child)
+            }
+        }
+
+        stack.push(node)
+    }
+
+    let root = stack.pop()
+    root.sector = [0, PIPI]
+
+    let parentIdToNode: Record<number, ProcessedNode> = {[root.id]: root}
+    let deltaFromSiblings: Record<number, number> = {}
+
+    for (let i = sortedNodes.length - 1; i >= 0; i--) {
+        let node = sortedNodes[i]
+
+        if (!deltaFromSiblings[node.parentId]) {
+            deltaFromSiblings[node.parentId] = 0
+        }
+
+        let parent = parentIdToNode[node.parentId]
+
+        let delta = parent.sector[0] + deltaFromSiblings[parent.id]
+        let alpha = (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
+        node.sector = [delta, delta + alpha]
+
+        parentIdToNode[node.id] = node
+        deltaFromSiblings[parent.id] += alpha
+
+        if (lt(node.sector[0], 0) || gt(node.sector[1], PIPI)) {
+            throw new Error(`Sector ${node.sector} is not in the range [0, 2*PI]`)
+        }
+
+        node.position = fitToSector(node)
+        debug().ray({angle: node.sector[0], color: 'blue'})
+        debug().ray({angle: node.sector[1], color: 'red'})
+
+        node.el.classList.remove('invisible')
+        node.el.ariaHidden = 'false'
+        node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+    }
+
     debug().flush($background)
 
-    switchAppState(STATE_SUCCESS)
-} catch (e) {
+    switchAppState('success')
+} catch (err: unknown) {
     if (IN_PRODUCTION) {
         // Report the error to the server
     }
 
-    console.error(e)
+    console.error(err)
 
-    updateErrorState(e, "It looks like we are having trouble rendering the map.")
-    switchAppState(STATE_ERROR)
-}
-
-function draw(
-    $g: Selection<SVGGElement, {}, HTMLElement, unknown>,
-    vertex: PVertex,
-    parent: PVertex | null = null
-) {
-    debug().ray({ angle: vertex.sector[0] })
-    debug().ray({ angle: vertex.sector[1] })
-    vertex.position = fitToSector(vertex, parent, vertex.depth === 1 ? 50 : 0)
-
-    vertex.el.classList.remove('invisible')
-    vertex.el.ariaHidden = 'false'
-    vertex.el.style.transform = `translate(${vertex.position[0]}px, ${vertex.position[1]}px)`
-
-
-    if (parent) {
-        let [l, w] = vertex.size
-        let [x, y] = vertex.position
-
-        let [Pl, Pw] = parent.size
-        let [Px, Py] = parent.position
-
-        let closestPoint = [
-            [x, y + w/2],
-            [x + l, y + w/2],
-            [x + l/2, y + w],
-            [x + l/2, y]
-        ].reduce((prev, curr) => {
-            return distance(prev, parent.position) < distance(curr, parent.position) ? prev : curr
-        })
-
-        let closestPointToParent = [
-            [Px, Py + Pw/2],
-            [Px + Pl, Py + Pw/2],
-            [Px + Pl/2, Py + Pw],
-            [Px + Pl/2, Py]
-        ].reduce((prev, curr) => {
-            return distance(prev, vertex.position) < distance(curr, vertex.position) ? prev : curr
-        })
-
-
-        vertex.edge = closestPoint
-
-        $g.append('path')
-            .attr('d', `M${closestPointToParent} L${closestPoint}`)
-            .attr('stroke', '#ddd')
-            .attr('stroke-width', 2)
+    const elStateContainer = document.querySelector("[data-state='error']")
+    if (!elStateContainer) {
+        throw new Error("No error state container found")
     }
-
-    for (const child of vertex.children) {
-        draw($g, child, vertex)
-    }
-}
-
-function updateErrorState(
-    e: Error,
-    message: string,
-    flags: number = 0
-) {
-    const elStateContainer = document.querySelector("#app > [data-state='error']")
 
     let reason = elStateContainer.querySelector('.reason') as HTMLParagraphElement
     let reloadButton = elStateContainer.querySelector('.reload-button') as HTMLButtonElement
@@ -146,13 +156,27 @@ function updateErrorState(
 
     if (!IN_PRODUCTION) {
         debug.hidden = false
-        debug.textContent = `${e.name}: ${e.message}\n${e.stack}`
+        debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
     }
 
-    reason.innerHTML = message
-    reloadButton.hidden = (flags & SHOW_RELOAD_BUTTON) === 0
+    reason.innerHTML = err.message
+    reloadButton.hidden = false
+
+    switchAppState('error')
 }
 
-function distance(a: [number, number], b: [number, number]) {
-    return Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+function switchAppState(newState: AppState): void {
+    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
+        let isActive = newState === state.dataset.state
+
+        state.ariaHidden = isActive ? "false" : "true"
+        if (isActive) {
+            state.classList.add('state-active')
+            state.classList.remove('state-inactive')
+        } else {
+            state.classList.add('state-inactive')
+            state.classList.remove('state-active')
+        }
+    })
+
 }

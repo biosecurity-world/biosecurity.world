@@ -3,26 +3,31 @@
 namespace App\Services\Iconsnatch;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Cache;
+use stdClass;
 
 class IconSnatch
 {
-    public static function client() {
+    public static function client(): Client
+    {
         return new Client([
-            'base_uri' => rtrim(
-                    env("ICONSNATCH_ENDPOINT", "https://iconsnatch.forevue.org"),
-                    '/'
-                ) . '/api/v1/resolve/',
+            'base_uri' => config('services.iconsnatch.endpoint').'/api/v1/resolve/',
             'timeout' => 5,
             'headers' => [
-                'User-Agent' => env("ICONSNATCH_USERAGENT", "Unknown")
-            ]
+                'User-Agent' => config('services.iconsnatch.useragent'),
+            ],
         ]);
     }
 
-    public static function downloadFrom(string $url): ?Icon {
+    public static function downloadFrom(string $url): ?Logo
+    {
+        $cacheKey = 'iconsnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url);
+        if (Cache::has($cacheKey)) {
+            /** @phpstan-ignore-next-line  */
+            return Cache::get($cacheKey);
+        }
+
         try {
             $body = static::client()
                 ->get(urlencode($url))
@@ -33,12 +38,12 @@ class IconSnatch
             return null;
         }
 
+        /** @var stdClass $data */
         $data = json_decode($body, false, flags: JSON_THROW_ON_ERROR);
 
-        if (!$data->success || $data->value === "") {
-            return null;
-        }
+        $logo = Logo::fromResponse($data);
+        Cache::forever($cacheKey, $logo);
 
-        return Icon::fromResponse($data);
+        return $logo;
     }
 }

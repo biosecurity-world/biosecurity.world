@@ -1,4 +1,4 @@
-import { PNG} from "pngjs"
+import { PNG } from "pngjs"
 import fs from "fs"
 import match from "pixelmatch"
 

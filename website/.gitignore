@@ -18,5 +18,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-.direnv/
 dist
+/storage/debugbar

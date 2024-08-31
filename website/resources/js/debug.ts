@@ -1,9 +1,9 @@
 import {Selection} from "d3";
 import {fitToSector} from "@/data";
-import {PVertex} from "@/index";
+import {ProcessedNode} from "@/index";
 import {PI, PI_2} from "@/utils";
 
-let _debugInstance = null
+let _debugInstance: Debug|null = null
 
 export default function debug(): Debug {
     if (_debugInstance === null) {
@@ -71,7 +71,7 @@ class Debug {
         this.buffer = []
     }
 
-    vertex(options: {vertex: PVertex, parent?: PVertex, minDistance?: number, color?: string}) {
+    vertex(options: {vertex: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
         if (!options.vertex.position) {
             options.vertex.position = fitToSector(options.vertex, options.parent ?? null, options.minDistance ?? 0)
         }

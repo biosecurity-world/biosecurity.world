@@ -32,7 +32,7 @@ return [
      */
     'exclude_file_patterns' => [
         '/\.php$/',
-        '/^hot$/'
+        '/^hot$/',
     ],
 
     /*

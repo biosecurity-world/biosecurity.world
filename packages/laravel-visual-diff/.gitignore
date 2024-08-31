@@ -1,9 +1,4 @@
-build
+vendor/
+node_modules/
+coverage/
 composer.lock
-docs
-vendor
-coverage
-.idea
-node_modules
-tests/Browser
-.direnv

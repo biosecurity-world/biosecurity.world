@@ -1,7 +1,9 @@
-import {MapData} from "./index";
+import {Node} from "@/index";
+
+export {};
 
 declare global {
     interface Window {
-        mapData: MapData
+        nodes: Node[]
     }
 }

@@ -1,19 +1,22 @@
 <?php
 
-namespace App\Services\NotionData\Tree;
+declare(strict_types=1);
 
-use App\Services\NotionData\Enums\NodeType;
+namespace App\Services\NotionData\Tree;
 
 class Node
 {
-    /** @var Node[] $children */
-    public array $children = [];
+    public int $depth;
+
+    /** @var array<int> */
+    public array $trail = [];
+
+    public int $od;
+
+    public int $order;
 
     public function __construct(
-        public string $id,
-        public string $parentId,
-        public array $trail = []
-    )
-    {
-    }
+        public int $id,
+        public int $parentId
+    ) {}
 }

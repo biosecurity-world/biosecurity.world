@@ -2,7 +2,7 @@
   "compilerOptions": {
       "baseUrl": ".",
       "target": "esnext",
-      "module": "commonjs",
+      "module": "esnext",
       "strict": true,
       "isolatedModules": true,
       "noImplicitAny": true,
