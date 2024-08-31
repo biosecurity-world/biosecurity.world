@@ -19,12 +19,11 @@
 - [ ] [minutes] Add hover/focus states for all the interactive things
 - [ ] [minutes] Make the edges nicer
 - [ ] [minutes] Mobile support (move the filter sidebar to a bottom bar that pops out, wrap the navigation bar)
-- [ ] [minutes] Add a footer!
 - [ ] [minute] Link Give feedback to feedback form for now
-
 - [ ] [minutes???] Fix janky resize behavior
 
 #### done
+- [x] [minutes] Add a footer!
 - [x] [minutes] Plumbing: loading spinner when loading an entry through
 - [x] [minutes] Rework the zoom handling to make it easier to click on the entries
 - [x] [minutes] Add the 'last updated at' (where? bottom-right? hero?)
@@ -39,7 +38,7 @@
 - [ ] Fix the remaining PHPStan issues
 - [ ] take a look at the TSC issues
 - [ ] add CI pipeline for running tests and linters
-- [ ] Sprite for favicons? 
+- [ ] Sprite for favicons?
 - [ ] Ditch cdn.forevue.org (more resilient)
 - [ ] [hour] Privacy policy (not needed for now)
 - [ ] Expand the map+filter to full screen once scrolling
