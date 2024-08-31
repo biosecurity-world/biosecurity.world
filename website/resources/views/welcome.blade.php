@@ -155,6 +155,17 @@
                 </div>
             </section>
             <section data-state="success" class="app-state state-inactive flex" aria-hidden="true">
+                <div class="absolute bottom-6 right-6">
+                    <div class="flex flex-col bg-white shadow divide-y rounded-lg">
+                        <button class="p-2 hover:bg-gray-50 rounded-t-lg" onclick="zoomIn()">
+                            <x-heroicon-s-plus class="size-5 text-gray-700"/>
+                        </button>
+
+                        <button class="p-2 hover:bg-gray-50 rounded-b-lg" onclick="zoomOut()">
+                            <x-heroicon-s-minus class="size-5 text-gray-700"/>
+                        </button>
+                    </div>
+                </div>
                     <svg role="main" id="map" width="100%" height="100%">
                         <g id="zoom-wrapper">
                             <g id="center-wrapper">
@@ -191,7 +202,7 @@
                             </g>
                         </g>
                     </svg>
-                </section>
+            </section>
         </main>
     </div>
 

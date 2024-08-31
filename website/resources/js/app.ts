@@ -29,6 +29,9 @@ try {
         ])
     $map.call(zoomHandler)
 
+    window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
+    window.zoomOut = () => zoomHandler.scaleBy($map, 0.8)
+
     window.addEventListener('resize', () => {
         mapWidth = $map.node()!.clientWidth
         mapHeight = $map.node()!.clientHeight
