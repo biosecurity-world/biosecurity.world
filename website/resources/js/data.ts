@@ -1,7 +1,7 @@
-import {PVertex, Sector} from "./index";
+import {ProcessedNode, Sector} from "./index";
 import {eq, getQuadrant, gt, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
 
-export function fitToSector(vertex: PVertex): [number, number] {
+export function fitToSector(vertex: ProcessedNode): [number, number] {
     if (gt(vertex.sector[1] - vertex.sector[0], PI) && !eq(vertex.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -13,7 +13,7 @@ export function fitToSector(vertex: PVertex): [number, number] {
     return findPositionForRect(vertex)
 }
 
-export function findPositionForRect(vertex: PVertex, offsetX: number | null = null): [number, number] {
+export function findPositionForRect(vertex: ProcessedNode): [number, number] {
     let [od, ot] = vertex.sector
     let [d, t] = getEffectiveSector(vertex.sector)
     let [l, w] = vertex.size
@@ -23,16 +23,16 @@ export function findPositionForRect(vertex: PVertex, offsetX: number | null = nu
     let tan_t = Math.tan(t)
 
     if (eq(d, 0) && inIE(t, PI, PIPI)) {
-        return [-l / 2 + offsetX, 0]
+        return [-l / 2, 0]
 
     }
 
     if (qD + 2 === qT) {
-        return [-l + offsetX, -w]
+        return [-l, -w]
     }
 
     if (inIE(d, 0, t) && inEI(t, d, PI_2)) {
-        let x = ((w + l * tan_d) / (tan_t - tan_d)) + offsetX
+        let x = ((w + l * tan_d) / (tan_t - tan_d))
         let y = (tan_d * (x + l))
 
         if (getQuadrant(od) === 1 || getQuadrant(od) === 2) {
@@ -47,13 +47,13 @@ export function findPositionForRect(vertex: PVertex, offsetX: number | null = nu
     }
 
     if (qD + 1 === qT && getQuadrant(od) === 1) {
-        let x = (w / (Math.tan(od) - Math.tan(ot)) - l) + offsetX
+        let x = (w / (Math.tan(od) - Math.tan(ot)) - l)
 
         return [x, Math.tan(ot) * (x + l)]
     }
 
     if (qD + 1 === qT) {
-        let x = (tan_d * l) / (tan_t - tan_d) - offsetX
+        let x = (tan_d * l) / (tan_t - tan_d)
         let y = tan_t * x
 
         if (getQuadrant(od) === 1 || getQuadrant(od) === 2) {
@@ -67,10 +67,7 @@ export function findPositionForRect(vertex: PVertex, offsetX: number | null = nu
         return [x, y]
     }
 
-    console.log(vertex);
-
-    throw new Error(`Could not fit sector ${vertex.size} in ${vertex.sector} (effective sector: ${[d, t]}, offsetX: ${offsetX})`)
-
+    throw new Error(`Could not fit sector ${vertex.size} in ${vertex.sector} (effective sector: ${[d, t]})`)
 }
 
 export function getEffectiveSector(sector: Sector): Sector {

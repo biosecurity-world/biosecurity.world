@@ -1,6 +1,7 @@
-import {eq, getEffectiveSector, PI, PI_2, PI_3} from "@/data";
+import {getEffectiveSector} from "@/data";
 import assert = require("assert");
 import {Sector} from "@/index";
+import {eq, PI, PI_2, PI_3} from "@/utils";
 
 it('finds the correct effective sector for side-bound sectors' , () => {
     let delta = PI_3
@@ -31,5 +32,4 @@ it('finds the correct effect sector for y-bounded sectors', () => {
         assert.ok(eq(effectiveSector[0], 0), `Expected delta in effective sector ${effectiveSector} for ${sector} to be [PI_3, PI]`)
         assert.ok(eq(effectiveSector[1], 2 * PI_3), `Expected theta in effective sector ${effectiveSector} for ${sector} to be [PI_3, PI]`)
     }
-
 })

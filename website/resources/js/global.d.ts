@@ -1,9 +1,9 @@
-import {Vertex} from "@/index";
+import {Node} from "@/index";
 
 export {};
 
 declare global {
     interface Window {
-        nodes: Vertex[]
+        nodes: Node[]
     }
 }

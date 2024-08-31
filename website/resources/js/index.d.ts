@@ -1,26 +1,21 @@
-export type Vertex = {
+export type Sector = [number, number]
+
+export type Node = {
     id: number
+    od: number
+    depth: number
+    trail: number[]
     parentId: number
-    children: Vertex[]
 }
 
 
-export type Sector = [number, number]
-export type PVertex = {
-    id: number
-    parentId: number
-    depth: number
+export type ProcessedNode = {
     weight: number
-    od: number
-    children: PVertex[]
-    el: SVGElement
-
     edge: [number, number]
     size: [number, number] // length, width
     position?: [number, number]
     sector: Sector
-}
 
-export type Root = {
-    "@type": NodeType.Root
-}
+    el: SVGElement
+} & Node
+

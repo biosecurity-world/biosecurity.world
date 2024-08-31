@@ -1,8 +1,21 @@
 import {D3ZoomEvent, select, zoom} from "d3";
 import debug from "@/debug";
-import {PVertex} from "@/index";
+import {ProcessedNode} from "@/index";
 
-const colors = [
+declare global {
+    interface Window {
+        testCase: {
+            sector: [number, number],
+            width: number,
+            length: number,
+            minX0?: number
+        }[]
+
+        visualDiffReady: boolean
+    }
+}
+
+const cssColors = [
     "rebeccapurple",
 
     "olive", "yellow", "teal", "navy", "mediumturquoise", "orangered", "peru", "crimson", "saddlebrown", "darkgoldenrod", "goldenrod", "dodgerblue", "deeppink", "cyan", "green", "lightcoral", "maroon", "darkgreen", "darkorange", "blue", "red", "darkseagreen", "palegreen", "mediumvioletred", "sienna", "hotpink", "tan", "purple", "gold", "darkslategray", "chocolate"
@@ -10,13 +23,13 @@ const colors = [
 
 (async () => {
     try {
-        const $map = select('#map')
-        const $centerWrapper = select('#center-wrapper')
-        const $zoomWrapper = select('#zoom-wrapper')
-        const $root = select('#cartesian-flip')
+        const $map = select<SVGElement, {}>('#map')
+        const $centerWrapper = select<SVGGElement, {}>('#center-wrapper')
+        const $zoomWrapper = select<SVGGElement, {}>('#zoom-wrapper')
+        const $root = select<SVGGElement, {}>('#cartesian-flip')
 
-        let mapWidth = $map.node().clientWidth
-        let mapHeight = $map.node().clientHeight
+        let mapWidth = $map.node()!.clientWidth
+        let mapHeight = $map.node()!.clientHeight
         let computeMapCenter = () => [mapWidth / 2, mapHeight / 2]
 
         $centerWrapper.attr('transform', `translate(${computeMapCenter()})`)
@@ -27,8 +40,8 @@ const colors = [
             .scaleExtent([0.1, 10])
 
         window.addEventListener('resize', () => {
-            mapWidth = $map.node().clientWidth
-            mapHeight = $map.node().clientHeight
+            mapWidth = $map.node()!.clientWidth
+            mapHeight = $map.node()!.clientHeight
             let mapCenter = computeMapCenter()
 
             $centerWrapper.attr('transform', `translate(${mapCenter})`)
@@ -36,33 +49,23 @@ const colors = [
 
         $map.call(zoomHandler)
 
-        let defaultMinX0 = 0
-
-        console.table(window.testCase.map(box => {
-            return {
-                delta: box.sector[0],
-                theta: box.sector[1],
-                width: box.width,
-                length: box.length,
-                minX0: box.minX0 ?? defaultMinX0
-            }
-        }))
+        console.table(window.testCase)
 
         console.log("=== CONSOLE OUTPUT BELOW ===")
 
         for (let i = 0; i < window.testCase.length; i++) {
             let box = window.testCase[i]
-            let color = colors[i % colors.length]
+            let color = cssColors[i % cssColors.length]
 
             debug().vertex({
-                vertex: {sector: box.sector, size: [box.length, box.width]} as PVertex,
+                vertex: {sector: box.sector, size: [box.length, box.width]} as ProcessedNode,
                 color
             })
         }
 
         debug().flush($root)
 
-    } catch (e) {
+    } catch (e: unknown) {
         console.error(e)
         document.body.innerHTML = `<pre>${e.message}
 ${e.stack}</pre>`

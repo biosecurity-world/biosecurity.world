@@ -1,18 +1,11 @@
 import 'htmx.org'
 import {D3ZoomEvent, select, zoom} from "d3"
-import {gt, IN_PRODUCTION, lt, PIPI, switchState} from "./utils";
-import {PVertex} from "./index";
+import {gt, IN_PRODUCTION, lt, PIPI} from "./utils";
+import {ProcessedNode} from "./index";
 import {fitToSector} from "./data";
 import debug from "@/debug";
 
-
 type AppState = "error" | "success" | "loading"
-const STATE_SUCCESS: AppState = "success"
-const STATE_ERROR: AppState = "error"
-
-let switchAppState = (newState: AppState) => switchState(newState, '.app-state', 'state')
-
-const SHOW_RELOAD_BUTTON = 1
 
 try {
     let $map = select<SVGElement, {}>('#map')
@@ -29,10 +22,10 @@ try {
 
     let zoomHandler = zoom()
         .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr('transform', e.transform.toString()))
-        .scaleExtent(IN_PRODUCTION ? [0.5, 4] : [0.5, 10])
+        .scaleExtent([0.5, 2.5])
         .translateExtent([
-            [-mapWidth * 0.5, -mapHeight * 0.5],
-            [mapWidth * 1.5, mapHeight * 1.5]
+            [-mapWidth * 2, -mapHeight * 2],
+            [mapWidth * 2, mapHeight * 2]
         ])
     $map.call(zoomHandler)
 
@@ -50,8 +43,8 @@ try {
         ])
     })
 
-    let nodes: PVertex[] = window.nodes as PVertex[]
-    let sortedNodes: PVertex[] = []
+    let nodes: ProcessedNode[] = window.nodes as ProcessedNode[]
+    let sortedNodes: ProcessedNode[] = []
 
     let stack = []
 
@@ -107,8 +100,8 @@ try {
     let root = stack.pop()
     root.sector = [0, PIPI]
 
-    let parentIdToNode = {[root.id]: root}
-    let deltaFromSiblings = {}
+    let parentIdToNode: Record<number, ProcessedNode> = {[root.id]: root}
+    let deltaFromSiblings: Record<number, number> = {}
 
     for (let i = sortedNodes.length - 1; i >= 0; i--) {
         let node = sortedNodes[i]
@@ -123,19 +116,16 @@ try {
         let alpha = (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
         node.sector = [delta, delta + alpha]
 
-        console.log(node.sector);
-
         parentIdToNode[node.id] = node
-
-        deltaFromSiblings[parent.id] += node.sector[1] - node.sector[0]
+        deltaFromSiblings[parent.id] += alpha
 
         if (lt(node.sector[0], 0) || gt(node.sector[1], PIPI)) {
             throw new Error(`Sector ${node.sector} is not in the range [0, 2*PI]`)
         }
 
-        debug().ray({angle: node.sector[0]})
-        debug().ray({angle: node.sector[1]})
-        node.position = fitToSector(node, parent, 0)
+        node.position = fitToSector(node)
+        debug().ray({angle: node.sector[0], color: 'blue'})
+        debug().ray({angle: node.sector[1], color: 'red'})
 
         node.el.classList.remove('invisible')
         node.el.ariaHidden = 'false'
@@ -144,25 +134,18 @@ try {
 
     debug().flush($background)
 
-    switchAppState(STATE_SUCCESS)
-} catch (e) {
+    switchAppState('success')
+} catch (err: unknown) {
     if (IN_PRODUCTION) {
         // Report the error to the server
     }
 
-    console.error(e)
+    console.error(err)
 
-    updateErrorState(e, "It looks like we are having trouble rendering the map.")
-    switchAppState(STATE_ERROR)
-}
-
-
-function updateErrorState(
-    e: Error,
-    message: string,
-    flags: number = 0
-) {
-    const elStateContainer = document.querySelector("#app > [data-state='error']")
+    const elStateContainer = document.querySelector("[data-state='error']")
+    if (!elStateContainer) {
+        throw new Error("No error state container found")
+    }
 
     let reason = elStateContainer.querySelector('.reason') as HTMLParagraphElement
     let reloadButton = elStateContainer.querySelector('.reload-button') as HTMLButtonElement
@@ -170,9 +153,27 @@ function updateErrorState(
 
     if (!IN_PRODUCTION) {
         debug.hidden = false
-        debug.textContent = `${e.name}: ${e.message}\n${e.stack}`
+        debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
     }
 
-    reason.innerHTML = message
-    reloadButton.hidden = (flags & SHOW_RELOAD_BUTTON) === 0
+    reason.innerHTML = err.message
+    reloadButton.hidden = false
+
+    switchAppState('error')
+}
+
+function switchAppState(newState: AppState): void {
+    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
+        let isActive = newState === state.dataset.state
+
+        state.ariaHidden = isActive ? "false" : "true"
+        if (isActive) {
+            state.classList.add('state-active')
+            state.classList.remove('state-inactive')
+        } else {
+            state.classList.add('state-inactive')
+            state.classList.remove('state-active')
+        }
+    })
+
 }
