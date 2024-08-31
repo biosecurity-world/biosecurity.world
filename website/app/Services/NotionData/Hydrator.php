@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace App\Services\NotionData;
 
 use App\Services\Iconsnatch\IconSnatch;
+use App\Services\NotionData\DataObjects\Activity;
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\DataObjects\InterventionFocus;
+use App\Services\NotionData\DataObjects\Location;
 use App\Services\NotionData\Enums\NotionColor;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -42,6 +47,10 @@ class Hydrator
     {
         $hydrated = [];
 
+        // These are used to calculate the uniqueness properties in Entry.
+        $entryCountMap = [];
+        $organizationTypeMap = [];
+
         foreach ($pages as $page) {
             $parents = $page->properties()->getRelationById(self::SCHEMA['parent'])->pageIds;
             $isCategory = $page->properties()->getCheckboxById(self::SCHEMA['isCategory'])->checked;
@@ -72,8 +81,28 @@ class Hydrator
                 $clone = clone $item;
                 $clone->parentId = $parent;
                 $hydrated[] = $clone;
+
+                if ($item instanceof Entry) {
+                    if (!isset($entryCountMap[$parent])) {
+                        $entryCountMap[$parent] = 0;
+                    }
+
+                    if (!isset($organizationTypeMap[$item->organizationType])) {
+                        $organizationTypeMap[$item->organizationType] = 0;
+                    }
+
+                    $entryCountMap[$parent]++;
+                    $organizationTypeMap[$item->organizationType]++;
+                }
             }
 
+        }
+
+        foreach ($hydrated as $item) {
+            if ($item instanceof Entry) {
+                $item->uniqueness = 1 / $entryCountMap[$item->parentId];
+                $item->organizationTypeUniqueness = 1 / $organizationTypeMap[$item->organizationType];
+            }
         }
 
         return $hydrated;

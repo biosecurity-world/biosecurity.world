@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Services\NotionData\Category;
-use App\Services\NotionData\Entry;
-use App\Services\NotionData\Entrygroup;
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\DataObjects\Entrygroup;
+use App\Services\NotionData\DataObjects\Root;
 use App\Services\NotionData\Notion;
-use App\Services\NotionData\Root;
 use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\TreeBuilder;
 use Illuminate\Support\Facades\Route;

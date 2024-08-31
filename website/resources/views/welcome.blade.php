@@ -83,7 +83,7 @@
                                         Highlight entries added in the last month.
                                     </span>
                                   </span>
-                            <label for="recent" data-toggle="on" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                            <label for="recent" data-toggle="off" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                                 <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                                 <input type="checkbox" class="sr-only" aria-hidden="true" aria-labelledby="availability-label" aria-describedby="availability-description" id="recent" name="recent">
                             </label>

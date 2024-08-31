@@ -6,8 +6,6 @@
 - [ ] [hour] Port SVG support to Logosnatch (fixes all the 'logo not found but logo exists' issues)
   that entry; same thing for entries)
 - [ ] [hour] Add the "changelog" to the navigation bar that lists the new entries since the last visit
-- [ ] [hour] Sort the groups in the entrygroups by the relevance of each entry (how unique is it compared to the
-  others?) and then each groups by its average (?) relevance.
 - [ ] [hour] When hovering an entry, highlight all the places in the map where this entry exists.
 - [ ] [hour] Plumbing: filter
 - [ ] [hour] Implement the 'Report error' button on the entry page
@@ -21,6 +19,8 @@
 - [ ] [minute] Link Give feedback to feedback form for now
 
 #### done
+- [x] [hour] Sort the groups in the entrygroups by the relevance of each entry (how unique is it compared to the
+  others?) and then each groups by its average (?) relevance.
 - [x] [hours] Match the app state to the URL (i.e. clicking on an entry changes the URL, and going to that URL reopens
 - [x] [minutes] Add a footer!
 - [x] [minutes] Plumbing: loading spinner when loading an entry through

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\Tree;
 
-use App\Services\NotionData\Category;
-use App\Services\NotionData\Entry;
-use App\Services\NotionData\Entrygroup;
-use App\Services\NotionData\Root;
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\DataObjects\Entrygroup;
+use App\Services\NotionData\DataObjects\Root;
 use App\Support\IdHash;
 use Exception;
 use Illuminate\Support\Collection;
@@ -71,13 +71,11 @@ class TreeBuilder
                     $reducedId = IdHash::hash($id);
 
                     $rest->push(new Node($reducedId, $parentId));
-                    $this->nodeToPage[$reducedId] = new Entrygroup(
-                        id: $id,
-                        entries: $entryIds->toArray(),
-                    );
+                    $this->nodeToPage[$reducedId] = new Entrygroup($id, $entryIds->toArray());
 
                     return $rest;
-                })->toArray();
+                })
+            ->toArray();
 
         $this->parentToChildrenMap = collect($this->nodes)->groupBy('parentId')->toArray();
 
