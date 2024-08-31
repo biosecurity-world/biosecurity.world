@@ -70,34 +70,19 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
 
 Route::get('/_/entries', function (Notion $notion) {
     $pages = $notion->pages();
-    $tree = (new TreeBuilder())->build($pages);
+    ['nodes' => $nodes, 'lookup' => $lookup] = (new TreeBuilder())->build($pages);
 
-    $links = [];
+    $links = collect($nodes)
+        ->filter(fn (Node $node) => $lookup[$node->id] instanceof Entrygroup)
+        ->flatMap(function (Node $node) use ($lookup) {
+            $group = $lookup[$node->id];
 
-    $traverse = function (Node $node) use ($tree, &$traverse, &$links) {
-        if ($tree['lookup'][$node->id] instanceof Entrygroup) {
-            foreach ($tree['lookup'][$node->id]['entries'] as $entry) {
-                $links[] = route('entries.show', ['id' => $node->id, 'entryId' => $entry]);
-            }
-        }
+            return collect($group->entries)->map(function (int $entryId) use ($node, $group) {
+                return route('entries.show', ['id' => $node->id, 'entryId' => $entryId]);
+            });
+        });
 
-        foreach ($node->children as $child) {
-            $traverse($child);
-        }
-    };
-
-    $traverse($tree['tree']);
-
-    $links = collect($links)->map(fn ($link) => "<a href=\"$link\">$link</a>")->implode('<br>');
-
-    return <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<body>
-$links
-</body>
-</html>
-HTML;
+    return view('entries.index', ['links' => $links]);
 });
 
 if (! app()->isProduction()) {
