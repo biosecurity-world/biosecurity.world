@@ -1,5 +1,5 @@
 import {D3ZoomEvent, select, zoom} from "d3";
-import debug from "@/debug";
+import {debug} from "@/utils";
 import {ProcessedNode} from "@/types";
 
 declare global {

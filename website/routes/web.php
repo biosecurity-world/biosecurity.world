@@ -88,7 +88,7 @@ Route::get('/_/entries', function (Notion $notion) {
 if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
-    // the code for the website which includes the code for testing the tree
+    // the code for the website which includes the code for tests the tree
     // These routes are ignored by the crawler that builds the static version
     // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {

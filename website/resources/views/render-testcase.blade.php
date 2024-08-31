@@ -8,13 +8,13 @@
     <title>Document</title>
 
     <script>
-        // There are probably so problems with floating-point conversion
+        // There are probably problems with floating-point precision when passing data
         // from PHP -> JSON -> JS. This seems to work for now.
         window.testCase = @js($case)
     </script>
 
     @vite(["resources/css/app.css"])
-    @vite(["resources/js/visual-testing.ts"])
+    @vite(["resources/js/tests/helpers/e2e.ts"])
 
     <style>
         #cartesian-flip {

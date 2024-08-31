@@ -1,4 +1,4 @@
-import {getEffectiveSector} from "@/data"
+import {getEffectiveSector} from "@/layout"
 import assert = require("assert")
 import {Sector} from "@/types"
 import {eq, PI, PI_2, PI_3} from "@/utils"

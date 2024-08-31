@@ -1,9 +1,8 @@
 import 'htmx.org'
 import {D3ZoomEvent, select, zoom} from "d3"
-import {gt, IN_PRODUCTION, lt, PIPI} from "./utils";
+import {debug, gt, IN_PRODUCTION, lt, PIPI} from "./utils";
 import {ProcessedNode} from "./types";
-import {fitToSector} from "./data";
-import debug from "@/debug";
+import {fitToSector} from "./layout";
 
 type AppState = "error" | "success" | "loading"
 
@@ -17,7 +16,7 @@ function switchAppState(newState: AppState): void {
     })
 }
 
-const router = new Router()
+const router = new FiltersState()
 
 try {
     let $map = select<SVGElement, {}>('#map')
