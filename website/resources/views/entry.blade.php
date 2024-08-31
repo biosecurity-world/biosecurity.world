@@ -79,10 +79,8 @@
             </div>
         @endif
 
-        <div class="px-4 pb-2 mt-2">
-            <span class="text-xs text-gray-500 tracking-tighter font-semibold">{{ ucfirst($entry->nounForOrganizationType()) }}</span>
-
-            <h2 class="text-xl font-display font-bold -mt-1">
+        <div class="px-4 pb-2 mt-4">
+            <h2 class="text-xl font-display font-bold">
                 <a class="text-emerald-600 underline" target="_blank" href="{{ $entry->link }}">
                     {{ $entry->label }}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
@@ -107,7 +105,7 @@
                 </ul>
             @endif
 
-            <div class="mt-4 text-justify">
+            <div class="mt-2 text-justify">
                 <x-notion-rich-text :text="$entry->description" />
             </div>
 

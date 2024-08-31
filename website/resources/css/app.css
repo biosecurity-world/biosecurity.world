@@ -64,3 +64,10 @@ input[name="focus"]:checked + label[for="focus_governance"] > .at-governance {
 /*#cartesian-flip {*/
 /*    transform: scaleY(-1);*/
 /*}*/
+.htmx-indicator{
+    opacity:0;
+    transition: opacity 500ms ease-in;
+}
+.htmx-request.htmx-indicator {
+    opacity:1;
+}

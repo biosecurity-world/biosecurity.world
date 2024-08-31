@@ -17,6 +17,7 @@
                         hx-get="{{ route('entries.show', ['id' => IdHash::hash($entrygroup->id), 'entryId' => IdHash::hash($entry->id)], absolute: false) }}/"
                         hx-trigger="click"
                         hx-target="#entry-aside"
+                        hx-indicator="#entry-loader"
                     >
                         <x-entry-logo :logo="$entry->logo" :size="24"/>
                     </button>

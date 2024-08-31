@@ -7,26 +7,24 @@
         "test": "mocha resources/js/tests --colors true"
     },
     "devDependencies": {
+        "@tailwindcss/forms": "^0.5.8",
+        "@types/assert": "^1.5.10",
         "@types/d3": "^7.4.3",
         "@types/mocha": "^10.0.7",
-        "@types/assert": "^1.5.10",
-
-        "vite": "^5.0",
-        "laravel-vite-plugin": "^1.0",
         "autoprefixer": "^10.4.19",
-        "postcss": "^8.4.39",
-        "tailwindcss": "^3.4.6",
-        "typescript": "^5.5.4",
-
+        "laravel-vite-plugin": "^1.0",
         "mocha": "^10.7.3",
-        "ts-mocha": "^10.0.0",
-
         "pixelmatch": "^6.0.0",
         "pngjs": "^7.0.0",
-        "puppeteer": "^23.1.1"
+        "postcss": "^8.4.39",
+        "puppeteer": "^23.1.1",
+        "tailwindcss": "^3.4.6",
+        "ts-mocha": "^10.0.0",
+        "typescript": "^5.5.4",
+        "vite": "^5.0"
     },
     "dependencies": {
         "d3": "^7.9.0",
-        "htmx.org": "2.0.2",
+        "htmx.org": "2.0.2"
     }
 }
