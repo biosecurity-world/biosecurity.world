@@ -41,8 +41,7 @@ Route::get('/', function (Notion $notion) {
             return $focus;
         })->values(),
         'databaseUrl' => $notion->databaseUrl(),
-        'lastEditedAt' => $notion->lastEditedAt(),
-
+        'lastEditedAt' => \Carbon\Carbon::instance($notion->lastEditedAt()),
     ]);
 })->name('welcome');
 

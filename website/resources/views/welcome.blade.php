@@ -47,70 +47,86 @@
 
     <div class="w-full h-full flex px-36 rounded-3xl">
         <aside class="w-full h-full max-w-md border-r bg-gray-50 p-6 border-y border-l rounded-tl-3xl">
-                        <h3 class="text-xl font-display">Filters</h3>
-                        <div class="relative mt-2">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                <x-heroicon-s-magnifying-glass class="size-5 text-gray-500"/>
+                        <section class="">
+                            <h3 class="text-xl font-display">
+                                Explore the map.
+                            </h3>
+
+                            <p class="text-gray-700 mt-1">
+                                Last updated on <time datetime="{{ $lastEditedAt->toIso8601String() }}"
+                                                      title="{{ $lastEditedAt->toIso8601String() }}">
+                                    {{ $lastEditedAt->format('F j, Y') }}.
+                                </time>
+                            </p>
+
+                            <div class="relative mt-2">
+                                <input type="text" autocomplete="off"
+                                       class="bg-white rounded-xl py-2.5 pr-11 pl-4 w-full shadow-sm border focus:outline-none focus:ring transition focus:ring-emerald-600"
+                                       placeholder="Search '1Day Sooner' or 'Research labs'">
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                    <x-heroicon-s-magnifying-glass class="size-5 text-gray-500"/>
+                                </div>
                             </div>
-                            <input type="text" autocomplete="off"
-                                   class="bg-white rounded-xl py-2.5 pl-11 pr-2.5 w-full shadow-sm border focus:outline-none focus:ring transition focus:ring-emerald-600"
-                                   placeholder="Search '1Day Sooner' or 'Research labs'">
-                        </div>
+                        </section>
 
-                        <fieldset class="mt-6">
-                            <legend class="font-medium">Focus on</legend>
-                            <div class="mt-1">
-                                <input type="radio" name="focus" id="focus_technical" class="sr-only peer">
-                                <label for="focus_technical" class="block py-1.5 peer-checked:bg-technical transition rounded-t-xl px-4 flex items-center border">
-                                    <x-at-technical class="flex-grow"  />
-                                    <x-heroicon-m-check class="size-4 text-white check"/>
-                                </label>
-                            </div>
+                        <section class="mt-6">
+                            <h4 class="text-lg font-display">Filters</h4>
+                            <fieldset>
+                                <legend class="font-medium">Focus on</legend>
 
-                            <div>
-                                <input type="radio" name="focus" id="focus_governance" class="sr-only peer">
-                                <label for="focus_governance" class="block py-1.5 peer-checked:bg-governance transition px-4 flex items-center border border-t-0">
-                                    <x-at-governance class="flex-grow" />
-                                    <x-heroicon-m-check class="size-4 text-white check"/>
-                                </label>
-                            </div>
+                                <div class="shadow-sm rounded-xl">
+                                    <div class="mt-1">
+                                        <input type="radio" name="focus" id="focus_technical" class="sr-only peer">
+                                        <label for="focus_technical" class="block py-1.5 peer-checked:bg-technical transition rounded-t-xl px-4 flex items-center border">
+                                            <x-at-technical class="flex-grow"  />
+                                            <x-heroicon-m-check class="size-4 text-white check"/>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="focus" id="focus_governance" class="sr-only peer">
+                                        <label for="focus_governance" class="block py-1.5 peer-checked:bg-governance transition px-4 flex items-center border border-t-0">
+                                            <x-at-governance class="flex-grow" />
+                                            <x-heroicon-m-check class="size-4 text-white check"/>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input checked type="radio" name="focus" id="focus_neither" class="sr-only peer">
+                                        <label for="focus_neither" class="block py-1.5 peer-checked:bg-white transition rounded-b-xl px-4 flex items-center border border-t-0">
+                                            <span class="flex-grow">Neither</span>
+                                            <x-heroicon-m-check class="size-4 text-gray-700 check"/>
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
 
-                            <div>
-                                <input checked type="radio" name="focus" id="focus_neither" class="sr-only peer">
-                                <label for="focus_neither" class="block py-1.5 peer-checked:bg-white transition rounded-b-xl px-4 flex items-center border border-t-0">
-                                    <span class="flex-grow">Neither</span>
-                                    <x-heroicon-m-check class="size-4 text-gray-700 check"/>
-                                </label>
-                            </div>
-                        </fieldset>
+                            <div class="mt-6">
+                                <span class="font-medium leading-6 text-gray-900 whitespace-nowrap">By activity type</span>
+                                <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the map.</p>
 
-                        <div class="mt-6">
-                            <span class="font-medium leading-6 text-gray-900 whitespace-nowrap">By activity type</span>
-                            <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the map.</p>
+                                <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
+                                    @foreach($activities as $activity)
+                                        <li>
+                                            <button
+                                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm"
+                                                style="color: {{ $activity->color->foreground() }}; background-color: {{ $activity->color->background() }}"
+                                                type="button"
+                                            >
+                                                <span class="sr-only">Remove filter</span>
 
-                            <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
-                                @foreach($activities as $activity)
-                                    <li>
-                                        <button
-                                            class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap"
-                                            style="color: {{ $activity->color->foreground() }}; background-color: {{ $activity->color->background() }}"
-                                            type="button"
-                                        >
-                                            <span class="sr-only">Remove filter</span>
-
-                                            @unless(empty($activity->iconName()))
-                                                <x-activity-type-icon :icon="$activity->iconName()"
-                                                                      aria-hidden="true"
-                                                                      class="size-[1.125rem] group-hover:opacity-75"/>
-                                            @endunless
-                                            <span class="ml-1 leading-none group-hover:opacity-75">
+                                                @unless(empty($activity->iconName()))
+                                                    <x-activity-type-icon :icon="$activity->iconName()"
+                                                                          aria-hidden="true"
+                                                                          class="size-[1.125rem] group-hover:opacity-75"/>
+                                                @endunless
+                                                <span class="ml-1 leading-none group-hover:opacity-75">
                                                                                     {{ Str::limit($activity->label, 35) }}
                                                                                 </span>
-                                        </button>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </section>
         </aside>
         <aside class="bg-gray-100 w-full max-w-md border-y" id="entry-aside"></aside>
         <main class="w-full h-full relative border-y border-r rounded-tr-3xl">
