@@ -12,7 +12,7 @@
 @tailwind utilities;
 
 .app-state {
-    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100 rounded-tr-3xl;
+    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100 rounded-r-3xl  flex items-center justify-center;
 }
 
 .state-active {

@@ -16,19 +16,18 @@
   then0)
 - [ ] [hour] Implement the alternative interactions for mobile (i.e. hover on an entry to highlight them doesn't work)
 - [ ] [minutes] Optimize Logosnatch's size picking algorithm
-- [ ] [minutes] Add the 'last updated at' (where? bottom-right? hero?)
-- [ ] [minutes] Rework the zoom handling to make it easier to click on the entries
 - [ ] [minutes] Add hover/focus states for all the interactive things
 - [ ] [minutes] Make the edges nicer
 - [ ] [minutes] Mobile support (move the filter sidebar to a bottom bar that pops out, wrap the navigation bar)
 - [ ] [minutes] Add a footer!
-- [ ] [minutes] Plumbing: loading spinner when loading an entry through
 - [ ] [minute] Link Give feedback to feedback form for now
 
 - [ ] [minutes???] Fix janky resize behavior
 
 #### done
-
+- [x] [minutes] Plumbing: loading spinner when loading an entry through
+- [x] [minutes] Rework the zoom handling to make it easier to click on the entries
+- [x] [minutes] Add the 'last updated at' (where? bottom-right? hero?)
 - [x] [minutes] Add explicit zoom controls (+ / -)
 - [x] [minute] embed htmx
 

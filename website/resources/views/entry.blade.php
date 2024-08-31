@@ -130,7 +130,7 @@
             </ul>
         </div>
     </div>
-    <div class="py-2 px-6 bg-gray-50 border-t space-x-2">
+    <div class="py-2 px-6 bg-gray-50 border-t space-x-2 rounded-br-3xl">
         <a class="inline-flex text-sm underline text-gray-700" href="{{ $notionUrl }}">
             <span class=mr-0.5">Open in Notion</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
