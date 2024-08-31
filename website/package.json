@@ -5,8 +5,8 @@
         "dev": "vite",
         "build": "vite build",
         "test": "mocha resources/js/tests --colors true",
-        "lint": "prettier --write resources/js/**/*.ts resources/css/**/*.css",
-        "test:lint": "prettier --check resources/js/**/*.ts resources/css/**/*.css"
+        "lint": "prettier --write resources/js/**/*.ts resources/css/**/*.css *.json *.js",
+        "test:lint": "prettier --check resources/js/**/*.ts resources/css/**/*.css *.json *.js"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.8",

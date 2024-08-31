@@ -20,16 +20,20 @@
         <div class="max-w-7xl mx-auto">
             <nav>
                 <ul class="flex justify-between">
-                    <li class="font-display">biosecurity.world</li>
+                    <li class="font-display">
+                        <a href="{{ route('welcome') }}" class="hover:underline">
+                            biosecurity.world
+                        </a>
+                    </li>
                     <li>
                         <span class="sr-only">Menu items</span>
 
                         <ul class="flex space-x-6">
+                            <li><a href="{{ route('how-to-contribute', absolute: false) }}" class="underline">
+                                    Contribute
+                                </a></li>
                             <li><a href="{{ route('give-feedback', absolute: false) }}" class="underline">
                                     Give feedback
-                                </a></li>
-                            <li><a href="{{ route('how-to-contribute', absolute: false) }}" class="underline">
-                                    How to contribute?
                                 </a></li>
                             <li><a href="{{ route('about', absolute: false) }}" class="underline">
                                     About
@@ -76,18 +80,13 @@
                                         Highlight recently added entries
                                     </span>
                                     <span class="text-sm text-gray-500" id="availability-description">
-                                        Highlight entries added in the
-                                        <button class="inline-flex items-center underline decoration-dashed decoration-gray-300 underline-offset-2">
-                                            <span>last month</span>
-                                            <x-heroicon-m-chevron-down class="size-4"/>
-                                        </button>
+                                        Highlight entries added in the last month.
                                     </span>
                                   </span>
-                            <!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
-                            <button type="button" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                                <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+                            <label for="recent" data-toggle="on" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                                 <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                            </button>
+                                <input type="checkbox" class="sr-only" aria-hidden="true" aria-labelledby="availability-label" aria-describedby="availability-description" id="recent" name="recent">
+                            </label>
                         </div>
                     </section>
                     <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
@@ -97,23 +96,23 @@
                             <fieldset>
                                 <legend class="font-medium leading-6 text-gray-900">Focus on</legend>
 
-                                <div class="shadow-sm rounded-xl mt-1">
+                                <div class="shadow-sm rounded-xl mt-1 bg-white">
                                     <div>
-                                        <input type="radio" name="focus" id="focus_technical" class="sr-only peer">
+                                        <input type="radio" name="focus" id="focus_technical" value="technical" class="sr-only peer">
                                         <label for="focus_technical" class="block py-1.5 peer-checked:bg-technical transition rounded-t-xl px-4 flex items-center border">
                                             <x-at-technical class="flex-grow"  />
                                             <x-heroicon-m-check class="size-4 text-white check"/>
                                         </label>
                                     </div>
                                     <div>
-                                        <input type="radio" name="focus" id="focus_governance" class="sr-only peer">
+                                        <input type="radio" name="focus" id="focus_governance" value="governance" class="sr-only peer">
                                         <label for="focus_governance" class="block py-1.5 peer-checked:bg-governance transition px-4 flex items-center border border-t-0">
                                             <x-at-governance class="flex-grow" />
                                             <x-heroicon-m-check class="size-4 text-white check"/>
                                         </label>
                                     </div>
                                     <div>
-                                        <input checked type="radio" name="focus" id="focus_neither" class="sr-only peer">
+                                        <input checked type="radio" name="focus" id="focus_neither" value="neither" class="sr-only peer">
                                         <label for="focus_neither" class="block py-1.5 peer-checked:bg-white transition rounded-b-xl px-4 flex items-center border border-t-0">
                                             <span class="flex-grow">Neither</span>
                                             <x-heroicon-m-check class="size-4 text-gray-700 check"/>
@@ -130,22 +129,26 @@
                             <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
                                 @foreach($activities as $activity)
                                     <li>
-                                        <button
+                                        <label
+                                            for="activity_{{ \App\Support\IdHash::hash($activity->id) }}"
                                             class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm"
                                             style="color: {{ $activity->color->foreground() }}; background-color: {{ $activity->color->background() }}"
                                             type="button"
                                         >
                                             <span class="sr-only">Remove filter</span>
 
-                                            @unless(empty($activity->iconName()))
+                                            @if(!empty($activity->iconName()))
                                                 <x-activity-type-icon :icon="$activity->iconName()"
                                                                       aria-hidden="true"
                                                                       class="size-[1.125rem] group-hover:opacity-75"/>
-                                            @endunless
+                                            @endif
+
                                             <span class="ml-1 leading-none group-hover:opacity-75">
-                                                                                    {{ Str::limit($activity->label, 35) }}
-                                                                                </span>
-                                        </button>
+                                                {{ Str::limit($activity->label, 35) }}
+                                            </span>
+
+                                            <input type="checkbox" checked name="activities" id="activity_{{ \App\Support\IdHash::hash($activity->id) }}" value="{{ \App\Support\IdHash::hash($activity->id) }}" class="sr-only">
+                                        </label>
                                     </li>
                                 @endforeach
                             </ul>
@@ -223,9 +226,7 @@
                         </div>
                     </div>
                     <svg role="main" id="map" width="100%" height="100%">
-                        <g id="zoom-wrapper">
-                            <g id="center-wrapper">
-                                <g id="cartesian-flip">
+                            <g id="zoom-wrapper">
                                     <g id="background"></g>
 
                                     <rect width="8" height="8" rx="2" ry="2" data-node="{{ \App\Support\IdHash::hash($root->id) }}"
@@ -254,8 +255,6 @@
                                             </foreignObject>
                                         @endforeach
                                     </g>
-                                </g>
-                            </g>
                         </g>
                     </svg>
                 </section>

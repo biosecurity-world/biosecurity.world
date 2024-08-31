@@ -1,16 +1,21 @@
 {
-  "compilerOptions": {
-      "baseUrl": ".",
-      "target": "esnext",
-      "module": "esnext",
-      "strict": true,
-      "isolatedModules": true,
-      "noImplicitAny": true,
-      "noEmit": true,
-      "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@/*": ["./resources/js/*"]
-    }
-  },
-  "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts"]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "esnext",
+        "module": "esnext",
+        "strict": true,
+        "isolatedModules": true,
+        "noImplicitAny": true,
+        "noEmit": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@/*": [
+                "./resources/js/*"
+            ]
+        }
+    },
+    "include": [
+        "resources/js/**/*.ts",
+        "resources/js/**/*.d.ts"
+    ],
 }

@@ -2,7 +2,6 @@
 
 ### me
 
-- [ ] [hours] Match the app state to the URL (i.e. clicking on an entry changes the URL, and going to that URL reopens
 - [ ] [hour] Plumbing: search
 - [ ] [hour] Port SVG support to Logosnatch (fixes all the 'logo not found but logo exists' issues)
   that entry; same thing for entries)
@@ -20,15 +19,16 @@
 - [ ] [minutes] Make the edges nicer
 - [ ] [minutes] Mobile support (move the filter sidebar to a bottom bar that pops out, wrap the navigation bar)
 - [ ] [minute] Link Give feedback to feedback form for now
-- [ ] [minutes???] Fix janky resize behavior
 
 #### done
+- [x] [hours] Match the app state to the URL (i.e. clicking on an entry changes the URL, and going to that URL reopens
 - [x] [minutes] Add a footer!
 - [x] [minutes] Plumbing: loading spinner when loading an entry through
 - [x] [minutes] Rework the zoom handling to make it easier to click on the entries
 - [x] [minutes] Add the 'last updated at' (where? bottom-right? hero?)
 - [x] [minutes] Add explicit zoom controls (+ / -)
 - [x] [minute] embed htmx
+- [x] [minutes???] Fix janky resize behavior
 
 ###### unplanned
 - [x] added phpstan, pint, and fixed a good amount of issues, cleaned the codebase

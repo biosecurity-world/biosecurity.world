@@ -1,5 +1,0 @@
-class FiltersState {
-    init() {
-
-    }
-}

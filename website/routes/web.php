@@ -60,7 +60,7 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
     /** @var Entry $entry */
     $entry = $lookup[$entryId];
 
-    return view('entry', [
+    return view('entries.show', [
         'entry' => $entry,
         'host' => parse_url($entry->link, PHP_URL_HOST),
         'notionUrl' => sprintf('https://notion.so/%s', $entry->id),
