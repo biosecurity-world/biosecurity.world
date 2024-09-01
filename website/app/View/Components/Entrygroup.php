@@ -24,7 +24,16 @@ class Entrygroup extends Component
             ->groupBy('organizationType')
             ->map(fn (Collection $entries) => $entries->sortByDesc(fn (Entry $entry) => $entry->uniqueness))
             ->sortByDesc(fn (Collection $entries) => $entries->first()->organizationTypeUniqueness)
+            ->mapWithKeys(fn (Collection $entries, string $organizationType) => [
+                match ($organizationType) {
+                    "Research institute / lab / network" => "Research institute",
+                    "International non-profit organization" => "International NGO",
+                    "National non-profit organization" => "National NGO",
+                    default => $organizationType,
+                } => $entries,
+            ])
             ->toArray();
+
     }
 
     /**

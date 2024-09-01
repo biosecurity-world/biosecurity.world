@@ -20,12 +20,12 @@ class IconSnatch
         ]);
     }
 
-    public static function downloadFrom(string $url): ?Logo
+    public static function downloadFrom(string $url): Logo
     {
         $cacheKey = 'iconsnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url);
         if (Cache::has($cacheKey)) {
             /** @phpstan-ignore-next-line  */
-            return Cache::get($cacheKey);
+            return Cache::get($cacheKey) ?? Logo::zero();
         }
 
         try {
@@ -35,7 +35,7 @@ class IconSnatch
         } catch (GuzzleException $e) {
             report($e);
 
-            return null;
+            return Logo::zero();
         }
 
         /** @var stdClass $data */
@@ -44,6 +44,6 @@ class IconSnatch
         $logo = Logo::fromResponse($data);
         Cache::forever($cacheKey, $logo);
 
-        return $logo;
+        return $logo ?? Logo::zero();
     }
 }

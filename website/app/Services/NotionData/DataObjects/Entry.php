@@ -29,7 +29,7 @@ class Entry
         public array $activities,
         public Location $location,
         public bool $gcbrFocus,
-        public ?Logo $logo,
+        public Logo $logo,
     ) {}
 
     public function nounForOrganizationType(): string

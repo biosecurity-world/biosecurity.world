@@ -1,18 +1,3 @@
-{{--<!doctype html>--}}
-{{--<html lang="en" class="bg-gray-100 h-full">--}}
-{{--<head>--}}
-{{--    <meta charset="UTF-8">--}}
-{{--    <meta name="viewport"--}}
-{{--          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">--}}
-{{--    <meta http-equiv="X-UA-Compatible" content="ie=edge">--}}
-{{--    <title>Document</title>--}}
-
-{{--    <link rel="preconnect" href="https://fonts.bunny.net">--}}
-{{--    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />--}}
-
-{{--    @vite('resources/css/app.css')--}}
-{{--</head>--}}
-{{--<body class="bg-gray-50 border-r w-full max-w-md h-full">--}}
 <div class="entry flex flex-col h-full justify-between border-r border-t-0 rounded-r-3xl bg-white">
     <div>
         <div class="flex justify-between items-center bg-white pl-4 pr-6 py-4 rounded-tr-3xl border-b border-r">
@@ -51,7 +36,7 @@
                               clip-rule="evenodd"/>
                     </svg>
 
-                    <x-entry-logo :logo="$entry->logo" :size="16" class="ml-2"/>
+                    <x-entry-logo class="ml-2" :logo="$entry->logo" />
                 </li>
             </ol>
 
@@ -153,5 +138,3 @@
         </a>
     </div>
 </div>
-{{--</body>--}}
-{{--</html>--}}

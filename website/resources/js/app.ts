@@ -45,22 +45,50 @@ document.querySelectorAll("input[name='activities']").forEach((el: HTMLInputElem
 
 
 // Handle the 'highlight recently added entries' toggle
-let recentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
-filters.persist('recent', () => `${+recentToggle.checked}`, (value: string) => {
-        recentToggle.checked = value === '1'
+let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
+filters.persist('recent', () => `${+elRecentToggle.checked}`, (value: string) => {
+        elRecentToggle.checked = value === '1'
 
         let label = document.querySelector('label[for="recent"]') as HTMLLabelElement
-        label.dataset.toggle = recentToggle.checked ? 'on' : 'off'
+        label.dataset.toggle = elRecentToggle.checked ? 'on' : 'off'
 }, "0")
-recentToggle.addEventListener('click', () => filters.syncOnly(["recent"]))
+elRecentToggle.addEventListener('click', () => filters.syncOnly(["recent"]))
 
+document.querySelectorAll("input[name='focus']").forEach((el: HTMLInputElement) => {
+    el.addEventListener('change', () => filters.syncOnly(['focus']))
+})
 
 // We synchronize the saved state (from previous visits)
 // with the UI state for all the tracked element above.
 filters.sync()
 
-document.querySelectorAll("input[name='focus']").forEach((el: HTMLInputElement) => {
-    el.addEventListener('change', () => filters.syncOnly(['focus']))
+
+
+let elEntrygroupContainer = document.getElementById('entrygroups')
+let elsEntryButtons = document.querySelectorAll('button[data-sum]')
+function highlightEntriesWithSum(sum: number) {
+    let instances = 0
+
+    elsEntryButtons.forEach((btn: HTMLButtonElement) => {
+        let isActive = btn.dataset.sum === sum.toString()
+        btn.classList.toggle('active', isActive)
+        if (isActive) {
+            instances++
+        }
+    })
+
+    if (instances > 1) {
+        elEntrygroupContainer.classList.add('hovered')
+    }
+}
+
+function removeHighlight() {
+    elEntrygroupContainer.classList.remove('hovered')
+}
+
+elsEntryButtons.forEach((el: HTMLButtonElement) => {
+    el.addEventListener('mouseenter', (e: MouseEvent) => highlightEntriesWithSum(+el.dataset.sum))
+    el.addEventListener('mouseleave', (e: MouseEvent) => removeHighlight())
 })
 
 try {
@@ -100,7 +128,7 @@ try {
             [mapWidth * 1.5, mapHeight * 1.5]
         ])
 
-    $map.transition().duration(300).call(
+    $map.transition().duration(500).call(
         zoomHandler.transform,
         mapState.position !== null
             ? zoomIdentity.translate(mapState.position[0], mapState.position[1]).scale(mapState.position[2])

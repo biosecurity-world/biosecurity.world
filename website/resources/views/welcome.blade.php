@@ -54,7 +54,7 @@
             <aside class="relative">
                 <div class="w-full h-full max-w-lg border-r divide-y border-y border-l rounded-l-3xl flex flex-col">
                     <section class="p-6 bg-white rounded-l-3xl">
-                        <h3 class="text-xl font-display">
+                        <h3 class="text-xl font-display flex-grow">
                             Explore the map.
                         </h3>
 
@@ -241,7 +241,7 @@
                                         @endforeach
                                     </g>
 
-                                    <g>
+                                    <g id="entrygroups">
                                         @foreach($entrygroups as $entrygroup)
                                             <foreignObject width="100%"
                                                            height="100%"

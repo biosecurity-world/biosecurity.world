@@ -22,4 +22,13 @@ class Logo
             version: $data->meta->version,
         );
     }
+
+    public static function zero(): Logo
+    {
+        return new self(
+            url: '/images/missing-logo.svg',
+            filled: false,
+            version: '',
+        );
+    }
 }

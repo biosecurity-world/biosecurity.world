@@ -89,3 +89,15 @@ label[for^="activity_"].inactive {
 [data-toggle="on"] > span {
     @apply translate-x-5;
 }
+
+#entrygroups.hovered [data-sum]:not(.active) {
+    opacity: .25;
+}
+
+#entrygroups.hovered [data-sum].active > .entry-logo {
+    @apply border border-emerald-600;
+}
+
+#entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
+    opacity: .25;
+}
