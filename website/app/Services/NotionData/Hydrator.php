@@ -83,11 +83,11 @@ class Hydrator
                 $hydrated[] = $clone;
 
                 if ($item instanceof Entry) {
-                    if (!isset($entryCountMap[$parent])) {
+                    if (! isset($entryCountMap[$parent])) {
                         $entryCountMap[$parent] = 0;
                     }
 
-                    if (!isset($organizationTypeMap[$item->organizationType])) {
+                    if (! isset($organizationTypeMap[$item->organizationType])) {
                         $organizationTypeMap[$item->organizationType] = 0;
                     }
 

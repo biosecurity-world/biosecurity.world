@@ -10,10 +10,10 @@ use Notion\Pages\Properties\RichTextProperty;
 #[\AllowDynamicProperties]
 class Entry
 {
-    /** @var float $uniqueness Defined as 1 / (number of occurrences in the entrygroups) */
+    /** @var float Defined as 1 / (number of occurrences in the entrygroups) */
     public float $uniqueness;
 
-    /** @var float $organizationTypeUniqueness Defined as 1 / (number of occurrences in the entrygroups) */
+    /** @var float Defined as 1 / (number of occurrences in the entrygroups) */
     public float $organizationTypeUniqueness;
 
     public function __construct(

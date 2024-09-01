@@ -91,7 +91,7 @@ label[for^="activity_"].inactive {
 }
 
 #entrygroups.hovered [data-sum]:not(.active) {
-    opacity: .25;
+    opacity: 0.25;
 }
 
 #entrygroups.hovered [data-sum].active > .entry-logo {
@@ -99,5 +99,5 @@ label[for^="activity_"].inactive {
 }
 
 #entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
-    opacity: .25;
+    opacity: 0.25;
 }

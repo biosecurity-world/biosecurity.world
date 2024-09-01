@@ -8,15 +8,14 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
-use Notion\Pages\Properties\RichTextProperty;
 
 class Entrygroup extends Component
 {
     public array $entries;
 
     /**
-     * @param Entrygroup $entrygroup
-     * @param Entry[] $entries
+     * @param  Entrygroup  $entrygroup
+     * @param  Entry[]  $entries
      */
     public function __construct(public EntrygroupData $entrygroup, array $entries)
     {
@@ -26,9 +25,9 @@ class Entrygroup extends Component
             ->sortByDesc(fn (Collection $entries) => $entries->first()->organizationTypeUniqueness)
             ->mapWithKeys(fn (Collection $entries, string $organizationType) => [
                 match ($organizationType) {
-                    "Research institute / lab / network" => "Research institute",
-                    "International non-profit organization" => "International NGO",
-                    "National non-profit organization" => "National NGO",
+                    'Research institute / lab / network' => 'Research institute',
+                    'International non-profit organization' => 'International NGO',
+                    'National non-profit organization' => 'National NGO',
                     default => $organizationType,
                 } => $entries,
             ])
