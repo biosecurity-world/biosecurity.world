@@ -34,6 +34,8 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       - name: Comment changes
         uses: thollander/actions-comment-pull-request@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           filePath: /home/runner/report.md
           pr_number: ${{ github.event.number }}
