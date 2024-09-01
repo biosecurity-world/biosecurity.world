@@ -67,7 +67,7 @@
 
             <div class="relative mt-2">
                 <input type="text" autocomplete="off"
-                       class="bg-white border-gray-200 rounded-xl py-2.5 pr-11 pl-4 w-full shadow-sm border focus:outline-none focus:ring transition focus:ring-emerald-600"
+                       class="bg-white border-gray-200 rounded-xl py-2.5 pr-11 pl-4 w-full shadow-sm border focus:outline-none focus:ring-2 focus:border-emerald-600 transition focus:ring-emerald-600"
                        placeholder="Search '1Day Sooner' or 'Research labs'">
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                     <x-heroicon-s-magnifying-glass class="size-5 text-gray-500" />
@@ -76,22 +76,19 @@
 
             <div class="mt-4 flex items-center justify-between">
                       <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-gray-900" id="availability-label">
+                        <span class="text-sm font-medium leading-6 text-gray-900">
                             Highlight recently added entries
                         </span>
-                        <span class="text-sm text-gray-500" id="availability-description">
+                        <span class="text-sm text-gray-500">
                             Highlight entries added in the last month.
                         </span>
                       </span>
+                <input type="checkbox" class="sr-only peer" aria-hidden="true" id="recent" name="recent">
                 <label for="recent" data-toggle="off"
-                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
-                       role="switch" aria-checked="false" aria-labelledby="availability-label"
-                       aria-describedby="availability-description">
+                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-600 peer-focus:ring-offset-2">
                 <span aria-hidden="true"
                       class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    <input type="checkbox" class="sr-only" aria-hidden="true"
-                           aria-labelledby="availability-label" aria-describedby="availability-description"
-                           id="recent" name="recent">
+
                 </label>
             </div>
         </section>
@@ -107,7 +104,7 @@
                                     <input type="radio" name="focus" id="focus_technical" value="technical"
                                            class="sr-only peer">
                                     <label for="focus_technical"
-                                           class="block py-1.5 peer-checked:bg-technical transition rounded-t-xl px-4 flex items-center border">
+                                           class="block py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
                                         <x-at-technical class="flex-grow" />
                                         <x-heroicon-m-check class="size-4 text-white check" />
                                     </label>
@@ -116,7 +113,7 @@
                                     <input type="radio" name="focus" id="focus_governance" value="governance"
                                            class="sr-only peer">
                                     <label for="focus_governance"
-                                           class="block py-1.5 peer-checked:bg-governance transition px-4 flex items-center border border-t-0">
+                                           class="block py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
                                         <x-at-governance class="flex-grow" />
                                         <x-heroicon-m-check class="size-4 text-white check" />
                                     </label>
@@ -125,7 +122,7 @@
                                     <input checked type="radio" name="focus" id="focus_neither" value="neither"
                                            class="sr-only peer">
                                     <label for="focus_neither"
-                                           class="block py-1.5 peer-checked:bg-white transition rounded-b-xl px-4 flex items-center border border-t-0">
+                                           class="block py-1.5 peer-checked:bg-white transition rounded-b-xl px-4 flex items-center border border-t-0 hover:bg-gray-50 peer-focus:ring-2 peer-focus:ring-gray-700 peer-focus:ring-offset-2">
                                         <span class="flex-grow">Neither</span>
                                         <x-heroicon-m-check class="size-4 text-gray-700 check" />
                                     </label>
@@ -142,9 +139,12 @@
                         <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
                             @foreach($activities as $activity)
                                 <li>
+                                    <input type="checkbox" checked name="activities"
+                                           id="activity_{{ IdHash::hash($activity->id) }}"
+                                           value="{{ IdHash::hash($activity->id) }}" class="sr-only peer">
                                     <label
                                         for="activity_{{ IdHash::hash($activity->id) }}"
-                                        class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm"
+                                        class="flex items-center py-1 rounded-full bg-gray-50 text-sm font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-emerald-600 peer-focus:ring-opacity-50 transition"
                                         style="color: {{ $activity->color->foreground() }}; background-color: {{ $activity->color->background() }}"
                                         type="button"
                                     >
@@ -159,10 +159,6 @@
                                         <span class="ml-1 leading-none group-hover:opacity-75">
                                             {{ Str::limit($activity->label, 35) }}
                                         </span>
-
-                                        <input type="checkbox" checked name="activities"
-                                               id="activity_{{ IdHash::hash($activity->id) }}"
-                                               value="{{ IdHash::hash($activity->id) }}" class="sr-only">
                                     </label>
                                 </li>
                             @endforeach

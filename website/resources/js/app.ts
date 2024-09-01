@@ -12,6 +12,7 @@ function switchAppState(newState: AppState): void {
         let isActive = newState === state.dataset.state
 
         state.ariaHidden = isActive ? "false" : "true"
+        state.tabIndex = isActive ? 0 : -1
         state.classList.toggle('state-active', isActive)
         state.classList.toggle('state-inactive', !isActive)
     })
@@ -86,7 +87,9 @@ function removeHighlight() {
 
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
     el.addEventListener('mouseenter', (e: MouseEvent) => highlightEntriesWithSum(+el.dataset.sum))
+    el.addEventListener('focus', (e: FocusEvent) => highlightEntriesWithSum(+el.dataset.sum))
     el.addEventListener('mouseleave', (e: MouseEvent) => removeHighlight())
+    el.addEventListener('blur', (e: FocusEvent) => removeHighlight())
 })
 
 try {
