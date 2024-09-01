@@ -22,7 +22,7 @@ abstract class TestCase extends BaseTestCase
         $response->visualDiff($name !== null ? \Illuminate\Support\Str::slug($name) : null, $url);
     }
 
-    public function vertex(float $delta, float $theta, $width = 25, $length = 100): array
+    public function node(float $delta, float $theta, $width = 25, $length = 100): array
     {
         return [
             'sector' => [$delta, $theta],

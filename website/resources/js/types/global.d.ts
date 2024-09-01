@@ -1,6 +1,6 @@
-import {Node} from "@/index";
+import {Node} from "@/types/index"
 
-export {};
+export {}
 
 declare global {
     interface Window {

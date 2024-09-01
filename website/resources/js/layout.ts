@@ -1,22 +1,22 @@
-import {ProcessedNode, Sector} from "./index";
+import {ProcessedNode, Sector} from "./types";
 import {eq, getQuadrant, gt, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
 
-export function fitToSector(vertex: ProcessedNode): [number, number] {
-    if (gt(vertex.sector[1] - vertex.sector[0], PI) && !eq(vertex.sector[0], 0)) {
+export function fitToSector(node: ProcessedNode): [number, number] {
+    if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
 
-    if (eq(vertex.sector[0], 0) && eq(vertex.sector[1], PIPI)) {
-        return [-vertex.size[0] / 2, -vertex.size[1] / 2]
+    if (eq(node.sector[0], 0) && eq(node.sector[1], PIPI)) {
+        return [-node.size[0] / 2, -node.size[1] / 2]
     }
 
-    return findPositionForRect(vertex)
+    return findPositionForRect(node)
 }
 
-export function findPositionForRect(vertex: ProcessedNode): [number, number] {
-    let [od, ot] = vertex.sector
-    let [d, t] = getEffectiveSector(vertex.sector)
-    let [l, w] = vertex.size
+export function findPositionForRect(node: ProcessedNode): [number, number] {
+    let [od, ot] = node.sector
+    let [d, t] = getEffectiveSector(node.sector)
+    let [l, w] = node.size
     let qD = getQuadrant(d)
     let qT = getQuadrant(t)
     let tan_d = Math.tan(d)
@@ -67,7 +67,7 @@ export function findPositionForRect(vertex: ProcessedNode): [number, number] {
         return [x, y]
     }
 
-    throw new Error(`Could not fit sector ${vertex.size} in ${vertex.sector} (effective sector: ${[d, t]})`)
+    throw new Error(`Could not fit sector ${node.size} in ${node.sector} (effective sector: ${[d, t]})`)
 }
 
 export function getEffectiveSector(sector: Sector): Sector {

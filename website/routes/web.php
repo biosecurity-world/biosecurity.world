@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Services\NotionData\Category;
-use App\Services\NotionData\Entry;
-use App\Services\NotionData\Entrygroup;
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\DataObjects\Entrygroup;
+use App\Services\NotionData\DataObjects\Root;
 use App\Services\NotionData\Notion;
-use App\Services\NotionData\Root;
 use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\TreeBuilder;
 use Illuminate\Support\Facades\Route;
@@ -60,7 +60,7 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
     /** @var Entry $entry */
     $entry = $lookup[$entryId];
 
-    return view('entry', [
+    return view('entries.show', [
         'entry' => $entry,
         'host' => parse_url($entry->link, PHP_URL_HOST),
         'notionUrl' => sprintf('https://notion.so/%s', $entry->id),
@@ -88,7 +88,7 @@ Route::get('/_/entries', function (Notion $notion) {
 if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
-    // the code for the website which includes the code for testing the tree
+    // the code for the website which includes the code for tests the tree
     // These routes are ignored by the crawler that builds the static version
     // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {

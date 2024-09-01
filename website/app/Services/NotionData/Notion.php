@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
 use Illuminate\Support\Facades\Cache;
 use Notion\Databases\Database;
 use Notion\Notion as NotionWrapper;

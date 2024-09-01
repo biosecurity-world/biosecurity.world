@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\Tree;
 
-use App\Services\NotionData\Category;
-use App\Services\NotionData\Entry;
-use App\Services\NotionData\Entrygroup;
-use App\Services\NotionData\Root;
+use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\DataObjects\Entrygroup;
+use App\Services\NotionData\DataObjects\Root;
 use App\Support\IdHash;
 use Exception;
 use Illuminate\Support\Collection;
@@ -52,29 +52,30 @@ class TreeBuilder
             return ['nodes' => [], 'lookup' => []];
         }
 
+        /** @phpstan-ignore-next-line  */
         $this->nodes = collect($this->nodes)
             ->groupBy('parentId')
-            ->flatMap(function (Collection $children, int $parentId) {
-                [$entries, $rest] = $children->partition(fn (Node $node) => $this->nodeToPage[$node->id] instanceof Entry);
+            ->flatMap(
+                /** @return Collection<Node> */
+                function (Collection $children, int $parentId): Collection {
+                    [$entries, $rest] = $children->partition(fn (Node $node) => $this->nodeToPage[$node->id] instanceof Entry);
 
-                if ($entries->isEmpty()) {
+                    if ($entries->isEmpty()) {
+                        return $rest;
+                    }
+
+                    /** @var Collection<int,string> $entryIds */
+                    $entryIds = $entries->pluck('id');
+
+                    $id = sha1($parentId.'-'.$entryIds->sort()->join('-'));
+                    $reducedId = IdHash::hash($id);
+
+                    $rest->push(new Node($reducedId, $parentId));
+                    $this->nodeToPage[$reducedId] = new Entrygroup($id, $entryIds->toArray());
+
                     return $rest;
-                }
-
-                /** @var Collection<string> $entryIds */
-                $entryIds = $entries->pluck('id');
-
-                $id = sha1($parentId.'-'.$entryIds->sort()->join('-'));
-                $reducedId = IdHash::hash($id);
-
-                $rest->push(new Node($reducedId, $parentId));
-                $this->nodeToPage[$reducedId] = new Entrygroup(
-                    id: $id,
-                    entries: $entryIds->toArray(),
-                );
-
-                return $rest;
-            })->toArray();
+                })
+            ->toArray();
 
         $this->parentToChildrenMap = collect($this->nodes)->groupBy('parentId')->toArray();
 
@@ -103,7 +104,7 @@ class TreeBuilder
         } else {
             $matches = collect($this->nodes)->where('id', $id)->where(fn (Node $node) => $node->parentId === $parentId);
             if (count($matches) !== 1) {
-                throw new Exception("Should not happen: The vertex represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
+                throw new Exception("Should not happen: The node represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
             }
 
             /** @var Node $node */

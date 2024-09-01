@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\NotionData;
+namespace App\Services\NotionData\DataObjects;
 
 #[\AllowDynamicProperties]
 class Entrygroup
 {
     public function __construct(
         public string $id,
-        /** @var string[] */
+        /** @var int[] */
         public array $entries,
     ) {}
 }

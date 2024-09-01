@@ -1,6 +1,6 @@
 import {D3ZoomEvent, select, zoom} from "d3";
-import debug from "@/debug";
-import {ProcessedNode} from "@/index";
+import {debug} from "@/utils";
+import {ProcessedNode} from "@/types";
 
 declare global {
     interface Window {
@@ -57,8 +57,8 @@ const cssColors = [
             let box = window.testCase[i]
             let color = cssColors[i % cssColors.length]
 
-            debug().vertex({
-                vertex: {sector: box.sector, size: [box.length, box.width]} as ProcessedNode,
+            debug().node({
+                node: {sector: box.sector, size: [box.length, box.width]} as ProcessedNode,
                 color
             })
         }

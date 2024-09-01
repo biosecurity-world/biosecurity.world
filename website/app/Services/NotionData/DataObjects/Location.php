@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\NotionData;
+namespace App\Services\NotionData\DataObjects;
 
 use Notion\Databases\Properties\SelectOption;
 

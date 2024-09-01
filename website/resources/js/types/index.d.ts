@@ -8,7 +8,6 @@ export type Node = {
     parentId: number
 }
 
-
 export type ProcessedNode = {
     weight: number
     edge: [number, number]
@@ -18,4 +17,3 @@ export type ProcessedNode = {
 
     el: SVGElement
 } & Node
-

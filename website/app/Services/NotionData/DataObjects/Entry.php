@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\NotionData;
+namespace App\Services\NotionData\DataObjects;
 
 use App\Services\Iconsnatch\Logo;
 use Notion\Pages\Properties\RichTextProperty;
@@ -10,6 +10,12 @@ use Notion\Pages\Properties\RichTextProperty;
 #[\AllowDynamicProperties]
 class Entry
 {
+    /** @var float Defined as 1 / (number of occurrences in the entrygroups) */
+    public float $uniqueness;
+
+    /** @var float Defined as 1 / (number of occurrences in the entrygroups) */
+    public float $organizationTypeUniqueness;
+
     public function __construct(
         public string $id,
         public string $parentId,
@@ -23,7 +29,7 @@ class Entry
         public array $activities,
         public Location $location,
         public bool $gcbrFocus,
-        public ?Logo $logo,
+        public Logo $logo,
     ) {}
 
     public function nounForOrganizationType(): string

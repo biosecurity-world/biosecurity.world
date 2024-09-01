@@ -1,11 +1,96 @@
 import 'htmx.org'
-import {D3ZoomEvent, select, zoom} from "d3"
-import {gt, IN_PRODUCTION, lt, PIPI} from "./utils";
-import {ProcessedNode} from "./index";
-import {fitToSector} from "./data";
-import debug from "@/debug";
+import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
+import {debug, gt, IN_PRODUCTION, lt, PIPI} from "./utils";
+import {ProcessedNode} from "./types";
+import {fitToSector} from "./layout";
+import PersistentState, {PersistentMapState} from "@/state"
 
 type AppState = "error" | "success" | "loading"
+
+function switchAppState(newState: AppState): void {
+    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
+        let isActive = newState === state.dataset.state
+
+        state.ariaHidden = isActive ? "false" : "true"
+        state.tabIndex = isActive ? 0 : -1
+        state.classList.toggle('state-active', isActive)
+        state.classList.toggle('state-inactive', !isActive)
+    })
+}
+
+const mapState = new PersistentMapState()
+window.mapState = mapState
+mapState.sync()
+
+const filters = new PersistentState()
+
+// Handle the 'Focus on' filter
+filters.persist('focus', () => (document.querySelector('input[name=focus]:checked') as HTMLInputElement).value, (key: string) => {
+    document.querySelector(`input[name=focus][value="${key}"]`)!.setAttribute("checked", "checked")
+}, 'neither')
+
+
+// Handle the 'By activity' filter
+document.querySelectorAll("input[name='activities']").forEach((el: HTMLInputElement) => {
+    let key =`a[${el.value}]`
+
+    filters.persist(key, () => `${+el.checked}`, (value: string) => {
+        el.checked = value === '1'
+        document.querySelector(`label[for="${el.id}"]`)!.classList.toggle('inactive', !el.checked)
+    }, "1")
+
+    el.addEventListener('change', (e: Event) => {
+        filters.syncOnly([key])
+    })
+})
+
+
+// Handle the 'highlight recently added entries' toggle
+let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
+filters.persist('recent', () => `${+elRecentToggle.checked}`, (value: string) => {
+        elRecentToggle.checked = value === '1'
+
+        let label = document.querySelector('label[for="recent"]') as HTMLLabelElement
+        label.dataset.toggle = elRecentToggle.checked ? 'on' : 'off'
+}, "0")
+elRecentToggle.addEventListener('click', () => filters.syncOnly(["recent"]))
+
+document.querySelectorAll("input[name='focus']").forEach((el: HTMLInputElement) => {
+    el.addEventListener('change', () => filters.syncOnly(['focus']))
+})
+
+// We synchronize the saved state (from previous visits)
+// with the UI state for all the tracked element above.
+filters.sync()
+
+let elEntrygroupContainer = document.getElementById('entrygroups')
+let elsEntryButtons = document.querySelectorAll('button[data-sum]')
+function highlightEntriesWithSum(sum: number) {
+    let instances = 0
+
+    elsEntryButtons.forEach((btn: HTMLButtonElement) => {
+        let isActive = btn.dataset.sum === sum.toString()
+        btn.classList.toggle('active', isActive)
+        if (isActive) {
+            instances++
+        }
+    })
+
+    if (instances > 1) {
+        elEntrygroupContainer.classList.add('hovered')
+    }
+}
+
+function removeHighlight() {
+    elEntrygroupContainer.classList.remove('hovered')
+}
+
+elsEntryButtons.forEach((el: HTMLButtonElement) => {
+    el.addEventListener('mouseenter', (e: MouseEvent) => highlightEntriesWithSum(+el.dataset.sum))
+    el.addEventListener('focus', (e: FocusEvent) => highlightEntriesWithSum(+el.dataset.sum))
+    el.addEventListener('mouseleave', (e: MouseEvent) => removeHighlight())
+    el.addEventListener('blur', (e: FocusEvent) => removeHighlight())
+})
 
 try {
     let $map = select<SVGElement, {}>('#map')
@@ -20,31 +105,38 @@ try {
 
     $centerWrapper.attr('transform', `translate(${computeMapCenter()})`)
 
+    let lastT = 0
     let zoomHandler = zoom()
-        .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr('transform', e.transform.toString()))
+        .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => {
+            $zoomWrapper.attr("transform", e.transform.toString())
+
+            // setPosition calls history.replaceState which is "rate-limited", in the sense that
+            // it throws a SecurityError if called too often. This is transparent to
+            // the user, but it seems better not to trigger an error.
+            let t = Date.now()
+            if (t - lastT >= 200) {
+                mapState.setPosition(
+                    Math.round(e.transform.x * 1000) / 1000,
+                    Math.round(e.transform.y * 1000) / 1000,
+                    Math.round(e.transform.k * 1000) / 1000
+                )
+                lastT = t
+            }
+        })
         .scaleExtent([0.5, 2.5])
         .translateExtent([
-            [-mapWidth * 2, -mapHeight * 2],
-            [mapWidth * 2, mapHeight * 2]
+            [-mapWidth * 1.5, -mapHeight * 1.5],
+            [mapWidth * 1.5, mapHeight * 1.5]
         ])
+
+    $map.transition().duration(500).call(
+        zoomHandler.transform,
+        zoomIdentity.translate(mapState.position[0], mapState.position[1]).scale(mapState.position[2])
+    )
     $map.call(zoomHandler)
 
     window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
     window.zoomOut = () => zoomHandler.scaleBy($map, 0.8)
-
-    window.addEventListener('resize', () => {
-        mapWidth = $map.node()!.clientWidth
-        mapHeight = $map.node()!.clientHeight
-        let mapCenter = computeMapCenter()
-
-        $centerWrapper.attr('transform', `translate(${mapCenter})`)
-
-        zoomHandler.translateTo($map, mapCenter[0], mapCenter[1])
-        zoomHandler.translateExtent([
-            [-mapWidth * 0.5, -mapHeight * 0.5],
-            [mapWidth * 1.5, mapHeight * 1.5]
-        ])
-    })
 
     let nodes: ProcessedNode[] = window.nodes as ProcessedNode[]
     let sortedNodes: ProcessedNode[] = []
@@ -54,20 +146,19 @@ try {
     for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i]
 
-        let el = document.querySelector(`[data-vertex="${node.id}"]`) as SVGElement | null
+        let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
         if (!el) {
-            throw new Error(`Vertex with id ${node.id} has no corresponding element in the DOM`)
+            throw new Error(`Node with id ${node.id} has no corresponding element in the DOM`)
         }
         node.el = el
 
         let bounds: DOMRect
         // We set the <foreignObject> with a height of 100% and a w of 100%
         // because we don't want to compute the size of the elements server-side
-        // but this means that if we do vertex.el.getBoundingClientRect()
-        // we get the wrong bounds.
+        // but this means that node.el.getBoundingClientRect() returns the wrong bounds.
         if (node.el instanceof SVGForeignObjectElement) {
             if (node.el.childElementCount !== 1) {
-                throw new Error("It is expected that the foreignObject representing the vertex has a single child to compute its real bounding box, not the advertised (100%, 100%)")
+                throw new Error("It is expected that the foreignObject representing the node has a single child to compute its real bounding box, not the advertised (100%, 100%)")
             }
 
             bounds = node.el.firstElementChild!.getBoundingClientRect()
@@ -165,18 +256,4 @@ try {
     switchAppState('error')
 }
 
-function switchAppState(newState: AppState): void {
-    document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
-        let isActive = newState === state.dataset.state
 
-        state.ariaHidden = isActive ? "false" : "true"
-        if (isActive) {
-            state.classList.add('state-active')
-            state.classList.remove('state-inactive')
-        } else {
-            state.classList.add('state-inactive')
-            state.classList.remove('state-active')
-        }
-    })
-
-}

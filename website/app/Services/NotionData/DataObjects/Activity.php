@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\NotionData;
+namespace App\Services\NotionData\DataObjects;
 
 use App\Services\NotionData\Enums\NotionColor;
 use Notion\Databases\Properties\SelectOption;
