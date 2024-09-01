@@ -17,6 +17,25 @@ function showAppState(newState: AppState): void {
     })
 }
 
+function showError(message: string, err: unknown) {
+    const elStateContainer = document.querySelector("[data-state='error']")
+    if (!elStateContainer) {
+        throw new Error("No error state container found")
+    }
+
+    let reason = elStateContainer.querySelector('.reason') as HTMLParagraphElement
+    let debug = elStateContainer.querySelector('.debug') as HTMLPreElement
+
+    if (!IN_PRODUCTION) {
+        debug.hidden = false
+        debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
+    }
+
+    reason.innerHTML = message
+
+    showAppState('error')
+}
+
 window.persistedMapState = new MapStateStore()
 window.persistedMapState.sync()
 
@@ -101,14 +120,13 @@ document.querySelectorAll('button[data-entry-url]').forEach((el: HTMLButtonEleme
                     window.persistedMapState.resetFocusedEntry()
                 })
             })
-            .catch((err: unknown) => {
-                console.log(err);
-            })
+            .catch((err: unknown) => showError('An error occurred while loading the entry. Please try again later.', err))
             .finally(() => {
                 elEntryLoader.classList.remove('loading-entry')
             })
     })
 })
+
 
 
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
@@ -265,24 +283,10 @@ try {
 
     console.error(err)
 
-    const elStateContainer = document.querySelector("[data-state='error']")
-    if (!elStateContainer) {
-        throw new Error("No error state container found")
-    }
-
-    let reason = elStateContainer.querySelector('.reason') as HTMLParagraphElement
-    let reloadButton = elStateContainer.querySelector('.reload-button') as HTMLButtonElement
-    let debug = elStateContainer.querySelector('.debug') as HTMLPreElement
-
-    if (!IN_PRODUCTION) {
-        debug.hidden = false
-        debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
-    }
-
-    reason.innerHTML = err.message
-    reloadButton.hidden = false
-
-    showAppState('error')
+    showError(
+        'An error occurred while loading the map. Please try again later.',
+        err
+    )
 }
 
 
