@@ -127,7 +127,12 @@ document.querySelectorAll('button[data-entry-url]').forEach((el: HTMLButtonEleme
     })
 })
 
-
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+        elEntryWrapper.innerHTML = ''
+        window.persistedMapState.resetFocusedEntry()
+    }
+})
 
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
     el.addEventListener('mouseenter', (e: MouseEvent) => highlightEntriesWithSum(+el.dataset.sum))
