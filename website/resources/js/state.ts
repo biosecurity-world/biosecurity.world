@@ -118,7 +118,7 @@ export default class PersistentState {
 }
 
 export class PersistentMapState {
-    position: [number, number, number] | null = null
+    position: [number, number, number] = [0, 0, 1]
     focusedEntry: [number, number] | null = null
 
     setPosition(x: number, y: number, k: number) {

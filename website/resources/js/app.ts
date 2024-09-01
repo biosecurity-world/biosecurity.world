@@ -62,8 +62,6 @@ document.querySelectorAll("input[name='focus']").forEach((el: HTMLInputElement) 
 // with the UI state for all the tracked element above.
 filters.sync()
 
-
-
 let elEntrygroupContainer = document.getElementById('entrygroups')
 let elsEntryButtons = document.querySelectorAll('button[data-sum]')
 function highlightEntriesWithSum(sum: number) {
@@ -130,9 +128,7 @@ try {
 
     $map.transition().duration(500).call(
         zoomHandler.transform,
-        mapState.position !== null
-            ? zoomIdentity.translate(mapState.position[0], mapState.position[1]).scale(mapState.position[2])
-            : zoomIdentity
+        zoomIdentity.translate(mapState.position[0], mapState.position[1]).scale(mapState.position[2])
     )
     $map.call(zoomHandler)
 
