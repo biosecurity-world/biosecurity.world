@@ -2,7 +2,9 @@
 
 namespace App\Services\NotionData\DataObjects;
 
-#[\AllowDynamicProperties]
+use AllowDynamicProperties;
+
+#[AllowDynamicProperties]
 class Entrygroup
 {
     public function __construct(

@@ -46,4 +46,14 @@ class Entry
             default => 'organization',
         };
     }
+
+    public function entryUrl(): string
+    {
+        return sprintf('https://notion.so/%s', $this->id);
+    }
+
+    public function host(): string
+    {
+        return parse_url($this->link, PHP_URL_HOST);
+    }
 }

@@ -141,7 +141,7 @@ elsEntryButtons.forEach((el: HTMLButtonElement) => {
     el.addEventListener('blur', (e: FocusEvent) => removeHighlight())
 })
 
-try {
+// try {
     let $map = select<SVGElement, {}>('#map')
     let $zoomWrapper = select<SVGGElement, {}>('#zoom-wrapper')
     let $centerWrapper = select<SVGGElement, {}>('#center-wrapper')
@@ -281,17 +281,17 @@ try {
     debug().flush($background)
 
     showAppState('success')
-} catch (err: unknown) {
-    if (IN_PRODUCTION) {
-        // Report the error to the server
-    }
-
-    console.error(err)
-
-    showError(
-        'An error occurred while loading the map. Please try again later.',
-        err
-    )
-}
-
-
+// } catch (err: unknown) {
+//     if (IN_PRODUCTION) {
+//         // Report the error to the server
+//     }
+//
+//     console.error(err)
+//
+//     showError(
+//         'An error occurred while loading the map. Please try again later.',
+//         err
+//     )
+// }
+//
+//

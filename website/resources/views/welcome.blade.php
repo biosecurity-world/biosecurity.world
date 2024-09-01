@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
-    <script>window.nodes = @json($nodes);</script>
+    <script>window.nodes = @json($tree->nodes);</script>
 
     @vite('resources/js/app.ts')
     @vite('resources/css/app.css')
@@ -137,7 +137,7 @@
                             map.</p>
 
                         <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
-                            @foreach($activities as $activity)
+                            @foreach($tree->activities() as $activity)
                                 <li>
                                     <input type="checkbox" checked name="activities"
                                            id="activity_{{ IdHash::hash($activity->id) }}"
@@ -230,12 +230,12 @@
                             <g id="background"></g>
 
                             <rect width="8" height="8" rx="2" ry="2"
-                                  data-node="{{ IdHash::hash($root->id) }}"
+                                  data-node="{{ IdHash::hash($tree->root()->id) }}"
                                   class="invisible" aria-hidden="true"
                                   stroke="#e5e7eb" fill="white" />
 
                             <g>
-                                @foreach($categories as $category)
+                                @foreach($tree->categories() as $category)
                                     <foreignObject width="100%" height="100%" class="invisible" aria-hidden="true"
                                                    data-node="{{ IdHash::hash($category->id) }}">
                                         <x-category :category="$category" />
@@ -244,14 +244,14 @@
                             </g>
 
                             <g id="entrygroups">
-                                @foreach($entrygroups as $entrygroup)
+                                @foreach($tree->entrygroups() as $entrygroup)
                                     <foreignObject width="100%"
                                                    height="100%"
                                                    class="invisible"
                                                    aria-hidden="true"
                                                    data-node="{{ IdHash::hash($entrygroup->id) }}">
                                         <x-entrygroup
-                                            :entries="array_map(fn (string $id) => $lookup[$id], $entrygroup->entries)"
+                                            :entries="array_map(fn (string $id) => $tree->lookup[$id], $entrygroup->entries)"
                                             :entrygroup="$entrygroup"
                                         />
                                     </foreignObject>

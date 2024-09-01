@@ -19,4 +19,9 @@ class Node
         public int $id,
         public int $parentId
     ) {}
+
+    public function breadcrumb(Tree $tree): array
+    {
+        return array_map(fn ($id) => $tree->lookup[$id]->label, $this->trail);
+    }
 }

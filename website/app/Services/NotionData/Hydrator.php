@@ -14,6 +14,7 @@ use App\Services\NotionData\Enums\NotionColor;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
+use Illuminate\Validation\ValidationException;
 use Notion\Databases\Database;
 use Notion\Databases\Properties\SelectOption;
 use Notion\Pages\Page;
@@ -39,13 +40,11 @@ class Hydrator
 
     public function __construct(protected Database $database) {}
 
-    /**
-     * @param  Page[]  $pages
-     * @return array<Category|Entry>
-     */
-    public function hydrate(array $pages): array
+    /** @param  Page[]  $pages */
+    public function hydrate(array $pages): HydratedPages
     {
         $hydrated = [];
+        $errors = [];
 
         // These are used to calculate the uniqueness properties in Entry.
         $entryCountMap = [];
@@ -57,23 +56,27 @@ class Hydrator
 
             if (count($parents) === 0) {
                 if (! $isCategory) {
+                    $errors[] = HydrationError::fromString('Only categories can be top-level items.', $page);
+
                     continue;
                 }
 
-                $category = $this->categoryFromPage($page, null);
-                if (is_null($category)) {
-                    continue;
+                try {
+                    $hydrated[] = $this->categoryFromPage($page, null);
+                } catch (ValidationException $e) {
+                    $errors[] = HydrationError::fromValidationException($e, $page);
                 }
-                $hydrated[] = $category;
 
                 continue;
             }
 
-            $item = $isCategory ?
-                $this->categoryFromPage($page, '') :
-                $this->entryFromPage($page, '');
+            try {
+                $item = $isCategory ?
+                    $this->categoryFromPage($page, '') :
+                    $this->entryFromPage($page, '');
+            } catch (ValidationException $e) {
+                $errors[] = HydrationError::fromValidationException($e, $page);
 
-            if (is_null($item)) {
                 continue;
             }
 
@@ -95,7 +98,6 @@ class Hydrator
                     $organizationTypeMap[$item->organizationType]++;
                 }
             }
-
         }
 
         foreach ($hydrated as $item) {
@@ -105,28 +107,24 @@ class Hydrator
             }
         }
 
-        return $hydrated;
+        return new HydratedPages($hydrated, $errors);
     }
 
-    public function categoryFromPage(Page $page, ?string $parentId): ?Category
+    public function categoryFromPage(Page $page, ?string $parentId): Category
     {
-        $validator = Validator::make(
+        $validated = Validator::validate(
             ['title' => $page->title()?->toString()],
             ['title' => ['required', 'string']]
         );
 
-        if ($validator->fails()) {
-            return null;
-        }
-
-        return new Category($page->id, $parentId, $validator->validated()['title']);
+        return new Category($page->id, $parentId, $validated['title']);
     }
 
-    public function entryFromPage(Page $page, string $parentId): ?Entry
+    public function entryFromPage(Page $page, string $parentId): Entry
     {
         $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
 
-        $validator = Validator::make(
+        $data = Validator::validate(
             [
                 'id' => $page->id,
                 'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
@@ -153,11 +151,6 @@ class Hydrator
             ]
         );
 
-        if ($validator->fails()) {
-            return null;
-        }
-
-        $data = $validator->validated();
         $data['parentId'] = $parentId;
         $data['activities'] = array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $data['activities']);
         $data['interventionFocuses'] = array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $data['interventionFocuses']);

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Entry;
 use Illuminate\Support\Facades\Cache;
 use Notion\Databases\Database;
 use Notion\Notion as NotionWrapper;
@@ -34,8 +32,7 @@ class Notion
         return Cache::rememberForever('database', fn () => $this->client->databases()->find($this->databaseId));
     }
 
-    /** @return array<Entry|Category> */
-    public function pages(): array
+    public function pages(): HydratedPages
     {
         $database = $this->database();
 
