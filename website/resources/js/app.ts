@@ -154,7 +154,7 @@ elsEntryButtons.forEach((el: HTMLButtonElement) => {
 
     $centerWrapper.attr('transform', `translate(${computeMapCenter()})`)
 
-    let lastT = 0
+    let lastUpdatedPositionInUrl = 0
     let zoomHandler = zoom()
         .on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => {
             $zoomWrapper.attr("transform", e.transform.toString())
@@ -162,14 +162,14 @@ elsEntryButtons.forEach((el: HTMLButtonElement) => {
             // setPosition calls history.replaceState which is "rate-limited", in the sense that
             // it throws a SecurityError if called too often. This is transparent to
             // the user, but it seems better not to trigger an error.
-            let t = Date.now()
-            if (t - lastT >= 200) {
+            let now = Date.now()
+            if (now - lastUpdatedPositionInUrl >= 200) {
                 window.persistedMapState.setPosition(
                     Math.round(e.transform.x * 1000) / 1000,
                     Math.round(e.transform.y * 1000) / 1000,
                     Math.round(e.transform.k * 1000) / 1000
                 )
-                lastT = t
+                lastUpdatedPositionInUrl = now
             }
         })
         .scaleExtent([0.5, 2.5])
