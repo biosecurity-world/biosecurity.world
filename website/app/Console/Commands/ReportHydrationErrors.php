@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\NotionData\Hydrator;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
-use App\Support\IdHash;
 use Illuminate\Console\Command;
 use Notion\Pages\Page;
 
@@ -23,13 +21,22 @@ class ReportHydrationErrors extends Command
 
         $markdown = "";
 
-        collect($tree->errors)->groupBy('message')->each(function ($errors, $message) use (&$markdown) {
+        $errors = collect($tree->errors)->flatMap(function ($error) {
+            return collect($error->messages)->map(function ($message) use ($error) {
+                return [
+                    'message' => $message,
+                    'page' => $error->page,
+                ];
+            });
+        });
+
+        collect($errors)->groupBy('message')->each(function ($errors, $message) use (&$markdown) {
             $markdown .= "### $message\n";
 
             foreach ($errors as $error) {
-                $page = $error->page;
+                $page = $error['page'];
 
-                $url = "https://www.notion.so/{$page->id}";
+                $url = "https://www.notion.so/" . str_replace('-', '', $page->id);
 
                 $label = $page instanceof Page ? $page->title()->toString() : $page->label;
 
@@ -37,10 +44,9 @@ class ReportHydrationErrors extends Command
             }
         });
 
-        if (app()->isProduction()) {
-            file_put_contents('/home/runner/report.md', $markdown);
-        }  else {
-            echo $markdown;
-        }
+        file_put_contents(
+            app()->isProduction() ? '/home/runner/report.md' : 'report.md',
+            $markdown
+        );
     }
 }

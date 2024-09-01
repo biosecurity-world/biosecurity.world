@@ -132,8 +132,8 @@ class Hydrator
                 'label' => $page->title()?->toString(),
                 'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
                 'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
-                'activities' => $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options,
-                'interventionFocuses' => $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options,
+                'activities' => array_map(fn(SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
+                'interventionFocuses' => array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
                 'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
                 'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
             ],
@@ -144,17 +144,18 @@ class Hydrator
                 'gcbrFocus' => ['required', 'boolean'],
                 'link' => ['required', 'string', 'url'],
                 'organizationType' => ['required', 'string'],
-                ...collect(['activities', 'interventionFocuses', 'location'])->mapWithKeys(fn (string $multiSelect) => [$multiSelect => [
-                    "$multiSelect.*.id" => ['required', 'string'],
-                    "$multiSelect.*.name" => ['required', 'string'],
-                    "$multiSelect.*.color" => ['required', 'string', new In(Arr::pluck(NotionColor::cases(), 'value'))],
-                ]]),
+                "interventionFocuses" => ['required', 'array', function ($attribute, $value, $fail) {
+                    $hasSupertype = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance() || $focus->isTechnical());
+                    if (! $hasSupertype) {
+                        $fail('At least one intervention focus must be either [TECHNICAL] or [GOVERNANCE].');
+                    }
+                }],
+                'activities' => ['required', 'array'],
+                'location' => ['required', 'array']
             ]
         );
 
         $data['parentId'] = $parentId;
-        $data['activities'] = array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $data['activities']);
-        $data['interventionFocuses'] = array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $data['interventionFocuses']);
         $data['location'] = Location::fromNotionOptions($data['location']);
         $data['logo'] = IconSnatch::downloadFrom($data['link']);
 

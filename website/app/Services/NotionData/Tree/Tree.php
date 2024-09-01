@@ -45,7 +45,7 @@ class Tree
         return collect($this->lookup)->filter(fn ($el) => $el instanceof Entrygroup);
     }
 
-    public function activities(): array
+    public function activities(): Collection
     {
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->activities)
@@ -59,7 +59,7 @@ class Tree
             ->values();
     }
 
-    public function interventionFocuses(): array
+    public function interventionFocuses(): Collection
     {
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->interventionFocuses)
