@@ -11,7 +11,7 @@ namespace App\Support;
 class IdHash
 {
     /** @var array<string|int, int> */
-    protected static array $idMap = [];
+    public static array $idMap = [];
 
     protected static int $counter = 0;
 

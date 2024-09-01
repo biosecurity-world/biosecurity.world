@@ -45,7 +45,7 @@ class Tree
         return collect($this->lookup)->filter(fn ($el) => $el instanceof Entrygroup);
     }
 
-    public function activities()
+    public function activities(): array
     {
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->activities)
@@ -59,7 +59,7 @@ class Tree
             ->values();
     }
 
-    public function interventionFocuses()
+    public function interventionFocuses(): array
     {
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->interventionFocuses)
@@ -130,7 +130,7 @@ class Tree
             $node = self::getNode($tree, $id, $parentId);
 
             if (! $parentToChildrenMap->has($id) && $tree->lookup[$id] instanceof Category) {
-                $tree->errors[] = HydrationError::fromString('Category contains 0 entries.', $tree->lookup[$id]->id);
+                $tree->errors[] = HydrationError::fromString('Category contains 0 entries.', $tree->lookup[$id]);
 
                 return [];
             }
@@ -176,7 +176,9 @@ class Tree
             return new Node($id, $parentId);
         }
 
-        $matches = collect($tree->nodes)->where('id', $id)->where(fn (Node $node) => $node->parentId === $parentId);
+        $matches = collect($tree->nodes)
+            ->where('id', $id)
+            ->where(fn (Node $node) => $node->parentId === $parentId);
         if (count($matches) !== 1) {
             throw new Exception("Should not happen: The node represented by the couple (id: `$id`, parentId: `$parentId`) has {$matches->count()} matches while it should have exactly one.");
         }

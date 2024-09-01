@@ -36,13 +36,11 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
 })->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
 
 Route::get('/_/entries', function (Notion $notion) {
-    $pages = $notion->pages();
-    ['nodes' => $nodes, 'lookup' => $lookup] = (new TreeBuilder())->build($pages);
+    $tree = Tree::buildFromPages($notion->pages());
 
-    $links = collect($nodes)
-        ->filter(fn (Node $node) => $lookup[$node->id] instanceof Entrygroup)
-        ->flatMap(function (Node $node) use ($lookup) {
-            $group = $lookup[$node->id];
+    $links = $tree->entrygroups()
+        ->flatMap(function (Node $node) use ($tree) {
+            $group = $tree->lookup[$node->id];
 
             return collect($group->entries)->map(function (int $entryId) use ($node) {
                 return route('entries.show', ['id' => $node->id, 'entryId' => $entryId]);

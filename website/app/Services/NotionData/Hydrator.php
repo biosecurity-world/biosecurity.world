@@ -11,6 +11,7 @@ use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\DataObjects\Location;
 use App\Services\NotionData\Enums\NotionColor;
+use App\Support\IdHash;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
