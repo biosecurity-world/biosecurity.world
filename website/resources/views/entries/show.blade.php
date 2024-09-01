@@ -40,7 +40,7 @@
                 </li>
             </ol>
 
-            <button class="flex items-center duration-300 hover:bg-gray-50 transition p-2 -m-2 rounded-xl group" onclick="document.getElementById('entry-aside').innerHTML = ''; mapState.resetFocusedEntry()">
+            <button class="flex items-center duration-300 hover:bg-gray-50 transition p-2 -m-2 rounded-xl group close-entry">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                      class="size-5 text-gray-700 group-hover:text-emerald-600">
                     <path

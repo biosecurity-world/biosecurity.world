@@ -209,8 +209,8 @@
                 </div>
             </section>
             <section data-state="success" class="app-state state-inactive flex" aria-hidden="true">
-                <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y" id="entry-aside"></div>
-                <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y pointer-events-none flex justify-center border-r bg-gray-50 rounded-r-3xl pt-16 htmx-indicator" id="entry-loader">
+                <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y" id="entry-wrapper"></div>
+                <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y pointer-events-none flex justify-center border-r bg-gray-50 rounded-r-3xl pt-16" id="entry-loader">
                     <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-emerald-600"
                          viewBox="0 0 100 101" fill="none"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

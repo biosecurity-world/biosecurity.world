@@ -31,11 +31,12 @@
     left: -9999px;
 }
 
-#entry-aside:not(:has(> .entry)) {
+
+#entry-wrapper:not(:has(> .entry)) {
     display: none;
 }
 
-#entry-aside:has(> .entry) {
+#entry-wrapper:has(> .entry) {
     display: block;
 }
 
@@ -66,11 +67,12 @@ label[for^="activity_"].inactive {
     color: theme("colors.gray.500") !important;
 }
 
-.htmx-indicator {
+#entry-loader {
     opacity: 0;
     transition: opacity 500ms ease-in;
 }
-.htmx-request.htmx-indicator {
+
+#entry-loader.loading-entry {
     opacity: 1;
 }
 

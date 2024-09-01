@@ -7,11 +7,9 @@
                 @foreach($collection as $k => $entry)
                     <button
                         data-sum="{{ crc32($entry->id) }}"
-                        hx-get="{{ route('entries.show', ['id' => IdHash::hash($entrygroup->id), 'entryId' => IdHash::hash($entry->id)], absolute: false) }}/"
-                        hx-trigger="click"
-                        hx-target="#entry-aside"
-                        hx-indicator="#entry-loader"
-                        onclick="mapState.setFocusedEntry({{ IdHash::hash($entrygroup->id) }}, {{ IdHash::hash($entry->id) }})"
+                        data-entry="{{ IdHash::hash($entry->id) }}"
+                        data-entrygroup="{{ IdHash::hash($entrygroup->id) }}"
+                        data-entry-url="{{ route('entries.show', ['id' => IdHash::hash($entrygroup->id), 'entryId' => IdHash::hash($entry->id)], absolute: false) }}/"
                     >
                         <x-entry-logo :logo="$entry->logo" class="hover:border-emerald-600" />
                     </button>

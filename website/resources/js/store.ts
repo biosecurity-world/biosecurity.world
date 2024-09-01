@@ -1,9 +1,4 @@
-import {IN_PRODUCTION} from "@/utils"
-
-/**
- * A global, non-reactive, persistent state manager.
- */
-export default class PersistentState {
+export default class FiltersStateStore {
     tracked: Record<string, [() => any, (value: any) => void, any]> = {}
 
     /**
@@ -28,8 +23,6 @@ export default class PersistentState {
 
             let [check, apply, defaultValue] = this.tracked[key]
             let value = check()
-
-            console.log(value)
 
             apply(value)
 
@@ -117,7 +110,7 @@ export default class PersistentState {
     }
 }
 
-export class PersistentMapState {
+export class MapStateStore {
     position: [number, number, number] = [0, 0, 1]
     focusedEntry: [number, number] | null = null
 
@@ -138,7 +131,6 @@ export class PersistentMapState {
 
         this.updateFragment()
     }
-
     sync() {
         let loc = new URL(window.location.toString())
 

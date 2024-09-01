@@ -1,13 +1,12 @@
-import 'htmx.org'
 import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
 import {debug, gt, IN_PRODUCTION, lt, PIPI} from "./utils";
 import {ProcessedNode} from "./types";
 import {fitToSector} from "./layout";
-import PersistentState, {PersistentMapState} from "@/state"
+import FiltersStateStore, {MapStateStore} from "@/store"
 
 type AppState = "error" | "success" | "loading"
 
-function switchAppState(newState: AppState): void {
+function showAppState(newState: AppState): void {
     document.querySelectorAll('.app-state').forEach((state: HTMLElement) => {
         let isActive = newState === state.dataset.state
 
@@ -18,14 +17,13 @@ function switchAppState(newState: AppState): void {
     })
 }
 
-const mapState = new PersistentMapState()
-window.mapState = mapState
-mapState.sync()
+window.persistedMapState = new MapStateStore()
+window.persistedMapState.sync()
 
-const filters = new PersistentState()
+const filtersStore = new FiltersStateStore()
 
 // Handle the 'Focus on' filter
-filters.persist('focus', () => (document.querySelector('input[name=focus]:checked') as HTMLInputElement).value, (key: string) => {
+filtersStore.persist('focus', () => (document.querySelector('input[name=focus]:checked') as HTMLInputElement).value, (key: string) => {
     document.querySelector(`input[name=focus][value="${key}"]`)!.setAttribute("checked", "checked")
 }, 'neither')
 
@@ -34,34 +32,34 @@ filters.persist('focus', () => (document.querySelector('input[name=focus]:checke
 document.querySelectorAll("input[name='activities']").forEach((el: HTMLInputElement) => {
     let key =`a[${el.value}]`
 
-    filters.persist(key, () => `${+el.checked}`, (value: string) => {
+    filtersStore.persist(key, () => `${+el.checked}`, (value: string) => {
         el.checked = value === '1'
         document.querySelector(`label[for="${el.id}"]`)!.classList.toggle('inactive', !el.checked)
     }, "1")
 
     el.addEventListener('change', (e: Event) => {
-        filters.syncOnly([key])
+        filtersStore.syncOnly([key])
     })
 })
 
 
 // Handle the 'highlight recently added entries' toggle
 let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
-filters.persist('recent', () => `${+elRecentToggle.checked}`, (value: string) => {
+filtersStore.persist('recent', () => `${+elRecentToggle.checked}`, (value: string) => {
         elRecentToggle.checked = value === '1'
 
         let label = document.querySelector('label[for="recent"]') as HTMLLabelElement
         label.dataset.toggle = elRecentToggle.checked ? 'on' : 'off'
 }, "0")
-elRecentToggle.addEventListener('click', () => filters.syncOnly(["recent"]))
+elRecentToggle.addEventListener('click', () => filtersStore.syncOnly(["recent"]))
 
 document.querySelectorAll("input[name='focus']").forEach((el: HTMLInputElement) => {
-    el.addEventListener('change', () => filters.syncOnly(['focus']))
+    el.addEventListener('change', () => filtersStore.syncOnly(['focus']))
 })
 
 // We synchronize the saved state (from previous visits)
 // with the UI state for all the tracked element above.
-filters.sync()
+filtersStore.sync()
 
 let elEntrygroupContainer = document.getElementById('entrygroups')
 let elsEntryButtons = document.querySelectorAll('button[data-sum]')
@@ -84,6 +82,34 @@ function highlightEntriesWithSum(sum: number) {
 function removeHighlight() {
     elEntrygroupContainer.classList.remove('hovered')
 }
+
+let elEntryLoader = document.getElementById('entry-loader')
+let elEntryWrapper = document.getElementById('entry-wrapper')
+document.querySelectorAll('button[data-entry-url]').forEach((el: HTMLButtonElement) => {
+    el.addEventListener('click', (e: MouseEvent) => {
+        elEntryLoader.classList.add('loading-entry')
+
+        fetch(el.dataset.entryUrl!)
+            .then((response: Response) => response.text())
+            .then((html: string) => {
+                elEntryWrapper.innerHTML = html
+
+                window.persistedMapState.setFocusedEntry(+el.dataset.entrygroup, +el.dataset.entry)
+
+                elEntryWrapper.querySelector('button.close-entry')!.addEventListener('click', (e: MouseEvent) => {
+                    elEntryWrapper.innerHTML = ''
+                    window.persistedMapState.resetFocusedEntry()
+                })
+            })
+            .catch((err: unknown) => {
+                console.log(err);
+            })
+            .finally(() => {
+                elEntryLoader.classList.remove('loading-entry')
+            })
+    })
+})
+
 
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
     el.addEventListener('mouseenter', (e: MouseEvent) => highlightEntriesWithSum(+el.dataset.sum))
@@ -115,7 +141,7 @@ try {
             // the user, but it seems better not to trigger an error.
             let t = Date.now()
             if (t - lastT >= 200) {
-                mapState.setPosition(
+                window.persistedMapState.setPosition(
                     Math.round(e.transform.x * 1000) / 1000,
                     Math.round(e.transform.y * 1000) / 1000,
                     Math.round(e.transform.k * 1000) / 1000
@@ -131,7 +157,10 @@ try {
 
     $map.transition().duration(500).call(
         zoomHandler.transform,
-        zoomIdentity.translate(mapState.position[0], mapState.position[1]).scale(mapState.position[2])
+        zoomIdentity.translate(
+            window.persistedMapState.position[0],
+            window.persistedMapState.position[1]
+        ).scale(window.persistedMapState.position[2])
     )
     $map.call(zoomHandler)
 
@@ -228,7 +257,7 @@ try {
 
     debug().flush($background)
 
-    switchAppState('success')
+    showAppState('success')
 } catch (err: unknown) {
     if (IN_PRODUCTION) {
         // Report the error to the server
@@ -253,7 +282,7 @@ try {
     reason.innerHTML = err.message
     reloadButton.hidden = false
 
-    switchAppState('error')
+    showAppState('error')
 }
 
 
