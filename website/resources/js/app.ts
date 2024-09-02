@@ -113,6 +113,9 @@ document.querySelectorAll('button[data-entry-url]').forEach((el: HTMLButtonEleme
             .then((html: string) => {
                 elEntryWrapper.innerHTML = html
 
+                console.log(html);
+                return;
+
                 window.persistedMapState.setFocusedEntry(+el.dataset.entrygroup, +el.dataset.entry)
 
                 elEntryWrapper.querySelector('button.close-entry')!.addEventListener('click', (e: MouseEvent) => {

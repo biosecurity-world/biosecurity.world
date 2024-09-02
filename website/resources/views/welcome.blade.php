@@ -230,7 +230,7 @@
                             <g id="background"></g>
 
                             <rect width="8" height="8" rx="2" ry="2"
-                                  data-node="{{ IdHash::hash($tree->root()->id) }}"
+                                  data-node="{{ $tree->rootNodeId }}"
                                   class="invisible" aria-hidden="true"
                                   stroke="#e5e7eb" fill="white" />
 

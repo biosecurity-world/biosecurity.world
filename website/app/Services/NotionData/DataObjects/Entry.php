@@ -47,13 +47,19 @@ class Entry
         };
     }
 
-    public function entryUrl(): string
+    public function notionUrl(): string
     {
         return sprintf('https://notion.so/%s', $this->id);
     }
 
     public function host(): string
     {
-        return parse_url($this->link, PHP_URL_HOST);
+        $host = parse_url($this->link, PHP_URL_HOST);
+
+        if (! is_string($host)) {
+            throw new \RuntimeException('Should not happen: could not parse host in entry link but entries are supposed to be always validated');
+        }
+
+        return $host;
     }
 }

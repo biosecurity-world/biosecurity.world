@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\Tree;
 
+use App\Services\NotionData\DataObjects\Category;
+
 class Node
 {
     public int $depth;
@@ -20,8 +22,16 @@ class Node
         public int $parentId
     ) {}
 
-    public function breadcrumb(Tree $tree): array
+    /** @return array<string> */
+    public function breadcrumbs(Tree $tree): array
     {
-        return array_map(fn ($id) => $tree->lookup[$id]->label, $this->trail);
+        return array_map(function ($id) use ($tree) {
+            $page = $tree->lookup[$id];
+            if (! $page instanceof Category) {
+                throw new \RuntimeException('Should not happen: a node in the trail is not a category');
+            }
+
+            return $page->label;
+        }, $this->trail);
     }
 }

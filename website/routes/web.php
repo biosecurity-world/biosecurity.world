@@ -25,12 +25,12 @@ Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
     $tree = Tree::buildFromPages($notion->pages());
 
-    $entrygroup = $tree->getNodeById($id);
-    abort_if(! $entrygroup, 404);
+    abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
 
     return view('entries.show', [
+        'entrygroup' => $tree->lookup[$id],
         'entry' => $tree->lookup[$entryId],
-        'breadcrumb' => $entrygroup->breadcrumb($tree),
+        'breadcrumbs' => $tree->getNodeById($id)->breadcrumbs($tree),
     ]);
 })->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
 

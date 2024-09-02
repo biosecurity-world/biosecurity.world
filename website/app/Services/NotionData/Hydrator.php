@@ -121,36 +121,34 @@ class Hydrator
     public function entryFromPage(Page $page, string $parentId): Entry
     {
         $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
+        $rawPage = [
+            'id' => $page->id,
+            'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
+            'label' => $page->title()?->toString(),
+            'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
+            'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
+            'activities' => array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
+            'interventionFocuses' => array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
+            'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+            'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
+        ];
+        $data = Validator::make($rawPage, [
+            'id' => ['required', 'string'],
+            'label' => ['required', 'string'],
+            'description' => ['required'],
+            'gcbrFocus' => ['required', 'boolean'],
+            'link' => ['required', 'string', 'url'],
+            'organizationType' => ['required', 'string'],
+            'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {
+                if (collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance() || $focus->isTechnical())) {
+                    return;
+                }
 
-        $data = Validator::validate(
-            [
-                'id' => $page->id,
-                'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
-                'label' => $page->title()?->toString(),
-                'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
-                'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
-                'activities' => array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
-                'interventionFocuses' => array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
-                'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
-                'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
-            ],
-            [
-                'id' => ['required', 'string'],
-                'label' => ['required', 'string'],
-                'description' => ['required'],
-                'gcbrFocus' => ['required', 'boolean'],
-                'link' => ['required', 'string', 'url'],
-                'organizationType' => ['required', 'string'],
-                'interventionFocuses' => ['required', 'array', function ($attribute, $value, $fail) {
-                    $hasSupertype = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance() || $focus->isTechnical());
-                    if (! $hasSupertype) {
-                        $fail('At least one intervention focus must be either [TECHNICAL] or [GOVERNANCE].');
-                    }
-                }],
-                'activities' => ['required', 'array'],
-                'location' => ['required', 'array'],
-            ]
-        );
+                $fail('At least one intervention focus must be either [TECHNICAL] or [GOVERNANCE].');
+            }],
+            'activities' => ['required', 'array'],
+            'location' => ['required', 'array'],
+        ])->validate();
 
         $data['parentId'] = $parentId;
         $data['location'] = Location::fromNotionOptions($data['location']);
