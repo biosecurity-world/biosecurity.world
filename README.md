@@ -22,6 +22,7 @@
 - [ ] [hour] Privacy policy (not needed for now)
 - [ ] Expand the map+filter to full screen once scrolling 
 - [ ] Easy way to reset the filters (button?) 
+- [ ] Have a "strict mode" for hydration where you run checks that take longer (like active_url) 
 
 ### Fun ideas
 - RSS feed
