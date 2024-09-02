@@ -35,8 +35,7 @@ class ReportHydrationErrors extends Command
 
             foreach ($errors as $error) {
                 $page = $error['page'];
-
-                $url = "https://www.notion.so/" . str_replace('-', '', $page->id)7;
+                $url = "https://www.notion.so/" . str_replace('-', '', $page->id);
 
                 $label = $page instanceof Page ? $page->title()->toString() : $page->label;
 
