@@ -6,6 +6,7 @@ export type Node = {
     depth: number
     trail: number[]
     parentId: number
+    filtered: boolean
 }
 
 export type ProcessedNode = {

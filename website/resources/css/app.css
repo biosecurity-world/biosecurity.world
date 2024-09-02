@@ -26,38 +26,38 @@
 }
 
 .invisible {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
 }
 
-#entry-aside:not(:has(> .entry)) {
+#entry-wrapper:not(:has(> .entry)) {
     display: none;
 }
 
-#entry-aside:has(> .entry) {
+#entry-wrapper:has(> .entry) {
     display: block;
 }
 
 /** Style the 'focus on' filter **/
-input[name="focus"]:checked + label > .check {
+input[name^="lens_"]:checked + label > .check {
     opacity: 1;
 }
 
-input[name="focus"]:not(:checked) + label > .check {
+input[name^="lens_"]:not(:checked) + label > .check {
     opacity: 0;
 }
 
-input[name="focus"]:checked + label[for="focus_technical"] {
+input[name^="lens_"]:checked + label[for="lens_technical"] {
     @apply border-technical;
 }
 
-input[name="focus"]:checked + label[for="focus_governance"] {
+input[name^="lens_"]:checked + label[for="lens_governance"] {
     @apply border-governance;
 }
 
-input[name="focus"]:checked + label[for="focus_technical"] > .at-technical,
-input[name="focus"]:checked + label[for="focus_governance"] > .at-governance {
+input[name^="lens_"]:checked + label[for^="lens_"] > .at-technical,
+input[name^="lens_"]:checked + label[for^="lens_"] > .at-governance {
     color: white;
 }
 
@@ -66,11 +66,12 @@ label[for^="activity_"].inactive {
     color: theme("colors.gray.500") !important;
 }
 
-.htmx-indicator {
+#entry-loader {
     opacity: 0;
     transition: opacity 500ms ease-in;
 }
-.htmx-request.htmx-indicator {
+
+#entry-loader.loading-entry {
     opacity: 1;
 }
 

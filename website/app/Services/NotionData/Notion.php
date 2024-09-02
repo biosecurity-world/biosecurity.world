@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Entry;
 use Illuminate\Support\Facades\Cache;
 use Notion\Databases\Database;
 use Notion\Notion as NotionWrapper;
@@ -34,16 +32,12 @@ class Notion
         return Cache::rememberForever('database', fn () => $this->client->databases()->find($this->databaseId));
     }
 
-    /** @return array<Entry|Category> */
-    public function pages(): array
+    public function pages(): HydratedPages
     {
         $database = $this->database();
 
         /** @var Page[] $pages */
         $pages = Cache::rememberForever('pages', fn () => $this->client->databases()->queryAllPages($database));
-
-        // sort pages by last edited time
-        usort($pages, fn (Page $a, Page $b) => $a->lastEditedTime <=> $b->lastEditedTime);
 
         return (new Hydrator($database))->hydrate(
             array_filter($pages, fn (Page $page) => ! $page->archived)

@@ -11,7 +11,7 @@ This is a document intended for current and future developers.
 
   Activity types icons are matched to an icon name based on their **exact**
   name (see [Notion.php](app/Services/NotionData/Notion.php)), then the icon name is matched to the
-  actual icon (see [activity-type-icon.blade.php](resources/views/components/activity-type-icon.blade.php)). 
+  actual icon (see [activity-type-icon.blade.php](resources/views/components/activity-icon.blade.php)). 
 
 ### Architectural choices
 

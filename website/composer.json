@@ -11,6 +11,7 @@
         "spatie/laravel-export": "^1.1"
     },
     "require-dev": {
+        "brianium/paratest": "^7.5",
         "fakerphp/faker": "^1.23",
         "itsgoingd/clockwork": "^5.2",
         "larastan/larastan": "^2.0",
@@ -33,7 +34,8 @@
         "lint": "pint",
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi --memory-limit=-1",
-        "test:unit": "phpunit --order-by=defects",
+        "test:unit": "phpunit --order-by=defects --testsuite Unit",
+        "test:e2e": "phpunit --order-by=defects --testsuite Browser",
         "test": [
             "@test:lint",
             "@test:types",

@@ -1,4 +1,3 @@
-@php use App\Support\IdHash; @endphp
 <div class="relative w-fit cursor-pointer rounded-md border bg-white p-2 space-y-2 pointer-events-auto">
     @foreach($entries as $name => $collection)
         <div>
@@ -7,11 +6,9 @@
                 @foreach($collection as $k => $entry)
                     <button
                         data-sum="{{ crc32($entry->id) }}"
-                        hx-get="{{ route('entries.show', ['id' => IdHash::hash($entrygroup->id), 'entryId' => IdHash::hash($entry->id)], absolute: false) }}/"
-                        hx-trigger="click"
-                        hx-target="#entry-aside"
-                        hx-indicator="#entry-loader"
-                        onclick="mapState.setFocusedEntry({{ IdHash::hash($entrygroup->id) }}, {{ IdHash::hash($entry->id) }})"
+                        data-entry="{{ $entry->id }}"
+                        data-entrygroup="{{ $entrygroup->id }}"
+                        data-entry-url="{{ route('entries.show', ['id' => $entrygroup->id, 'entryId' => $entry->id], absolute: false) }}/"
                     >
                         <x-entry-logo :logo="$entry->logo" class="hover:border-emerald-600" />
                     </button>

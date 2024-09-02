@@ -3,13 +3,20 @@
 namespace App\Services\NotionData\DataObjects;
 
 use App\Services\NotionData\Enums\NotionColor;
+use App\Support\IdHash;
 use Notion\Databases\Properties\SelectOption;
 
-#[\AllowDynamicProperties]
 class InterventionFocus
 {
+    /** @var array<string> */
+    protected static array $seen = [];
+
+    public const string TECHNICAL_FOCUS_ID = '|tSq';
+
+    public const string GOVERNANCE_FOCUS_ID = 'rBTY';
+
     public function __construct(
-        public string $id,
+        public int $id,
         public string $label,
         public NotionColor $color
     ) {}
@@ -20,20 +27,27 @@ class InterventionFocus
             throw new \InvalidArgumentException('Select for the activity is missing either an id or a name');
         }
 
-        return new self(
-            $opt->id,
-            $opt->name,
-            NotionColor::from($opt->color?->value ?? NotionColor::Default->value)
-        );
+        $id = IdHash::hash($opt->id);
+
+        if (! in_array($id, self::$seen)) {
+            self::$seen[] = $opt->id;
+        }
+
+        return new self($id, $opt->name, NotionColor::from($opt->color?->value ?? NotionColor::Default->value));
+    }
+
+    public static function totalSeen(): int
+    {
+        return count(self::$seen);
     }
 
     public function isTechnical(): bool
     {
-        return $this->label === '[TECHNICAL]';
+        return IdHash::reverse($this->id) === self::TECHNICAL_FOCUS_ID;
     }
 
     public function isGovernance(): bool
     {
-        return $this->label === '[GOVERNANCE]';
+        return IdHash::reverse($this->id) === self::GOVERNANCE_FOCUS_ID;
     }
 }

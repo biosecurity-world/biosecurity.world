@@ -1,0 +1,47 @@
+name: report-hydration-errors
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull request number'
+        required: false
+jobs:
+  report-hydration-errors:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v27
+
+      - name: Cache composer packages
+        id: cache-composer
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-composer-packages
+        with:
+          path: ~/.composer-store
+          key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+      - name: Install PHP dependencies
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
+        env:
+          COMPOSER_HOME: ~/.composer-store
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Report hydration errors
+        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan app:report-hydration-errors /home/runner/report.md
+        env:
+          NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      - name: Comment changes
+        uses: thollander/actions-comment-pull-request@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filePath: /home/runner/report.md
+          pr_number: ${{ github.event.number }}
+          comment_tag: "Hydration Errors"

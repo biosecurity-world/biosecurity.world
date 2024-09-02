@@ -1,10 +1,6 @@
-import {IN_PRODUCTION} from "@/utils"
-
-/**
- * A global, non-reactive, persistent state manager.
- */
-export default class PersistentState {
-    tracked: Record<string, [() => any, (value: any) => void, any]> = {}
+export default class FiltersStateStore {
+    private tracked: Record<string, [() => any, (value: any) => void, any]> = {}
+    private cb: () => void;
 
     /**
      * @param key A unique key for this state used in the query string and local storage.
@@ -21,6 +17,7 @@ export default class PersistentState {
     }
 
     syncOnly(keys: string[]): this {
+        let changed = false
         for (const key of keys) {
             if (!this.tracked[key]) {
                 throw new Error(`Key [${key}] is not being tracked.`)
@@ -28,8 +25,6 @@ export default class PersistentState {
 
             let [check, apply, defaultValue] = this.tracked[key]
             let value = check()
-
-            console.log(value)
 
             apply(value)
 
@@ -39,10 +34,18 @@ export default class PersistentState {
 
             if (defaultValue !== null && value === defaultValue) {
                 this.clearState(key)
+                if (this.cb) {
+                    this.cb()
+                }
                 continue;
             }
 
             this.setState(key, value)
+            changed = true
+        }
+
+        if (changed && this.cb) {
+            this.cb()
         }
 
         return this
@@ -54,21 +57,29 @@ export default class PersistentState {
         return this
     }
 
-    getState(key: string, fallback: string|null = null) {
+    getState(key: string) {
+        if (!this.tracked[key]) {
+            throw new Error(`Key [${key}] is being accessed but is not being tracked.`)
+        }
+
         let loc = new URL(window.location.toString())
         if (loc.searchParams.has(key)) {
             return loc.searchParams.get(key)
         }
 
         let potentialValue = this.getInLocalStorage(key)
-        if (key !== null) {
+        if (potentialValue !== null) {
             return potentialValue
         }
 
-        return fallback
+        return this.tracked[key][2]
     }
 
     setState(key: string, value: string) {
+        if (!this.tracked[key]) {
+            throw new Error(`Key [${key}] is being set but is not being tracked.`)
+        }
+
         let loc = new URL(window.location.toString())
         if (loc.searchParams.get(key) !== value) {
             loc.searchParams.delete(key)
@@ -87,6 +98,30 @@ export default class PersistentState {
         return this;
     }
 
+    reset() {
+        let loc = new URL(window.location.toString())
+        for (const key of Object.keys(this.tracked)) {
+            if (loc.searchParams.has(key)) {
+                loc.searchParams.delete(key)
+            }
+
+            this.removeInLocalStorage(key)
+        }
+
+        window.history.pushState({}, '', loc.toString())
+
+        for (const key of Object.keys(this.tracked)) {
+            let [check, apply, defaultValue] = this.tracked[key]
+            apply(defaultValue)
+        }
+
+        this.sync()
+
+        if (this.cb) {
+            this.cb()
+        }
+    }
+
     clearState(key: string) {
         let loc = new URL(window.location.toString())
         if (loc.searchParams.has(key)) {
@@ -100,24 +135,30 @@ export default class PersistentState {
         return this;
     }
 
-    getInLocalStorage(key: string) {
+    private getInLocalStorage(key: string) {
         return JSON.parse(localStorage.getItem(`state-${key}`))?.value || null
     }
 
-    setInLocalStorage(key: string, value: any) {
+    private setInLocalStorage(key: string, value: any) {
         localStorage.setItem(`state-${key}`, JSON.stringify({value}))
 
         return this;
     }
 
-    removeInLocalStorage(key: string) {
+    private removeInLocalStorage(key: string) {
         localStorage.removeItem(`state-${key}`)
 
         return this;
     }
+
+    onChange(cb: () => void) {
+        this.cb = cb
+
+        return this
+    }
 }
 
-export class PersistentMapState {
+export class MapStateStore {
     position: [number, number, number] = [0, 0, 1]
     focusedEntry: [number, number] | null = null
 
@@ -138,7 +179,6 @@ export class PersistentMapState {
 
         this.updateFragment()
     }
-
     sync() {
         let loc = new URL(window.location.toString())
 

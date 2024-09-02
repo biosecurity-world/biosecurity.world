@@ -11,7 +11,7 @@ namespace App\Support;
 class IdHash
 {
     /** @var array<string|int, int> */
-    protected static array $idMap = [];
+    public static array $idMap = [];
 
     protected static int $counter = 0;
 
@@ -37,5 +37,20 @@ class IdHash
         }
 
         return self::$idMap[$id];
+    }
+
+    public static function reverse(int|string $id): string
+    {
+        if (is_string($id)) {
+            throw new \RuntimeException('You are trying to reverse a string. Was it already reversed?');
+        }
+
+        $reversed = array_search($id, self::$idMap);
+
+        if (! is_string($reversed)) {
+            throw new \RuntimeException('Could not find the original ID for the hashed ID.');
+        }
+
+        return $reversed;
     }
 }

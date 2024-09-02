@@ -1,6 +1,8 @@
 <?php
 
-namespace Tests;
+namespace Tests\Browser;
+
+use Tests\TestCase;
 
 class TreeRenderingVisualTest extends TestCase
 {

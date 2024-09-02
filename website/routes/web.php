@@ -2,46 +2,31 @@
 
 declare(strict_types=1);
 
-use App\Services\NotionData\DataObjects\Category;
+use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\DataObjects\Root;
 use App\Services\NotionData\Notion;
-use App\Services\NotionData\Tree\Node;
-use App\Services\NotionData\Tree\TreeBuilder;
+use App\Services\NotionData\Tree\Tree;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (Notion $notion) {
-    $pages = $notion->pages();
-    $tree = (new TreeBuilder())->build($pages);
-    $lookup = collect($tree['lookup']);
-
-    $root = $lookup->first(fn ($el) => $el instanceof Root);
-    $categories = $lookup->filter(fn ($el) => $el instanceof Category);
-    $entries = $lookup->filter(fn ($el) => $el instanceof Entry);
-    $entrygroups = $lookup->filter(fn ($el) => $el instanceof Entrygroup);
+    $tree = Tree::buildFromPages($notion->pages());
 
     return view('welcome', [
-        'nodes' => $tree['nodes'],
-        'lookup' => $lookup,
-        'root' => $root,
-        'categories' => $categories,
-        'entries' => $entries,
-        'entrygroups' => $entrygroups,
-        'activities' => $entries->flatMap(fn (Entry $e) => $e->activities)->groupBy('id')->map(function ($group) {
-            $activity = $group->first();
-            $activity->total = $group->count();
-
-            return $activity;
-        })->values(),
-        'interventionFocus' => $entries->flatMap(fn (Entry $e) => $e->interventionFocuses)->groupBy('id')->map(function ($group) {
-            $focus = $group->first();
-            $focus->total = $group->count();
-
-            return $focus;
-        })->values(),
+        'tree' => $tree,
+        'activitiesBitmask' => Activity::$seen,
+        'lookup' => [
+            'entries' => $tree->entries()->map(fn (Entry $entry) => [
+                'id' => $entry->id,
+                'activities' => $entry->getActivityBitmask(Activity::$seen),
+                'lenses' => $entry->lens(),
+            ]),
+            'entrygroups' => $tree->entrygroups(),
+        ],
+        'activityIds' => Activity::$seen,
         'databaseUrl' => $notion->databaseUrl(),
-        'lastEditedAt' => \Carbon\Carbon::instance($notion->lastEditedAt()),
+        'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
     ]);
 })->name('welcome');
 
@@ -50,42 +35,31 @@ Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 
 Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
-    $pages = $notion->pages();
-    $tree = (new TreeBuilder())->build($pages);
-    $lookup = $tree['lookup'];
+    $tree = Tree::buildFromPages($notion->pages());
 
-    $entrygroup = collect($tree['nodes'])->firstWhere('id', $id);
-    abort_if(! $entrygroup instanceof Node, 404);
-
-    /** @var Entry $entry */
-    $entry = $lookup[$entryId];
+    abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
 
     return view('entries.show', [
-        'entry' => $entry,
-        'host' => parse_url($entry->link, PHP_URL_HOST),
-        'notionUrl' => sprintf('https://notion.so/%s', $entry->id),
-        'breadcrumbs' => array_map(fn ($id) => $lookup[$id]->label, $entrygroup->trail),
+        'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
+        'entrygroup' => $tree->lookup[$id],
+        'entry' => $tree->lookup[$entryId],
+        'breadcrumbs' => $tree->getNodeById($id)->breadcrumbs($tree),
     ]);
 })->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
 
 Route::get('/_/entries', function (Notion $notion) {
-    $pages = $notion->pages();
-    ['nodes' => $nodes, 'lookup' => $lookup] = (new TreeBuilder())->build($pages);
+    $tree = Tree::buildFromPages($notion->pages());
 
-    $links = collect($nodes)
-        ->filter(fn (Node $node) => $lookup[$node->id] instanceof Entrygroup)
-        ->flatMap(function (Node $node) use ($lookup) {
-            $group = $lookup[$node->id];
-
-            return collect($group->entries)->map(function (int $entryId) use ($node) {
-                return route('entries.show', ['id' => $node->id, 'entryId' => $entryId]);
-            });
-        });
+    $links = $tree
+        ->entrygroups()
+        ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
+            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+        ));
 
     return view('entries.index', ['links' => $links]);
 });
 
-if (! app()->isProduction()) {
+if (app()->runningUnitTests()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
     // the code for the website which includes the code for tests the tree

@@ -7,9 +7,13 @@
          cacheResult="true"
 >
     <testsuites>
-        <testsuite name="All">
-            <directory>tests</directory>
+        <testsuite name="Browser">
+            <directory>tests/Browser</directory>
         </testsuite>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+
     </testsuites>
     <source>
         <include>
