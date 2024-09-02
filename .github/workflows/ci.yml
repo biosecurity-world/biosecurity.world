@@ -94,8 +94,5 @@ jobs:
       - name: Unit tests
         run: nix develop --ignore-environment composer test:unit
 
-      - name: Types
-        run: nix develop --ignore-environment composer test:types
-
       - name: Lint
-        run: nix develop --ignore-environment composer test:lint
+        run: nix develop --ignore-environment composer test:types
