@@ -22,6 +22,7 @@ class ReportHydrationErrors extends Command
         $tree = Tree::buildFromPages($pages);
 
         $report = '';
+        $reported = 0;
 
         collect($tree->errors)
             ->flatMap(
@@ -32,7 +33,7 @@ class ReportHydrationErrors extends Command
             )
             ->groupBy(fn (HydrationError $error) => $error->messages[0])
             ->map(fn (Collection $errors) => $errors->map->page)
-            ->each(function (Collection $pages, string $errorMessage) use (&$report) {
+            ->each(function (Collection $pages, string $errorMessage) use (&$report, &$reported) {
                 $report .= "### $errorMessage\n";
 
                 foreach ($pages as $page) {
@@ -44,6 +45,7 @@ class ReportHydrationErrors extends Command
                     }
 
                     $report .= "- [$label]($url)\n";
+                    $reported++;
                 }
             });
 
@@ -58,5 +60,7 @@ a PR/Issue number. I can also run it and share the report.
 $report
 MARKDOWN
         );
+
+        $this->outputComponents()->info("Reported $reported errors in $path.");
     }
 }
