@@ -1,7 +1,6 @@
 # biosecurity.world
 
 ### me
-- [ ] [hour] Plumbing: filter
 - [ ] [hour] Plumbing: search
 - [ ] [hour] Port SVG support to Logosnatch (fixes all the 'logo not found but logo exists' issues)
   that entry; same thing for entries)
