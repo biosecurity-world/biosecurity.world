@@ -6,6 +6,9 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
 
     steps:
       - uses: actions/checkout@v2
@@ -64,9 +67,12 @@ jobs:
         run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
 
       - name: Run end-to-end tests
-        run: nix develop --ignore-environment --command vendor/bin/phpunit --testsuite=Browser
+        run: nix develop --ignore-environment --command composer test:e2e
   formats:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
     steps:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v27
