@@ -1,17 +1,17 @@
 # biosecurity.world
 
 ### me
+- [ ] [hours] Good mobile experience
+- [ ] [????] Safari Fun
 - [ ] [hour] Plumbing: search
 - [ ] [hour] Port SVG support to Logosnatch (fixes all the 'logo not found but logo exists' issues)
   that entry; same thing for entries)
 - [ ] [hour] Implement the 'Report error' button on the entry page
 - [ ] [hour] color the tree so that it's easy to see the different levels (alternate colors for depth=1? is easiest, see
   then)
-- [ ] [hour] Implement the alternative interactions for mobile (i.e. hover on an entry to highlight them doesn't work)
 - [ ] [minutes] Highlight the path to the highlighted entry
 - [ ] [minutes] Optimize Logosnatch's size picking algorithm
 - [ ] [minutes] Make the edges nicer
-- [ ] [minutes] Mobile support (move the filter sidebar to a bottom bar that pops out, wrap the navigation bar)
 - [ ] [minute] Link Give feedback to feedback form for now
 
 ### next sprint (ideas)
