@@ -9,7 +9,7 @@ use Notion\Pages\Page;
 
 class ReportHydrationErrors extends Command
 {
-    protected $signature = 'app:report-hydration-errors';
+    protected $signature = 'app:report-hydration-errors {path}';
 
     /**
      * Execute the console command.
@@ -36,7 +36,7 @@ class ReportHydrationErrors extends Command
             foreach ($errors as $error) {
                 $page = $error['page'];
 
-                $url = "https://www.notion.so/" . str_replace('-', '', $page->id);
+                $url = "https://www.notion.so/" . str_replace('-', '', $page->id)7;
 
                 $label = $page instanceof Page ? $page->title()->toString() : $page->label;
 
@@ -44,9 +44,18 @@ class ReportHydrationErrors extends Command
             }
         });
 
-        file_put_contents(
-            app()->isProduction() ? '/home/runner/report.md' : 'report.md',
-            $markdown
-        );
+        $markdown = <<<MARKDOWN
+# Report: possible problems with the data
+These problems don't stop the site from working, but entries with errors are ignored and will not be displayed.
+
+It can be re-run although the process is a bit tedious, you have to manually "dispatch" a run in the "Actions" tab and provide
+a PR/Issue number. I can also run it and share the report.
+
+$markdown
+MARKDOWN;
+
+
+        $path = $this->argument('path') ?? 'report.md';
+        file_put_contents($path, $markdown);
     }
 }
