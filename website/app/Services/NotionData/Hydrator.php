@@ -10,9 +10,6 @@ use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\DataObjects\Location;
-use App\Services\NotionData\Enums\NotionColor;
-use App\Support\IdHash;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
 use Illuminate\Validation\ValidationException;
@@ -132,7 +129,7 @@ class Hydrator
                 'label' => $page->title()?->toString(),
                 'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
                 'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
-                'activities' => array_map(fn(SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
+                'activities' => array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
                 'interventionFocuses' => array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
                 'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
                 'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
@@ -144,14 +141,14 @@ class Hydrator
                 'gcbrFocus' => ['required', 'boolean'],
                 'link' => ['required', 'string', 'url'],
                 'organizationType' => ['required', 'string'],
-                "interventionFocuses" => ['required', 'array', function ($attribute, $value, $fail) {
+                'interventionFocuses' => ['required', 'array', function ($attribute, $value, $fail) {
                     $hasSupertype = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance() || $focus->isTechnical());
                     if (! $hasSupertype) {
                         $fail('At least one intervention focus must be either [TECHNICAL] or [GOVERNANCE].');
                     }
                 }],
                 'activities' => ['required', 'array'],
-                'location' => ['required', 'array']
+                'location' => ['required', 'array'],
             ]
         );
 

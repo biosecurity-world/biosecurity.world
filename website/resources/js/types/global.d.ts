@@ -1,5 +1,5 @@
 import {Node} from "@/types/index"
-import {MapStateStore} from "@/store";
+import {MapStateStore} from "@/store"
 
 export {}
 

@@ -20,7 +20,8 @@ class PageResponseTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_the_marketing_pages_are_ok() {
+    public function test_the_marketing_pages_are_ok()
+    {
         $this->get('/about')->assertStatus(200);
         $this->get('/give-feedback')->assertStatus(200);
         $this->get('/how-to-contribute')->assertStatus(200);

@@ -19,7 +19,7 @@ class ReportHydrationErrors extends Command
         $pages = $notion->pages();
         $tree = Tree::buildFromPages($pages);
 
-        $markdown = "";
+        $markdown = '';
 
         $errors = collect($tree->errors)->flatMap(function ($error) {
             return collect($error->messages)->map(function ($message) use ($error) {
@@ -35,7 +35,7 @@ class ReportHydrationErrors extends Command
 
             foreach ($errors as $error) {
                 $page = $error['page'];
-                $url = "https://www.notion.so/" . str_replace('-', '', $page->id);
+                $url = 'https://www.notion.so/'.str_replace('-', '', $page->id);
 
                 $label = $page instanceof Page ? $page->title()->toString() : $page->label;
 
@@ -52,7 +52,6 @@ a PR/Issue number. I can also run it and share the report.
 
 $markdown
 MARKDOWN;
-
 
         $path = $this->argument('path') ?? 'report.md';
         file_put_contents($path, $markdown);

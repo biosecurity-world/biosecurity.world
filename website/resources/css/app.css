@@ -31,7 +31,6 @@
     left: -9999px;
 }
 
-
 #entry-wrapper:not(:has(> .entry)) {
     display: none;
 }

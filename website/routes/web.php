@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Services\NotionData\DataObjects\Entrygroup;
 use App\Services\NotionData\Notion;
-use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\Tree;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
@@ -40,8 +39,8 @@ Route::get('/_/entries', function (Notion $notion) {
 
     $links = $tree
         ->entrygroups()
-        ->flatMap(fn(Entrygroup $group) => collect($group->entries)->map(
-            fn(int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+        ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
+            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
         ));
 
     return view('entries.index', ['links' => $links]);
