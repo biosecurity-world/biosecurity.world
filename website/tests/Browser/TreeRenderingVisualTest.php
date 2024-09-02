@@ -1,8 +1,11 @@
 <?php
 
-namespace Tests;
+namespace Tests\Browser;
 
-class TreeRenderingVisualTest extends TestCase
+use Tests\TestCase;
+
+class
+TreeRenderingVisualTest extends TestCase
 {
     public function test_it_can_render_half_bounded_vertices_in_the_first_quadrant()
     {

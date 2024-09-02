@@ -14,17 +14,17 @@ return [
      */
     'npm_binary' => null,
 
-    'chrome_path' => env('CHROME_PATH', null),
+    'chrome_path' => env('CHROME_PATH'),
 
     /**
      * The path where all screenshots will be stored.
      */
-    'screenshot_path' => base_path('tests/VisualRegression/screenshots'),
+    'screenshot_path' => base_path('tests/Browser/regressions/screenshots'),
 
     /**
      * The path where diff result images will be stored.
      */
-    'diff_path' => base_path('tests/VisualRegression/diffs'),
+    'diff_path' => base_path('tests/Browser/regressions/diffs'),
 
     /**
      * The threshold used for the pixelmatch diffing process.

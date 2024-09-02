@@ -38,19 +38,16 @@ Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId)
 Route::get('/_/entries', function (Notion $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
-    $links = $tree->entrygroups()
-        ->flatMap(function (Node $node) use ($tree) {
-            $group = $tree->lookup[$node->id];
-
-            return collect($group->entries)->map(function (int $entryId) use ($node) {
-                return route('entries.show', ['id' => $node->id, 'entryId' => $entryId]);
-            });
-        });
+    $links = $tree
+        ->entrygroups()
+        ->flatMap(fn(Entrygroup $group) => collect($group->entries)->map(
+            fn(int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+        ));
 
     return view('entries.index', ['links' => $links]);
 });
 
-if (! app()->isProduction()) {
+if (app()->runningUnitTests()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
     // the code for the website which includes the code for tests the tree
