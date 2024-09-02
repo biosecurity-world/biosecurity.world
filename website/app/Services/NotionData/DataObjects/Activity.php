@@ -8,9 +8,10 @@ use Notion\Databases\Properties\SelectOption;
 
 class Activity
 {
-    /** @var array<string> */
+    /** @var array<int> */
     public static array $seen = [];
 
+    /** @var array<int> */
     public static array $countById = [];
 
     public function __construct(

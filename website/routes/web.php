@@ -5,10 +5,8 @@ declare(strict_types=1);
 use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
-use App\Support\IdHash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
@@ -19,10 +17,10 @@ Route::get('/', function (Notion $notion) {
         'tree' => $tree,
         'activitiesBitmask' => Activity::$seen,
         'lookup' => [
-            'entries' => $tree->entries()->map(fn(Entry $entry) => [
+            'entries' => $tree->entries()->map(fn (Entry $entry) => [
                 'id' => $entry->id,
                 'activities' => $entry->getActivityBitmask(Activity::$seen),
-                'lenses' => $entry->lens()
+                'lenses' => $entry->lens(),
             ]),
             'entrygroups' => $tree->entrygroups(),
         ],
@@ -32,14 +30,14 @@ Route::get('/', function (Notion $notion) {
     ]);
 })->name('welcome');
 
-Route::get('/about', fn() => '')->name('about');
-Route::get('/give-feedback', fn() => '')->name('give-feedback');
-Route::get('/how-to-contribute', fn() => '')->name('how-to-contribute');
+Route::get('/about', fn () => '')->name('about');
+Route::get('/give-feedback', fn () => '')->name('give-feedback');
+Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 
 Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
     $tree = Tree::buildFromPages($notion->pages());
 
-    abort_if(!isset($tree->lookup[$id]) || !isset($tree->lookup[$entryId]), 404);
+    abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
 
     return view('entries.show', [
         'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
@@ -54,8 +52,8 @@ Route::get('/_/entries', function (Notion $notion) {
 
     $links = $tree
         ->entrygroups()
-        ->flatMap(fn(Entrygroup $group) => collect($group->entries)->map(
-            fn(int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+        ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
+            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
         ));
 
     return view('entries.index', ['links' => $links]);
@@ -68,9 +66,9 @@ if (app()->runningUnitTests()) {
     // These routes are ignored by the crawler that builds the static version
     // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {
-        abort_if(!Cache::has('tree-' . $caseId), 404);
+        abort_if(! Cache::has('tree-'.$caseId), 404);
 
-        $case = Cache::get('tree-' . $caseId);
+        $case = Cache::get('tree-'.$caseId);
 
         return view('render-testcase', ['case' => $case]);
     })->name('tree-rendering');

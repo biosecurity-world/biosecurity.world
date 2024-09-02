@@ -99,6 +99,9 @@ class Tree
 
                     /** @var array<int> $entryIds */
                     $entryIds = Arr::pluck($entries->toArray(), 'id');
+
+                    // fixme: see below
+                    /** @phpstan-ignore-next-line */
                     usort($entryIds, fn (int $a, int $b) => $tree->lookup[$a]->createdAt <=> $tree->lookup[$b]->createdAt);
 
                     $id = sha1($parentId.'-'.implode('-', $entryIds));

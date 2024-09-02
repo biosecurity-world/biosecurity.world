@@ -6,8 +6,6 @@ namespace App\Services\NotionData\DataObjects;
 
 use App\Services\Iconsnatch\Logo;
 use App\Support\IdHash;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
 use Notion\Pages\Properties\RichTextProperty;
 
 class Entry
@@ -66,7 +64,9 @@ class Entry
         return $host;
     }
 
-    public function getActivityBitmask(array $map): int {
+    /**  @param array<int, int> $map */
+    public function getActivityBitmask(array $map): int
+    {
         $mask = 0;
 
         foreach ($map as $k => $id) {
@@ -76,7 +76,8 @@ class Entry
         return $mask;
     }
 
-    public function hasActivity(int $id): bool {
+    public function hasActivity(int $id): bool
+    {
         foreach ($this->activities as $activity) {
             if ($activity->id === $id) {
                 return true;

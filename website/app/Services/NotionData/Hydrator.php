@@ -134,7 +134,7 @@ class Hydrator
                 return Activity::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
             'interventionFocuses' => array_map(function (SelectOption $opt) {
-//                dump($opt);
+                //                dump($opt);
                 return InterventionFocus::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
             'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
@@ -151,7 +151,7 @@ class Hydrator
                 $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isTechnical());
                 $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance());
 
-                if ((!$isTechnical && !$isGovernance)) {
+                if ((! $isTechnical && ! $isGovernance)) {
                     $fail('The entry must have at least either a [TECHNICAL] or [GOVERNANCE] focus, or both');
                 }
             }],
