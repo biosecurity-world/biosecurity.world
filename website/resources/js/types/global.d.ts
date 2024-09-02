@@ -7,6 +7,7 @@ declare global {
     interface Window {
         // Set in welcome.blade.php
         nodes: Node[]
+        activityIds: number[]
 
         persistedMapState: MapStateStore
     }

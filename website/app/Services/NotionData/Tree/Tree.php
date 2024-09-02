@@ -67,10 +67,11 @@ class Tree
         $tree = new Tree([], [], $pages->errors, IdHash::hash('root'));
 
         foreach ($pages->data as $page) {
-            $reducedId = IdHash::hash($page->id);
+            $tree->lookup[$page->id] = $page;
 
-            $tree->lookup[$reducedId] = $page;
-            $tree->nodes[] = new Node($reducedId, $page->parentId !== null ? IdHash::hash($page->parentId) : $tree->rootNodeId);
+            $node = new Node($page->id, $page->parentId !== null ? $page->parentId : $tree->rootNodeId);
+
+            $tree->nodes[] = $node;
         }
 
         $rootNodes = collect($tree->nodes)->filter(fn (Node $node) => $node->parentId === $tree->rootNodeId);
@@ -79,7 +80,7 @@ class Tree
                 $root->parentId = $tree->rootNodeId;
             }
 
-            $tree->lookup[$tree->rootNodeId] = new Root('root');
+            $tree->lookup[$tree->rootNodeId] = new Root($tree->rootNodeId);
         } else {
             return $tree;
         }
@@ -98,13 +99,13 @@ class Tree
 
                     /** @var array<int> $entryIds */
                     $entryIds = Arr::pluck($entries->toArray(), 'id');
-                    sort($entryIds);
+                    usort($entryIds, fn (int $a, int $b) => $tree->lookup[$a]->createdAt <=> $tree->lookup[$b]->createdAt);
 
                     $id = sha1($parentId.'-'.implode('-', $entryIds));
                     $reducedId = IdHash::hash($id);
 
                     $rest->push(new Node($reducedId, $parentId));
-                    $tree->lookup[$reducedId] = new Entrygroup($id, $entryIds);
+                    $tree->lookup[$reducedId] = new Entrygroup(IdHash::hash($id), $entryIds);
 
                     return $rest;
                 })
@@ -125,13 +126,13 @@ class Tree
             $node->trail = $trail;
             $node->depth = $depth;
 
-            if ($id !== $tree->rootNodeId) {
-                $trail[] = $id;
+            if ($node->id !== $tree->rootNodeId) {
+                $trail[] = $node->id;
             }
 
             $od = 0;
             foreach ($parentToChildrenMap->get($id, []) as $child) {
-                foreach ($buildTree($child->id, $node->id, $node->trail, $node->depth + 1) as $childNode) {
+                foreach ($buildTree($child->id, $node->id, $trail, $node->depth + 1) as $childNode) {
                     if ($childNode->depth === $node->depth + 1) {
                         $od++;
                     }

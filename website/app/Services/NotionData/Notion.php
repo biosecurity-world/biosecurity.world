@@ -39,9 +39,6 @@ class Notion
         /** @var Page[] $pages */
         $pages = Cache::rememberForever('pages', fn () => $this->client->databases()->queryAllPages($database));
 
-        // sort pages by last edited time
-        usort($pages, fn (Page $a, Page $b) => $a->lastEditedTime <=> $b->lastEditedTime);
-
         return (new Hydrator($database))->hydrate(
             array_filter($pages, fn (Page $page) => ! $page->archived)
         );

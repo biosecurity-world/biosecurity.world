@@ -74,6 +74,12 @@ class Debug {
         })
     }
 
+    clear() {
+        this.buffer = [($svg) => $svg.selectAll('*').remove()]
+
+        return this
+    }
+
     flush($svg: Selection<any, {}, HTMLElement, unknown>) {
         this.buffer.forEach((fn) => fn($svg))
 

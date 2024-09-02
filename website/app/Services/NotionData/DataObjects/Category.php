@@ -8,8 +8,9 @@ namespace App\Services\NotionData\DataObjects;
 class Category
 {
     public function __construct(
-        public string $id,
-        public ?string $parentId,
+        public int $id,
+        public ?int $parentId,
         public string $label,
+        public \DateTimeInterface $createdAt,
     ) {}
 }

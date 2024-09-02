@@ -31,10 +31,13 @@ class Location implements \Stringable
 
         return collect($this->hints)
             ->reverse()
-            ->pluck('name')
             ->map(function ($name) {
                 if ($name === 'Europe (excl. UK)') {
                     return 'Europe';
+                }
+
+                if ($name === 'Cambridge MA') {
+                    return 'Cambridge, MA';
                 }
 
                 return $name;

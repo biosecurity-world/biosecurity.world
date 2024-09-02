@@ -3,15 +3,18 @@
 namespace App\Services\NotionData\DataObjects;
 
 use App\Services\NotionData\Enums\NotionColor;
+use App\Support\IdHash;
 use Notion\Databases\Properties\SelectOption;
 
 class Activity
 {
     /** @var array<string> */
-    protected static array $seen = [];
+    public static array $seen = [];
+
+    public static array $countById = [];
 
     public function __construct(
-        public string $id,
+        public int $id,
         public string $label,
         public NotionColor $color
     ) {}
@@ -27,11 +30,25 @@ class Activity
             throw new \InvalidArgumentException('Select for the activity is missing either an id or a name');
         }
 
-        if (! in_array($opt->id, self::$seen)) {
-            self::$seen[] = $opt->id;
+        $id = IdHash::hash($opt->id);
+
+        if (! in_array($id, self::$seen)) {
+            self::$seen[] = $id;
+
+            sort(self::$seen);
         }
 
-        return new self($opt->id, $opt->name, NotionColor::from($opt->color?->value ?? NotionColor::Default->value));
+        if (! isset(self::$countById[$id])) {
+            self::$countById[$id] = 0;
+        }
+
+        self::$countById[$id]++;
+
+        return new self(
+            $id,
+            $opt->name,
+            NotionColor::from($opt->color?->value ?? NotionColor::Default->value)
+        );
     }
 
     public function iconName(): ?string
@@ -47,5 +64,10 @@ class Activity
             'Education / career support' => 'education',
             default => null,
         };
+    }
+
+    public function occurrences(): int
+    {
+        return self::$countById[$this->id];
     }
 }

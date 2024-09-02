@@ -9,13 +9,9 @@ use App\Services\NotionData\DataObjects\Category;
 class Node
 {
     public int $depth;
-
     /** @var array<int> */
     public array $trail = [];
-
     public int $od;
-
-    public int $order;
 
     public function __construct(
         public int $id,

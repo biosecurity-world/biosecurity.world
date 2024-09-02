@@ -38,4 +38,12 @@ class IdHash
 
         return self::$idMap[$id];
     }
+
+    public static function reverse(int|string $id): string {
+        if (is_string($id)) {
+            throw new \RuntimeException('You are trying to reverse a string. Was it already reversed?');
+        }
+
+        return array_search($id, self::$idMap);
+    }
 }

@@ -10,6 +10,7 @@ use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\DataObjects\Location;
+use App\Support\IdHash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
 use Illuminate\Validation\ValidationException;
@@ -41,6 +42,8 @@ class Hydrator
     /** @param  Page[]  $pages */
     public function hydrate(array $pages): HydratedPages
     {
+        usort($pages, fn (Page $a, Page $b) => $a->createdTime <=> $b->createdTime);
+
         $hydrated = [];
         $errors = [];
 
@@ -70,8 +73,8 @@ class Hydrator
 
             try {
                 $item = $isCategory ?
-                    $this->categoryFromPage($page, '') :
-                    $this->entryFromPage($page, '');
+                    $this->categoryFromPage($page, -1) :
+                    $this->entryFromPage($page, -1);
             } catch (ValidationException $e) {
                 $errors[] = HydrationError::fromValidationException($e, $page);
 
@@ -80,19 +83,19 @@ class Hydrator
 
             foreach ($parents as $parent) {
                 $clone = clone $item;
-                $clone->parentId = $parent;
+                $clone->parentId = IdHash::hash($parent);
                 $hydrated[] = $clone;
 
                 if ($item instanceof Entry) {
-                    if (! isset($entryCountMap[$parent])) {
-                        $entryCountMap[$parent] = 0;
+                    if (! isset($entryCountMap[$clone->parentId])) {
+                        $entryCountMap[$clone->parentId] = 0;
                     }
 
                     if (! isset($organizationTypeMap[$item->organizationType])) {
                         $organizationTypeMap[$item->organizationType] = 0;
                     }
 
-                    $entryCountMap[$parent]++;
+                    $entryCountMap[$clone->parentId]++;
                     $organizationTypeMap[$item->organizationType]++;
                 }
             }
@@ -108,48 +111,55 @@ class Hydrator
         return new HydratedPages($hydrated, $errors);
     }
 
-    public function categoryFromPage(Page $page, ?string $parentId): Category
+    public function categoryFromPage(Page $page, ?int $parentId): Category
     {
         $validated = Validator::validate(
             ['title' => $page->title()?->toString()],
             ['title' => ['required', 'string']]
         );
 
-        return new Category($page->id, $parentId, $validated['title']);
+        return new Category(IdHash::hash($page->id), $parentId, $validated['title'], $page->createdTime);
     }
 
-    public function entryFromPage(Page $page, string $parentId): Entry
+    public function entryFromPage(Page $page, int $parentId): Entry
     {
         $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
         $rawPage = [
-            'id' => $page->id,
+            'id' => IdHash::hash($page->id),
             'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
             'label' => $page->title()?->toString(),
             'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
             'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
-            'activities' => array_map(fn (SelectOption $opt) => Activity::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
-            'interventionFocuses' => array_map(fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt), $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
+            'activities' => array_map(function (SelectOption $opt) {
+                return Activity::fromNotionOption($opt);
+            }, $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
+            'interventionFocuses' => array_map(function (SelectOption $opt) {
+//                dump($opt);
+                return InterventionFocus::fromNotionOption($opt);
+            }, $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
             'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
             'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
         $data = Validator::make($rawPage, [
-            'id' => ['required', 'string'],
+            'id' => ['required', 'int'],
             'label' => ['required', 'string'],
             'description' => ['required'],
             'gcbrFocus' => ['required', 'boolean'],
             'link' => ['required', 'string', 'url'],
             'organizationType' => ['required', 'string'],
             'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {
-                if (collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance() || $focus->isTechnical())) {
-                    return;
-                }
+                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isTechnical());
+                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance());
 
-                $fail('At least one intervention focus must be either [TECHNICAL] or [GOVERNANCE].');
+                if ((!$isTechnical && !$isGovernance)) {
+                    $fail('The entry must have at least either a [TECHNICAL] or [GOVERNANCE] focus, or both');
+                }
             }],
             'activities' => ['required', 'array'],
             'location' => ['required', 'array'],
         ])->validate();
 
+        $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
         $data['location'] = Location::fromNotionOptions($data['location']);
         $data['logo'] = IconSnatch::downloadFrom($data['link']);
