@@ -2,7 +2,6 @@
 
 namespace App\Services\Logosnatch;
 
-use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Cache;
 
 class IconSnatch
@@ -15,12 +14,22 @@ class IconSnatch
             return Cache::get($cacheKey);
         }
 
+        $iconsnatchBinary = config('services.iconsnatch.binary');
+        if (! is_string($iconsnatchBinary)) {
+            throw new \RuntimeException('IconSnatch binary not configured');
+        }
+
         $process = proc_open(
-            [config('services.iconsnatch.binary'), '-o', storage_path('app/public/logos'), '-d', storage_path('app/public/missing-logo.svg'), '-json'],
             [
-                0 => array('pipe', 'r'),
-                1 => array('pipe', 'w'),
-                2 => array('pipe', 'w'),
+                $iconsnatchBinary,
+                '-o', storage_path('app/public/logos'),
+                '-d', storage_path('app/public/missing-logo.svg'),
+                '-json',
+            ],
+            [
+                0 => ['pipe', 'r'],
+                1 => ['pipe', 'w'],
+                2 => ['pipe', 'w'],
             ],
             $pipes,
             '/tmp',
@@ -46,7 +55,15 @@ class IconSnatch
             throw new \RuntimeException('Failed to start iconsnatch process');
         }
 
+        if (! $body) {
+            throw new \RuntimeException("Failed to download logo: $error");
+        }
+
         $decoded = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+        if (! is_array($decoded) || ! array_key_exists('format', $decoded) || ! array_key_exists('path', $decoded) || ! array_key_exists('filled', $decoded)) {
+            throw new \RuntimeException(sprintf('Unexpected response from iconsnatch, got %s, expected key format, path, filled', $body));
+        }
+
         $logo = new Logo(
             $decoded['format'],
             'storage/logos/'.$decoded['path'],
