@@ -67,6 +67,11 @@ jobs:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 
+      - name: Copy icons
+        run:
+          mkdir -p ./dist/storage/logos/
+          cp -r ./storage/app/public/logos ./dist/storage/
+
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --keep BRANCH_NAME --command wrangler pages deploy ./dist --project-name biosecurity-world --branch ${BRANCH_NAME}
         env:
