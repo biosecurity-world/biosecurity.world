@@ -34,7 +34,7 @@ jobs:
 
       - name: Build logosnatch
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command go build
-        working-directory: ./logosnatch
+        working-directory: ./tools/logosnatch
 
       - name: Copy .env
         run: cp .env.example .env
