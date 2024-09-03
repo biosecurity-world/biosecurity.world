@@ -26,10 +26,15 @@ jobs:
         with:
           path: ~/.composer-store
           key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+          
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install
         env:
           COMPOSER_HOME: ~/.composer-store
+
+      - name: Build logosnatch
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command go build
+        working-directory: ./logosnatch
 
       - name: Run tests
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer test

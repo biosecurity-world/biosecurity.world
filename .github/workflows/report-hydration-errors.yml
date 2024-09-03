@@ -26,17 +26,25 @@ jobs:
         with:
           path: ~/.composer-store
           key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
         env:
           COMPOSER_HOME: ~/.composer-store
+
+      - name: Build logosnatch
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command go build
+        working-directory: ./logosnatch
+
       - name: Copy .env
         run: cp .env.example .env
+
       - name: Report hydration errors
         run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan app:report-hydration-errors /home/runner/report.md
         env:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+
       - name: Comment changes
         uses: thollander/actions-comment-pull-request@v2
         env:
