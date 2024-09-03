@@ -55,8 +55,7 @@ class ReportHydrationErrors extends Command
 These problems don't stop the site from working, but entries with errors are ignored and will not be displayed.
 
 It can be re-run although the process is a bit tedious, you have to manually "dispatch" a run in the "Actions" tab and provide
-a PR/Issue number. I can also run it and share the report.
-
+a PR/Issue number which you can find in the URL after "/pull/" or "/issues/".
 $report
 MARKDOWN
         );

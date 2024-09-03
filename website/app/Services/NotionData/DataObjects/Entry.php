@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\DataObjects;
 
-use App\Services\Iconsnatch\Logo;
+use App\Services\Logosnatch\Logo;
 use App\Support\IdHash;
 use Notion\Pages\Properties\RichTextProperty;
 
