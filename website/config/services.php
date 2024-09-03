@@ -36,8 +36,7 @@ return [
     ],
 
     'iconsnatch' => [
-        'endpoint' => env('ICONSNATCH_ENDPOINT', 'https://iconsnatch.forevue.org'),
-        'useragent' => env('ICONSNATCH_USERAGENT', 'Unknown'),
+        'binary' => env('ICONSNATCH_PATH'),
     ],
 
     'notion' => [

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
-use App\Services\Iconsnatch\IconSnatch;
+use App\Services\Logosnatch\IconSnatch;
 use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
@@ -162,7 +162,7 @@ class Hydrator
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
         $data['location'] = Location::fromNotionOptions($data['location']);
-        $data['logo'] = IconSnatch::downloadFrom($data['link']);
+        $data['logo'] = IconSnatch::retrieve($data['link']);
 
         return new Entry(...$data);
     }

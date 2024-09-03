@@ -1,4 +1,4 @@
-@if (!$isXHR)
+@if (!$isXHR && !app()->isProduction())
 <!doctype html>
 <html lang="en" class="h-full">
 <head>
@@ -163,7 +163,7 @@
         </a>
     </div>
 </div>
-@if (!$isXHR)
+@if (!$isXHR && !app()->isProduction())
 </body>
 </html>
 @endif
