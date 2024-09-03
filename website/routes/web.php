@@ -15,7 +15,6 @@ Route::get('/', function (Notion $notion) {
 
     return view('welcome', [
         'tree' => $tree,
-        'activitiesBitmask' => Activity::$seen,
         'lookup' => [
             'entries' => $tree->entries()->map(fn (Entry $entry) => [
                 'id' => $entry->id,
@@ -24,7 +23,6 @@ Route::get('/', function (Notion $notion) {
             ]),
             'entrygroups' => $tree->entrygroups(),
         ],
-        'activityIds' => Activity::$seen,
         'databaseUrl' => $notion->databaseUrl(),
         'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
     ]);
