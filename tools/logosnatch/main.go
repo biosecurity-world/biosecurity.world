@@ -28,8 +28,6 @@ func run() error {
 		if err2 := os.Mkdir(savePath, os.FileMode(0744)); err2 != nil {
 			return fmt.Errorf("error while creating output directory: %w", err2)
 		}
-
-		return err
 	}
 
 	if !useJSON {
