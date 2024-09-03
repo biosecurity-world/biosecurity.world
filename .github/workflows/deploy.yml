@@ -69,7 +69,7 @@ jobs:
 
       - name: Copy icons
         run:
-          mkdir -p ./dist/storage/logos/
+          mkdir -p ./dist/storage/logos/ &&
           cp -r ./storage/app/public/logos ./dist/storage/
 
       - name: Deploy website
