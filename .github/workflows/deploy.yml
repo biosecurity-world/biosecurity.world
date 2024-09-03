@@ -17,9 +17,9 @@ jobs:
 
       - uses: cachix/install-nix-action@v27
 
-      # Node Setup
       - name: Set pnpm cache store
         run: nix develop --ignore-environment --command pnpm config set store-dir ~/.pnpm-store
+
       - name: Cache node modules
         id: cache-npm
         uses: actions/cache@v4
@@ -28,25 +28,13 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: build-${{ env.cache-name }}-${{ hashFiles('website/pnpm-lock.yaml') }}
+
       - name: Install node dependencies
         run: nix develop --ignore-environment --command pnpm install
+
       - name: Build assets
         run: nix develop --ignore-environment --command pnpm build
 
-      - name: Iconsnatch setup
-        run: |
-          curl -L "https://github.com/forevue/iconsnatch/releases/download/0.0.0-alpha/faviconapi" -o /tmp/faviconapi
-          chmod +x /tmp/faviconapi
-          /tmp/faviconapi &
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
-            AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
-            AWS_REGION: ${{ secrets.AWS_REGION }}
-            ASSET_URL_FOR_BUCKET: cdn.forevue.org
-
-      # PHP Setup
       - name: Cache composer packages
         id: cache-composer
         uses: actions/cache@v4
@@ -55,26 +43,31 @@ jobs:
         with:
           path: ~/.composer-store
           key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
         env:
           COMPOSER_HOME: ~/.composer-store
 
+      - name: Build logosnatch
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command go build
+        working-directory: ./logosnatch
+
       - name: Copy .env
         run: cp .env.example .env
+
       - name: Start server
         run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
+
       - name: Build website
         run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
         env:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 
-      # Deployment
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --keep BRANCH_NAME --command wrangler pages deploy ./dist --project-name biosecurity-world --branch ${BRANCH_NAME}
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-

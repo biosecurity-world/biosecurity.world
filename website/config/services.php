@@ -35,10 +35,6 @@ return [
         ],
     ],
 
-    'iconsnatch' => [
-        'binary' => env('ICONSNATCH_PATH'),
-    ],
-
     'notion' => [
         'database' => env('NOTION_DATABASE'),
         'token' => env('NOTION_TOKEN'),

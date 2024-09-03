@@ -14,8 +14,8 @@ class IconSnatch
             return Cache::get($cacheKey);
         }
 
-        $iconsnatchBinary = config('services.iconsnatch.binary');
-        if (! is_string($iconsnatchBinary)) {
+        $iconsnatchBinary = base_path('tools/logosnatch/logosnatch');
+        if (! is_string($iconsnatchBinary) || ! file_exists($iconsnatchBinary)) {
             throw new \RuntimeException('IconSnatch binary not configured');
         }
 
