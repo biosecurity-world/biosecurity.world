@@ -88,7 +88,7 @@ class Debug {
 
     node(options: {node: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
         if (!options.node.position) {
-            options.node.position = fitToSector(options.node, options.parent ?? null, options.minDistance ?? 0)
+            options.node.position = fitToSector(options.node)
         }
 
         debug().ray({angle: options.node.sector[0], color: 'black'})
