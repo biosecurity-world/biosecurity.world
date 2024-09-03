@@ -136,7 +136,7 @@ export default class FiltersStateStore {
     }
 
     private getInLocalStorage(key: string) {
-        return JSON.parse(localStorage.getItem(`state-${key}`))?.value || null
+        return JSON.parse(localStorage.getItem(`state-${key}`) ?? '{}')?.value || null
     }
 
     private setInLocalStorage(key: string, value: any) {

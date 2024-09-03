@@ -57,6 +57,14 @@ Route::get('/_/entries', function (Notion $notion) {
     return view('entries.index', ['links' => $links]);
 });
 
+Route::get('/_/icons', function (Notion $notion) {
+    $tree = Tree::buildFromPages($notion->pages());
+
+    return view('logos', [
+        'logos' => $tree->entries()->map(fn (Entry $entry) => url($entry->logo->path))
+    ]);
+});
+
 if (app()->runningUnitTests()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
