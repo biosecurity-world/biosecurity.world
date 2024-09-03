@@ -35,6 +35,8 @@ jobs:
       - name: Build logosnatch
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command go build
         working-directory: ./tools/logosnatch
+        env:
+          GOMODCACHE: /home/runner/.go-store
 
       - name: Run tests
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer test
