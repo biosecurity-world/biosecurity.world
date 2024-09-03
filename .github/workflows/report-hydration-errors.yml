@@ -33,7 +33,7 @@ jobs:
           COMPOSER_HOME: ~/.composer-store
 
       - name: Build logosnatch
-        run: nix develop --ignore-environment --keep GOPATH --command go build
+        run: nix develop --command go build
         working-directory: ./tools/logosnatch
 
       - name: Copy .env
