@@ -1,6 +1,6 @@
 import {D3ZoomEvent, map, select, zoom, zoomIdentity} from "d3"
 import {debug, gt, lt, PIPI} from "./utils"
-import {Node, ProcessedNode} from "./types"
+import {Node, ProcessedNode, Sector} from "./types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
 import {shouldFilterEntry} from "@/filters";
@@ -296,37 +296,10 @@ try {
         }
     })
 
-    let lastUpdatedPositionInUrl = 0
     let zoomHandler = zoom()
-        .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => {
-            $zoomWrapper.attr("transform", e.transform.toString())
-
-            // setPosition calls history.replaceState which is "rate-limited", in the sense that
-            // it throws a SecurityError if called too often. This is transparent to
-            // the user, but it seems better not to trigger an error.
-            let now = Date.now()
-            if (now - lastUpdatedPositionInUrl >= 200) {
-                window.persistedMapState.setPosition(
-                    Math.round(e.transform.x * 1000) / 1000,
-                    Math.round(e.transform.y * 1000) / 1000,
-                    Math.round(e.transform.k * 1000) / 1000,
-                )
-                lastUpdatedPositionInUrl = now
-            }
-        })
+        .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
         .scaleExtent([0.5, 2.5])
 
-    $map.transition()
-        .duration(500)
-        .call(
-            zoomHandler.transform,
-            zoomIdentity
-                .translate(
-                    window.persistedMapState.position[0],
-                    window.persistedMapState.position[1],
-                )
-                .scale(window.persistedMapState.position[2]),
-        )
     $map.call(zoomHandler)
 
     window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
@@ -367,6 +340,14 @@ try {
     )
 }
 
+function drawSectorArea(node: {
+    size: [number, number];
+    position?: [number, number];
+    sector: Sector;
+} & Node) {
+    // TODO
+}
+
 function renderMap() {
     showAppState("loading")
 
@@ -400,6 +381,7 @@ function renderMap() {
                     lens_governance: filtersStore.getState('lens_governance'),
                     activityCount: activityCount
                 }, entry)
+
 
                 elEntry.classList.toggle("matches-filters", !shouldFilter)
 
@@ -499,8 +481,10 @@ function renderMap() {
         }
 
         node.position = fitToSector(node)
-        debug().ray({angle: node.sector[0], color: "blue"})
-        debug().ray({angle: node.sector[1], color: "red"})
+
+        if (node.depth === 1) {
+            drawSectorArea(node)
+        }
 
         node.el.classList.remove("invisible")
         node.el.ariaHidden = "false"

@@ -38,34 +38,42 @@ it("finds the correct effect sector for y-bounded sectors", () => {
 
 it('filters out entries correctly', () => {
     let state = (activities, count = null) => ({ activities, lens_technical: '0', lens_governance: '0', activityCount: count ?? activities.length })
+    let entry = (activities, lenses = 0) =>({ activities, lenses })
+
     expect(shouldFilterEntry(
-        state('11111111'),
-        { activities: 0b10010011, lenses: 0b0 }
+        { activities: '11111111', lens_governance: '0', lens_technical: '1', activityCount: 8 },
+        entry(0b1, 0b01)
     )).toBe(false)
 
+    expect(shouldFilterEntry(state('11111111'), entry(0b10010011))).toBe(false)
+    expect(shouldFilterEntry(state('00000000'), entry(0b10010011))).toBe(true)
+    expect(shouldFilterEntry(state('01000000'), entry(0b10010011))).toBe(true)
+    expect(shouldFilterEntry(state('01000000'), entry(0b11010011))).toBe(false)
+    expect(shouldFilterEntry(state('1000000', 8), entry(0b10000000))).toBe(true)
+    expect(shouldFilterEntry(state('1000000', 8), entry(0b01000000))).toBe(false)
 
     expect(shouldFilterEntry(
-        state('00000000'),
-        { activities: 0b10010011, lenses: 0b00 }
+        { activities: '00000000', lens_governance: '0', lens_technical: '0', activityCount: 8 },
+        entry(0b0, 0b00)
+    )).toBe(true)
+    //
+    expect(shouldFilterEntry(
+        { activities: '11111111', lens_governance: '0', lens_technical: '1', activityCount: 8 },
+        entry(0b1, 0b10)
     )).toBe(true)
 
     expect(shouldFilterEntry(
-        state('01000000'),
-        { activities: 0b10010011, lenses: 0b00 }
-    )).toBe(true)
-
-    expect(shouldFilterEntry(
-        state('01000000'),
-        { activities: 0b11010011, lenses: 0b00 }
+        { activities: '11111111', lens_governance: '0', lens_technical: '1', activityCount: 8 },
+        entry(0b1, 0b01)
     )).toBe(false)
 
     expect(shouldFilterEntry(
-        state('1000000', 8),
-        { activities: 0b10000000, lenses: 0b00 }
+        { activities: '00000000', lens_governance: '1', lens_technical: '0', activityCount: 8 },
+        entry(0b0, 0b01)
     )).toBe(true)
 
     expect(shouldFilterEntry(
-        state('1000000', 8),
-        { activities: 0b01000000, lenses: 0b00 }
+        { activities: '11111111', lens_governance: '1', lens_technical: '0', activityCount: 8 },
+        entry(0b1, 0b10)
     )).toBe(false)
 })

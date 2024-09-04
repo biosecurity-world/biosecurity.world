@@ -1,6 +1,6 @@
 export default class FiltersStateStore {
-    private tracked: Record<string, [() => any, (value: any) => void, any]> = {}
-    private cb: () => void;
+    tracked: Record<string, [() => any, (value: any) => void, any]> = {}
+    cb: (() => void) | null = null;
 
     /**
      * @param key A unique key for this state used in the query string and local storage.
@@ -111,7 +111,7 @@ export default class FiltersStateStore {
         window.history.pushState({}, '', loc.toString())
 
         for (const key of Object.keys(this.tracked)) {
-            let [check, apply, defaultValue] = this.tracked[key]
+            let [_, apply, defaultValue] = this.tracked[key]
             apply(defaultValue)
         }
 
@@ -159,14 +159,7 @@ export default class FiltersStateStore {
 }
 
 export class MapStateStore {
-    position: [number, number, number] = [0, 0, 1]
     focusedEntry: [number, number] | null = null
-
-    setPosition(x: number, y: number, k: number) {
-        this.position = [x, y, k]
-
-        this.updateFragment()
-    }
 
     setFocusedEntry(groupId: number, entryId: number) {
         this.focusedEntry = [groupId, entryId]
@@ -183,15 +176,6 @@ export class MapStateStore {
         let loc = new URL(window.location.toString())
 
         for (const part of loc.hash.split("/")) {
-            // TODO: Regexes should never be used, ever. If you have some time, rewrite this.
-            if (/^-?[0-9]+(\.[0-9]+)?x-?[0-9]+(\.[0-9]+)?@-?[0-9]+(\.[0-9]+)?$/.test(part)) {
-                this.position = [
-                    parseFloat(part.split("x")[0]),
-                    parseFloat(part.split("x")[1].split("@")[0]),
-                    parseFloat(part.split("@")[1])
-                ]
-            }
-
             if (part.match(/(\d+):(\d+)/)) {
                 this.focusedEntry = [parseInt(part.split(":")[0]), parseInt(part.split(":")[1])]
             }
@@ -205,10 +189,6 @@ export class MapStateStore {
 
         let hash = '/'
 
-        if (this.position !== null) {
-            hash += `${this.position[0]}x${this.position[1]}@${this.position[2]}/`
-        }
-
         if (this.focusedEntry !== null) {
             hash += `${this.focusedEntry[0]}:${this.focusedEntry[1]}/`
         }
@@ -216,6 +196,5 @@ export class MapStateStore {
         loc.hash = hash
 
         window.history.replaceState({}, '', loc.toString())
-
     }
 }
