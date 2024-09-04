@@ -1,8 +1,9 @@
 import {D3ZoomEvent, map, select, zoom, zoomIdentity} from "d3"
-import {debug, gt, IN_PRODUCTION, lt, PIPI} from "./utils"
+import {debug, gt, lt, PIPI} from "./utils"
 import {Node, ProcessedNode} from "./types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
+import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
 
@@ -28,10 +29,10 @@ function showError(message: string, err: unknown) {
     ) as HTMLParagraphElement
     let debug = elStateContainer.querySelector(".debug") as HTMLPreElement
 
-    if (!IN_PRODUCTION) {
-        debug.hidden = false
-        debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
-    }
+    // if (!IN_PRODUCTION) {
+    //     debug.hidden = false
+    //     debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
+    // }
 
     reason.innerHTML = message
 
@@ -75,18 +76,14 @@ filtersStore.persist(
                 }
             })
 
-        return mask
-            .toString(2)
-            .split("")
-            .reverse()
-            .join("")
-            .padEnd(activityCount, "0")
+        return mask.toString(2)
     },
     (value: string) => {
-        let mask = parseInt(value.split("").reverse().join(""), 2)
+        let mask = parseInt(value, 2)
+
         document
             .querySelectorAll(`input[name^="activity_"]`)
-            .forEach((el: HTMLInputElement, k: number) => {
+            .forEach((el: HTMLInputElement) => {
                 el.checked = (mask & (1 << parseInt(el.dataset.offset))) !== 0
 
                 document
@@ -94,7 +91,7 @@ filtersStore.persist(
                     .classList.toggle("inactive", !el.checked)
             })
     },
-    "1".repeat(activityCount),
+    "1".repeat(activityCount)
 )
 
 document
@@ -120,11 +117,12 @@ filtersStore.persist(
     },
     "0",
 )
-elRecentToggle.addEventListener("click", () =>
-    filtersStore.syncOnly(["recent"]),
-)
+elRecentToggle.addEventListener("click", () => filtersStore.syncOnly(["recent"]))
+
 
 let elEntrygroupContainer = document.getElementById("entrygroups")
+
+// Handle highlights based on sum.
 let elsEntryButtons = document.querySelectorAll("button[data-sum]")
 function highlightEntriesWithSum(sum: number) {
     let instances = 0
@@ -141,10 +139,21 @@ function highlightEntriesWithSum(sum: number) {
         elEntrygroupContainer.classList.add("hovered")
     }
 }
-
 function removeHighlight() {
     elEntrygroupContainer.classList.remove("hovered")
 }
+elsEntryButtons.forEach((el: HTMLButtonElement) => {
+    el.addEventListener("mouseenter", (e: MouseEvent) =>
+        highlightEntriesWithSum(+el.dataset.sum),
+    )
+    el.addEventListener("focus", (e: FocusEvent) =>
+        highlightEntriesWithSum(+el.dataset.sum),
+    )
+    el.addEventListener("mouseleave", (e: MouseEvent) => removeHighlight())
+    el.addEventListener("blur", (e: FocusEvent) => removeHighlight())
+})
+
+// Handle hiding entries that do not match current filters
 
 let elEntryLoader = document.getElementById("entry-loader")
 let elEntryWrapper = document.getElementById("entry-wrapper")
@@ -204,17 +213,6 @@ if (window.persistedMapState.focusedEntry) {
     ) as HTMLButtonElement
     openEntry(el.dataset.entryUrl!)
 }
-
-elsEntryButtons.forEach((el: HTMLButtonElement) => {
-    el.addEventListener("mouseenter", (e: MouseEvent) =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("focus", (e: FocusEvent) =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("mouseleave", (e: MouseEvent) => removeHighlight())
-    el.addEventListener("blur", (e: FocusEvent) => removeHighlight())
-})
 
 try {
     let elMapWrapper = document.getElementById('map-wrapper')
@@ -349,7 +347,7 @@ try {
 
     let cb = () => {
         debug().clear()
-        renderMap(parseInt(filtersStore.getState("activities"), 2))
+        renderMap()
         debug().flush($background)
     }
 
@@ -357,9 +355,9 @@ try {
 
     cb()
 } catch (err: unknown) {
-    if (IN_PRODUCTION) {
+    // if (IN_PRODUCTION) {
         // Sentry?
-    }
+    // }
 
     console.error(err)
 
@@ -369,7 +367,7 @@ try {
     )
 }
 
-function renderMap(activitiesMask: number = 0) {
+function renderMap() {
     showAppState("loading")
 
     let nodes: ProcessedNode[] = []
@@ -394,25 +392,20 @@ function renderMap(activitiesMask: number = 0) {
 
             for (const entryId of entryIds) {
                 let entry = window.lookup.entries[entryId]
+                let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
 
-                if ((activitiesMask & entry.activities) !== entry.activities) {
-                    continue
+                let shouldFilter = shouldFilterEntry({
+                    activities: filtersStore.getState('activities'),
+                    lens_technical: filtersStore.getState('lens_technical'),
+                    lens_governance: filtersStore.getState('lens_governance'),
+                    activityCount: activityCount
+                }, entry)
+
+                elEntry.classList.toggle("matches-filters", !shouldFilter)
+
+                if (!shouldFilter) {
+                    filteredIds.push(entryId)
                 }
-
-                let lens = 0
-                if (filtersStore.getState("lens_technical") === "1") {
-                    lens |= 1 << 0
-                }
-
-                if (filtersStore.getState("lens_governance") === "1") {
-                    lens |= 1 << 1
-                }
-
-                if (lens !== 0 && (lens & entry.lenses) !== entry.lenses) {
-                    continue
-                }
-
-                filteredIds.push(entryId)
             }
 
             node.filtered = filteredIds.length === 0
@@ -436,13 +429,9 @@ function renderMap(activitiesMask: number = 0) {
         // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
         // We need to use offsetWidth and offsetHeight instead.
         node.size = [
-            node.el.firstElementChild.offsetWidth,
-            node.el.firstElementChild.offsetHeight,
+            node.el.firstElementChild!.offsetWidth,
+            node.el.firstElementChild!.offsetHeight,
         ]
-
-        if (node.size[0] === undefined || node.size[1] === undefined) {
-            console.log(node.el)
-        }
 
         node.weight = node.size[0] * node.size[1]
 
