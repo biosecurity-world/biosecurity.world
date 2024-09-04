@@ -118,9 +118,14 @@
             </div>
 
             <div class="mt-6">
-                <span class="font-medium leading-6 text-gray-900">By activity type</span>
-                <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the
-                    map.</p>
+                <div class="flex justify-between">
+                    <span class="font-medium leading-6 text-gray-900">By activity type</span>
+                    <button class="text-sm text-gray-700  underline px-4 py-1.5 -my-1.5 -mx-4 rounded-xl hover:bg-gray-100 transition" id="toggle-all-activities">
+                        Toggle all
+                    </button>
+                </div>
+
+                <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the map.</p>
 
                 <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
                     @foreach($tree->activities() as $activity)

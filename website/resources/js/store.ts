@@ -24,8 +24,8 @@ export default class FiltersStateStore {
             }
 
             let [check, apply, defaultValue] = this.tracked[key]
-            let value = check()
 
+            let value = check()
             apply(value)
 
             if (value === this.getState(key)) {
@@ -93,7 +93,7 @@ export default class FiltersStateStore {
             this.setInLocalStorage(key, value)
         }
 
-        this.syncOnly([key])
+        this.tracked[key][1](value)
 
         return this;
     }

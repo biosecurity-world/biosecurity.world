@@ -113,10 +113,6 @@ label[for^="activity_"].inactive {
     display: none;
 }
 
-.entrygroup > .intervention-type:has(+ div > [data-sum].matches-filters):nth-child(1) {
-    margin-top: 0 !important;
-}
-
 #entrygroups .intervention-type:not(:has(+ div > [data-sum].matches-filters)) {
     margin-top: 0;
     display: none;
