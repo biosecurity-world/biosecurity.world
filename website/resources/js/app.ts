@@ -92,13 +92,12 @@ filtersStore.persist(
     "1".repeat(activityInputs.length)
 )
 
-document
-    .querySelectorAll(`input[name^="activity_"]`)
-    .forEach((el: HTMLInputElement) => {
-        el.addEventListener("change", () =>
-            filtersStore.syncOnly(["activities"]),
-        )
-    })
+activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["activities"])))
+
+document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
+    let reversed = filtersStore.getState('activities').padStart(activityInputs.length, '0').split('').map((bit: string) => bit === '0' ? '1' : '0').join('')
+    filtersStore.setState('activities', reversed)
+})
 
 // Handle the 'highlight recently added entries' toggle
 let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement

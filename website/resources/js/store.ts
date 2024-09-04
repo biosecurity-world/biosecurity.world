@@ -94,6 +94,9 @@ export default class FiltersStateStore {
         }
 
         this.tracked[key][1](value)
+        if (this.cb) {
+            this.cb()
+        }
 
         return this;
     }
