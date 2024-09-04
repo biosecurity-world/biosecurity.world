@@ -1,5 +1,3 @@
-@php use App\Support\IdHash; @endphp
-@php use App\Services\NotionData\DataObjects\InterventionFocus; @endphp
 @php use App\Services\NotionData\DataObjects\Activity; @endphp
     <!doctype html>
 <html lang="en" class="h-full">
@@ -56,7 +54,7 @@
     </div>
 </header>
 
-<div class="w-full h-full xl:px-36 flex">
+<div class="w-full h-full flex duration-500 transition-[padding] " id="map-wrapper">
     <aside class="w-full h-full border-r divide-y border-y border-l max-w-md rounded-l-3xl flex flex-col">
         <section class="p-6 bg-white rounded-l-3xl">
             <h3 class="text-xl font-display flex-grow">
@@ -205,7 +203,7 @@
                 <span class="sr-only">Loading...</span>
             </div>
         </section>
-        <section data-state="success" class="app-state state-inactive flex" aria-hidden="true">
+        <section data-state="success" class="app-state state-inactive !sticky" aria-hidden="true">
             <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y" id="entry-wrapper"></div>
             <div
                 class="absolute inset-0 z-20 w-full h-full max-w-md border-y pointer-events-none flex justify-center border-r bg-gray-50 rounded-r-3xl pt-16"
@@ -223,6 +221,7 @@
                 <span class="sr-only">Loading...</span>
             </div>
 
+            <div id="above-map"></div>
             <svg role="main" id="map" width="100%" height="100%">
                 <g id="zoom-wrapper">
                     <g id="center-wrapper">
@@ -288,6 +287,7 @@
             </div>
         </section>
     </main>
+
 </div>
 
 <footer aria-labelledby="footer-heading" class="px-4 xl:px-36">

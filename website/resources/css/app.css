@@ -25,6 +25,24 @@
     opacity: 0;
 }
 
+#map-wrapper:not(.fullscreen) {
+    @apply xl:px-36
+}
+
+#map-wrapper.fullscreen {
+    @apply absolute inset-0 px-0;
+}
+
+#map-wrapper.fullscreen > .rounded-l-3xl {
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+}
+
+#map-wrapper.fullscreen > .rounded-r-3xl {
+    border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
 .invisible {
     position: absolute !important;
     top: -9999px !important;
