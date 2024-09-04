@@ -26,7 +26,7 @@
 }
 
 #map-wrapper:not(.fullscreen) {
-    @apply xl:px-36
+    @apply xl:px-36;
 }
 
 #map-wrapper.fullscreen {

@@ -106,9 +106,7 @@ document
     })
 
 // Handle the 'highlight recently added entries' toggle
-let elRecentToggle = document.querySelector(
-    'input[name="recent"]',
-) as HTMLInputElement
+let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
 filtersStore.persist(
     "recent",
     () => `${+elRecentToggle.checked}`,
@@ -198,11 +196,6 @@ document
         )
     })
 
-document.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-        closeEntry()
-    }
-})
 
 if (window.persistedMapState.focusedEntry) {
     let [entrygroup, entry] = window.persistedMapState.focusedEntry
@@ -238,13 +231,38 @@ try {
     $centerWrapper.attr("transform", `translate(${computeMapCenter()})`)
 
     let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
-    let wheelIncrements = 0
+    let directionalIncrements = 0
     let nextScrollShouldBeIgnored = false
     let comingFromTop = elMapWrapper.getBoundingClientRect() > 0
     let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
 
     if (elMapWrapper.getBoundingClientRect().top < 0) {
         elMapWrapper.classList.add('fullscreen')
+    }
+
+    const handleMovement = (direction: number) => {
+        if (!isMapFixed()) {
+            return
+        }
+
+        directionalIncrements += direction
+
+        if (directionalIncrements === -2) {
+            elMapWrapper.classList.remove('fullscreen')
+            comingFromTop = true
+            directionalIncrements = 0
+            window.scrollTo(0, mapDistanceToTop - 1 - 1)
+
+            return;
+        }
+
+        if (directionalIncrements === 5) {
+            elMapWrapper.classList.remove('fullscreen')
+            directionalIncrements = 0
+            comingFromTop = false
+            nextScrollShouldBeIgnored = true
+            window.scrollTo(0, mapDistanceToTop + 1 + 1)
+        }
     }
 
     document.addEventListener('scroll', (e: Event) => {
@@ -264,29 +282,19 @@ try {
         }
     })
 
-    document.addEventListener('wheel', (e: WheelEvent) => {
-        if (!isMapFixed()) {
-            return
+    document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+            closeEntry()
         }
 
-        wheelIncrements += e.deltaY > 0 ? 1 : -1
-
-
-        if (wheelIncrements === -2) {
-            elMapWrapper.classList.remove('fullscreen')
-            comingFromTop = true
-            wheelIncrements = 0
-            window.scrollTo(0, mapDistanceToTop - 1 - 1)
-
-            return;
+        if (e.key === 'ArrowDown') {
+            handleMovement(1)
         }
 
-        if (wheelIncrements === 5) {
-            elMapWrapper.classList.remove('fullscreen')
-            wheelIncrements = 0
-            comingFromTop = false
-            nextScrollShouldBeIgnored = true
-            window.scrollTo(0, mapDistanceToTop + 1 + 1)
+        if (e.key === 'ArrowUp') {
+            handleMovement(-1)
         }
     })
 
