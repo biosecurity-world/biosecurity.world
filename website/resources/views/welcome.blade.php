@@ -69,15 +69,6 @@
                 </time>
             </p>
 
-            <div class="relative mt-2">
-                <input type="text" autocomplete="off"
-                       class="bg-white border-gray-200 rounded-xl py-2.5 pr-11 pl-4 w-full shadow-sm border focus:outline-none focus:ring-2 focus:border-emerald-600 transition focus:ring-emerald-600"
-                       placeholder="Search '1Day Sooner' or 'Research labs'">
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                    <x-heroicon-s-magnifying-glass class="size-5 text-gray-500"/>
-                </div>
-            </div>
-
             <div class="mt-4 flex items-center justify-between">
                       <span class="flex flex-grow flex-col">
                         <span class="text-sm font-medium leading-6 text-gray-900">
