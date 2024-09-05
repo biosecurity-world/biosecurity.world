@@ -57,7 +57,7 @@ class Hydrator
 
             if (count($parents) === 0) {
                 if (! $isCategory) {
-                    $errors[] = HydrationError::fromString('Only categories can be top-level but these are entries.', $page);
+                    $errors[] = HydrationError::fromString('Entries must belong to a category.<', $page);
 
                     continue;
                 }

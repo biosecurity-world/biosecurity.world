@@ -12,7 +12,7 @@
 @tailwind utilities;
 
 .app-state {
-    @apply absolute inset-0 h-full w-full transition-opacity duration-300 bg-gray-100 rounded-r-3xl  flex items-center justify-center;
+    @apply absolute inset-0 h-full w-full transition-opacity duration-300 flex items-center justify-center;
 }
 
 .state-active {
@@ -25,12 +25,19 @@
     opacity: 0;
 }
 
+#map-wrapper {
+    max-width: 144rem;
+    margin: 0 auto;
+}
+
 #map-wrapper:not(.fullscreen) {
-    @apply xl:px-36;
+    @apply 2xl:px-36 -mt-40;
+    max-height: 144rem;
 }
 
 #map-wrapper.fullscreen {
-    @apply absolute inset-0 px-0;
+    @apply absolute inset-0 px-0 bg-white;
+    max-height: unset;
 }
 
 #map-wrapper.fullscreen > .rounded-l-3xl {
@@ -128,4 +135,8 @@ label[for^="activity_"].inactive {
 
 #entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
     opacity: 0.25;
+}
+
+#entrygroups.hovered .intervention-type:has(+ div > [data-sum].active) {
+    @apply text-emerald-600;
 }

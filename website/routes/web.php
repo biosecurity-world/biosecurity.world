@@ -28,7 +28,7 @@ Route::get('/', function (Notion $notion) {
     ]);
 })->name('welcome');
 
-Route::get('/about', fn () => '')->name('about');
+Route::get('/about', fn () => view('about'))->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 

@@ -11,7 +11,7 @@ export default {
                 governance: colors.blue[600],
             },
             fontFamily: {
-                sans: ["Inter", ...defaultConfig.theme.fontFamily.sans],
+                sans: ["Nunito", ...defaultConfig.theme.fontFamily.sans],
                 display: ["Gilroy", ...defaultConfig.theme.fontFamily.sans],
             },
         },

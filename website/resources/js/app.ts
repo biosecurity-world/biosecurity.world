@@ -99,23 +99,6 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', () =
     filtersStore.setState('activities', reversed)
 })
 
-// Handle the 'highlight recently added entries' toggle
-let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
-filtersStore.persist(
-    "recent",
-    () => `${+elRecentToggle.checked}`,
-    (value: string) => {
-        elRecentToggle.checked = value === "1"
-
-        let label = document.querySelector(
-            'label[for="recent"]',
-        ) as HTMLLabelElement
-        label.dataset.toggle = elRecentToggle.checked ? "on" : "off"
-    },
-    "0",
-)
-elRecentToggle.addEventListener("click", () => filtersStore.syncOnly(["recent"]))
-
 
 let elEntrygroupContainer = document.getElementById("entrygroups")!
 
@@ -230,6 +213,11 @@ try {
     let nextScrollShouldBeIgnored = false
     let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
     let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+
+    window.addEventListener('resize', () => {
+        comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+        mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+    })
 
     if (elMapWrapper.getBoundingClientRect().top < 0) {
         elMapWrapper.classList.add('fullscreen')

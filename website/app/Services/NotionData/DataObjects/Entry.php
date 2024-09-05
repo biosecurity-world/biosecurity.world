@@ -50,7 +50,7 @@ class Entry
 
     public function notionUrl(): string
     {
-        return sprintf('https://notion.so/%s', IdHash::reverse($this->id));
+        return sprintf('https://notion.so/%s', str_replace('-', '', IdHash::reverse($this->id)));
     }
 
     public function host(): string
