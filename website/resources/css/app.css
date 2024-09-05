@@ -26,7 +26,7 @@
 }
 
 #map-wrapper:not(.fullscreen) {
-    @apply xl:px-36
+    @apply xl:px-36;
 }
 
 #map-wrapper.fullscreen {
@@ -107,6 +107,15 @@ label[for^="activity_"].inactive {
 
 [data-toggle="on"] > span {
     @apply translate-x-5;
+}
+
+[data-sum]:not(.matches-filters) {
+    display: none;
+}
+
+#entrygroups .intervention-type:not(:has(+ div > [data-sum].matches-filters)) {
+    margin-top: 0;
+    display: none;
 }
 
 #entrygroups.hovered [data-sum]:not(.active) {

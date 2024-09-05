@@ -1,7 +1,7 @@
-<div class="relative w-fit cursor-pointer rounded-md border bg-white p-2 space-y-2 pointer-events-auto">
+<div class="relative w-fit cursor-pointer rounded-md border bg-white p-2 pointer-events-auto entrygroup">
     @foreach($entries as $name => $collection)
-        <div>
-            <h4 class="intervention-type text-xs uppercase tracking-tight text-gray-500  font-display">{{ $name }}</h4>
+        <div class="">
+            <h4 class="intervention-type mt-2 text-xs uppercase tracking-tight text-gray-500  font-display">{{ $name }}</h4>
             <div class="grid grid-cols-6 gap-2">
                 @foreach($collection as $k => $entry)
                     <button

@@ -3,7 +3,7 @@ import {ProcessedNode} from "@/types"
 import {fitToSector} from "@/layout"
 
 
-export const IN_PRODUCTION = import.meta.env.PROD === true
+// export const IN_PRODUCTION = import.meta.env.PROD === true
 
 export const PI = Math.PI
 export const PI_4 = PI / 4
