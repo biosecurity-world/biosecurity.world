@@ -35,7 +35,7 @@
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
-                Humans regularly update the map and our team monitors privileged channels for announcements about new
+                Humans update regularly the map and our team monitors privileged channels for announcements about new
                 organizations.
             </p>
         </li>
@@ -170,7 +170,7 @@
         </section>
     </aside>
 
-    <main class="w-full h-full relative border-y border-r bg-gray-50 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
+    <main class="w-full h-full relative border-b border-r bg-gray-50 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
         <section data-state="error" aria-hidden="true"
                  class="app-state state-inactive">
             <div class="text-center">

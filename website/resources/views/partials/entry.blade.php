@@ -6,7 +6,6 @@
     <meta name="viewport"
           content="length=device-length, user-scalable=yes, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Understand the biosecurity landscape. - Biosecurity World</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
@@ -14,51 +13,31 @@
     @vite('resources/js/app.ts')
     @vite('resources/css/app.css')
 </head>
-<body class="h-full max-w-lg border-l border-t bg-gray-50">
+<body class="h-full max-w-lg border-l bg-gray-50">
 @endif
 <div class="entry flex flex-col h-full justify-between border-r border-t-0 rounded-r-3xl bg-white">
     <div>
-        <div class="flex justify-between items-center bg-white pl-4 pr-6 py-4 rounded-tr-3xl border-b border-r">
-            <ol role="list" class="flex items-center space-x-2 overflow-x-scroll">
-                <li>
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 19" fill="currentColor"
-                             class="size-4 text-gray-500">
-                            <path stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="1.5"
-                                  d="M3.3 14v-3.3c0-.5.4-.9.9-.9h11.6c.5 0 .9.4.9.9V14M3.3 14a1.7 1.7 0 1 0 0 3.3 1.7 1.7 0 0 0 0-3.3Zm13.4 0a1.7 1.7 0 1 0 0 3.3 1.7 1.7 0 0 0 0-3.3ZM10 14a1.7 1.7 0 1 0 0 3.3 1.7 1.7 0 0 0 0-3.3Zm0 0V5.7m-1.7 0h3.4c.4 0 .8-.4.8-.9V1.5c0-.5-.4-.8-.8-.8H8.3c-.4 0-.8.3-.8.8v3.3c0 .5.4.9.8.9Z"/>
-                            <path d="M7.5.7h5v5h-5z"/>
-                        </svg>
-
-                        <span class="sr-only">Root</span>
-                    </div>
-                </li>
+        <div class="flex justify-between items-center bg-gray-50 pl-4 pr-6 py-4 rounded-tr-3xl border-b border-r">
+            <ol role="list" class="flex items-center space-x-1 overflow-x-scroll">
                 @foreach($breadcrumbs as $breadcrumb)
                     <li class="flex items-center">
+                        <span class="mr-1 text-sm font-medium text-gray-700 whitespace-nowrap">{{ $breadcrumb }}</span>
+
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                              class="size-5 flex-shrink-0 text-gray-500">
                             <path fill-rule="evenodd"
                                   d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"
                                   clip-rule="evenodd"/>
                         </svg>
-
-                        <span class="ml-2 text-sm font-medium text-gray-700 whitespace-nowrap">{{ $breadcrumb }}</span>
                     </li>
                 @endforeach
 
                 <li class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                         class="size-5 flex-shrink-0 text-gray-500">
-                        <path fill-rule="evenodd"
-                              d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"
-                              clip-rule="evenodd"/>
-                    </svg>
-
                     <x-entry-logo class="ml-2" :logo="$entry->logo" />
                 </li>
             </ol>
 
-            <button class="flex items-center duration-300 hover:bg-gray-50 transition p-2 -m-2 rounded-xl group close-entry">
+            <button class="flex items-center duration-300 hover:bg-white hover:border-gray-200 border border-transparent transition p-2 -m-2 rounded-full group close-entry">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                      class="size-5 text-gray-700 group-hover:text-primary-600">
                     <path

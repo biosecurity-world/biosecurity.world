@@ -1,20 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="length=device-length, user-scalable=yes, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>About - Biosecurity World</title>
-
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700" rel="stylesheet"/>
-
-    @vite('resources/js/app.ts')
-    @vite('resources/css/app.css')
-</head>
-<body class="antialiased bg-gray-100">
-<x-navbar class="mt-4 lg:mt-8 lg:bg-white shadow-sm" border />
+<x-layouts.default class="antialiased bg-gray-100" title="About">
+<x-navbar class="mt-4 lg:mt-8 lg:bg-white" border />
 <main class="max-w-7xl mx-auto mt-12 px-6 xl:px-0">
     <div class="lg:flex">
         <h2 class="order-1 flex-1 text-lg lg:text-2xl font-display text-primary-950 lg:text-right">Who we are</h2>
@@ -49,6 +34,23 @@
     </section>
 
     <section class="mt-12 lg:mt-24">
+        <h2 class="text-lg lg:text-2xl font-display text-primary-950">Our values</h2>
+        <ul>
+            <li>
+                <span>Openness</span>
+
+                <p>Our work , and our processes are transparent for the world to see.</p>
+            </li>
+
+            <li>
+                <span>Efficiency</span>
+
+                <p> strive to make the most of our resources and time to achieve our goals.</p>
+            </li>
+        </ul>
+    </section>
+
+    <section class="mt-12 lg:mt-24">
         <h2 class="text-lg lg:text-2xl font-display text-primary-950">Contact us at</h2>
         <p class="max-w-3xl  text-3xl font-bold tracking-tight lg:text-6xl font-display text-primary-900">
             team@biosecurity.world
@@ -72,5 +74,4 @@
     </section>
 </main>
 <x-footer />
-</body>
-</html>
+</x-layouts.default>

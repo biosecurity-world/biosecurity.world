@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', ShowWelcomeController::class)->name('welcome');
 Route::view('/about', 'about')->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
-Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
+Route::view('/how-to-contribute', 'how-to-contribute')->name('how-to-contribute');
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
 Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');

@@ -4,10 +4,7 @@
         <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
                        aria-hidden="true"
                        data-node="{{ $tree->rootNodeId }}">
-            <p class="bg-white border max-w-[65ch] rounded-xl px-4 py-2 text-center">
-                Biosecurity is about protecting against biological agents and the people who might
-                release them, either accidentally or on purpose.
-            </p>
+            <div class="size-px"></div>
         </foreignObject>
 
         <g>
