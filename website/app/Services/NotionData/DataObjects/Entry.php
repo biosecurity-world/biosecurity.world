@@ -64,17 +64,6 @@ class Entry
         return $host;
     }
 
-    /**  @param array<int, int> $map */
-    public function getActivityBitmask(array $map): int
-    {
-        $mask = 0;
-
-        foreach ($map as $k => $id) {
-            $mask |= $this->hasActivity($id) << $k;
-        }
-
-        return $mask;
-    }
 
     public function hasActivity(int $id): bool
     {
@@ -87,18 +76,47 @@ class Entry
         return false;
     }
 
-    public function lens(): int
-    {
-        $mask = 0;
+    public static function  bitmaskLength(): int {
+        return count(Activity::$seen) + 3;
+    }
+
+    public static function andOrBitmask(): int {
+        return 0b111 << count(Activity::$seen);
+    }
+
+
+    public function isTechnical(): bool {
         foreach ($this->interventionFocuses as $focus) {
             if ($focus->isTechnical()) {
-                $mask |= 1 << 0;
-            }
-
-            if ($focus->isGovernance()) {
-                $mask |= 1 << 1;
+                return true;
             }
         }
+
+        return false;
+    }
+
+    public function isGovernance(): bool {
+        foreach ($this->interventionFocuses as $focus) {
+            if ($focus->isGovernance()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getFilterBitmask(): int
+    {
+        $mask = 0;
+        $offset = 0;
+
+        foreach (Activity::$seen as $id) {
+            $mask |= $this->hasActivity($id) << $offset++;
+        }
+
+        $mask |= ($this->isTechnical() ? 1 : 0) << $offset++;
+        $mask |= ($this->isGovernance() ? 1 : 0) << $offset++;
+        $mask |= ($this->gcbrFocus ? 1 : 0) << $offset++;
 
         return $mask;
     }

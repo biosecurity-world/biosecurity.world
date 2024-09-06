@@ -12,9 +12,10 @@
     <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700" rel="stylesheet"/>
 
     <script>
-        window.nodes = @json($tree->nodes);
-        // TODO: This is wasteful and will be removed. We want it to work before optimizing it.
-        window.lookup = @json($lookup);
+        window.nodes = @json($nodes);
+        window.masks = @json($entries);
+        window.bitmaskLength = {{ $bitmaskLength }};
+        window.andOrMask = {{ $andOrMask }};
     </script>
 
     @vite('resources/js/app.ts')
@@ -93,7 +94,7 @@
                         <input type="checkbox" name="lens_technical" id="lens_technical" value="technical"
                                class="sr-only peer">
                         <label for="lens_technical"
-                               class="block py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
+                               class="py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
                             <x-at-technical class="flex-grow"/>
                             <x-heroicon-m-check class="size-5 text-white check"/>
                         </label>
@@ -102,7 +103,7 @@
                         <input type="checkbox" name="lens_governance" id="lens_governance" value="governance"
                                class="sr-only peer">
                         <label for="lens_governance"
-                               class="block py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition rounded-b-xl px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
+                               class="py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition rounded-b-xl px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
                             <x-at-governance class="flex-grow"/>
                             <x-heroicon-m-check class="size-5 text-white check"/>
                         </label>
@@ -119,8 +120,8 @@
                             Include only organizations focused on large-scale pandemics prevention.
                         </span>
                       </span>
-                <input type="checkbox" class="sr-only peer" aria-hidden="true" id="recent" name="recent">
-                <label for="recent" data-toggle="off"
+                <input type="checkbox" class="sr-only peer" aria-hidden="true" id="gcbr_focus" name="gcbr_focus">
+                <label for="gcbr_focus" data-toggle="off"
                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-600 peer-focus:ring-offset-2">
                 <span aria-hidden="true"
                       class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
@@ -143,7 +144,6 @@
                         <li>
                             <input type="checkbox" checked name="activity_{{ $activity->id }}"
                                    id="activity_{{ $activity->id }}"
-                                   data-offset="{{ array_search($activity->id, Activity::$seen) }}"
                                    value="{{ $activity->id }}" class="sr-only peer">
                             <label
                                 for="activity_{{ $activity->id }}"
@@ -228,47 +228,8 @@
             </div>
 
             <div id="above-map"></div>
-            <svg role="main" id="map" width="100%" height="100%">
-                <g id="zoom-wrapper">
-                    <g id="center-wrapper">
-                        <g id="background"></g>
-
-
-                        <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
-                                       aria-hidden="true"
-                                       data-node="{{ $tree->rootNodeId }}">
-                            <p class="bg-white border max-w-[65ch] rounded-xl px-4 py-2 text-center">
-                                Biosecurity is about protecting against biological agents and the people who might
-                                release them, either accidentally or on purpose.
-                            </p>
-                        </foreignObject>
-
-                        <g>
-                            @foreach($tree->categories() as $category)
-                                <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
-                                               aria-hidden="true"
-                                               data-node="{{ $category->id }}">
-                                    <x-category :category="$category"/>
-                                </foreignObject>
-                            @endforeach
-                        </g>
-
-                        <g id="entrygroups">
-                            @foreach($tree->entrygroups() as $entrygroup)
-                                <foreignObject width="100%"
-                                               height="100%"
-                                               class="invisible pointer-events-none"
-                                               aria-hidden="true"
-                                               data-node="{{ $entrygroup->id }}">
-                                    <x-entrygroup
-                                        :entries="array_map(fn (string $id) => $tree->lookup[$id], $entrygroup->entries)"
-                                        :entrygroup="$entrygroup"
-                                    />
-                                </foreignObject>
-                            @endforeach
-                        </g>
-                    </g>
-                </g>
+            <svg id="map" width="100%" height="100%">
+                <!-- The map will be dynamically inserted here -->
             </svg>
             <div class="absolute bottom-6 right-6">
                 <div class="flex flex-col bg-white shadow divide-y rounded-lg">

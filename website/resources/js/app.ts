@@ -37,67 +37,63 @@ window.persistedMapState.sync()
 
 const filtersStore = new FiltersStateStore()
 
-document
-    .getElementById("filters-reset")!
-    .addEventListener("click", () => filtersStore.reset())
-// Handle the 'Focus on' filter
-for (const lens of ["lens_technical", "lens_governance"]) {
-    let elLens = document.querySelector(
-        `input[name="${lens}"]`,
-    ) as HTMLInputElement
-    filtersStore.persist(
-        lens,
-        () => `${+elLens.checked}`,
-        (checked: string) => (elLens.checked = checked === "1"),
-        "0",
-    )
-
-    elLens.addEventListener("change", () => filtersStore.syncOnly([lens]))
-}
+document.getElementById("filters-reset")!.addEventListener("click", () => filtersStore.reset())
 
 // Handle the 'By activity' filter
 let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
+let technicalLens = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
+let governanceLens = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
+let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
 filtersStore.persist(
-    "activities",
+    "mask",
     () => {
         let mask = 0
-        activityInputs.forEach((el: HTMLInputElement) => {
-            if (!el.checked) {
-                return;
-            }
+        let offset = 0
 
-            mask |= 1 << parseInt(el.dataset.offset!)
-        })
+        activityInputs.forEach((el) => mask |= (el.checked ? 1 : 0) << offset++)
+        mask |= (technicalLens.checked ? 1 : 0) << offset++
+        mask |= (governanceLens.checked ? 1 : 0) << offset++
+        mask |= (gcbrFocus.checked ? 1 : 0) << offset
 
         return mask.toString(2)
     },
-    (value: string) => {
-        let mask = parseInt(value, 2)
+    (maskStr: string) => {
+        let mask = parseInt(maskStr, 2)
+        let offset = 0
 
         activityInputs.forEach((el: HTMLInputElement) => {
-            el.checked = (mask & (1 << parseInt(el.dataset.offset!))) !== 0
+            el.checked = (mask & (1 << offset++)) !== 0
 
             document
                 .querySelector(`label[for="${el.id}"]`)!
                 .classList.toggle("inactive", !el.checked)
         })
+
+        technicalLens.checked = (mask & (1 << offset++)) !== 0
+        governanceLens.checked = (mask & (1 << offset++)) !== 0
+        gcbrFocus.checked = (mask & (1 << offset)) !== 0
+
+        document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
     },
-    "1".repeat(activityInputs.length)
+    "0".repeat(window.bitmaskLength),
 )
 
-activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["activities"])))
-
-document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
-    let reversed = filtersStore
-        .getState('activities')
-        .padStart(activityInputs.length, '0')
-        .split('')
-        .map((bit: string) => bit === '0' ? '1' : '0')
-        .join('')
-
-    filtersStore.setState('activities', reversed)
+activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["mask"])))
+technicalLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
+governanceLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
+gcbrFocus.addEventListener("change", (e) => {
+    document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
+    return filtersStore.syncOnly(["mask"]);
 })
 
+document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
+    activityInputs.forEach((el: HTMLInputElement) => {
+        el.checked = !el.checked
+        document.querySelector(`label[for="${el.id}"]`)!.classList.toggle("inactive", !el.checked)
+    })
+
+    filtersStore.syncOnly(["mask"])
+})
 
 let elEntrygroupContainer = document.getElementById("entrygroups")!
 
@@ -122,11 +118,11 @@ function removeHighlight() {
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
     let entryId = parseInt(el.dataset.entry!, 10)
 
-    el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
-    el.addEventListener("focus", () => highlightEntriesWithId(entryId))
-    el.addEventListener("mouseleave", () => removeHighlight())
-    el.addEventListener("blur", () => removeHighlight())
     el.addEventListener("click", () => openEntry(el))
+    el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
+    el.addEventListener("mouseleave", () => removeHighlight())
+    el.addEventListener("focus", () => highlightEntriesWithId(entryId))
+    el.addEventListener("blur", () => removeHighlight())
 })
 
 // Handle hiding entries that do not match current filters
@@ -174,6 +170,12 @@ if (window.persistedMapState.focusedEntry) {
 try {
     let elMapWrapper = document.getElementById('map-wrapper')!
     let $map = select<SVGElement, any>("#map")
+
+    let mapContentRes = await fetch('/m')
+    let mapContent = await mapContentRes.text()
+
+    $map.html(mapContent)
+
     let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
     let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
     let $background = select<SVGGElement, any>("#background")
@@ -312,19 +314,14 @@ function renderMap() {
             Partial<ProcessedNode> & { el: SVGElement }
 
         if (node.od === 0) {
-            let entryIds = window.lookup.entrygroups[node.id].entries
+            let entryIds = node.entries
             let filteredIds = []
 
             for (const entryId of entryIds) {
-                let entry = window.lookup.entries[entryId]
+                let entryMask = window.masks[entryId]
                 let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
 
-                let shouldFilter = shouldFilterEntry({
-                    activities: filtersStore.getState('activities'),
-                    lens_technical: filtersStore.getState('lens_technical'),
-                    lens_governance: filtersStore.getState('lens_governance'),
-                    activityCount: activityInputs.length
-                }, entry)
+                let shouldFilter = shouldFilterEntry(filtersStore.getState('mask'), entryMask.toString(2))
 
                 elEntry.classList.toggle("matches-filters", !shouldFilter)
 
@@ -400,14 +397,13 @@ function renderMap() {
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
 
-        if (!deltaFromSiblings[node.parentId]) {
-            deltaFromSiblings[node.parentId] = 0
+        if (!deltaFromSiblings[node.parent]) {
+            deltaFromSiblings[node.parent] = 0
         }
 
-        let parent = parentIdToNode[node.parentId]
+        let parent = parentIdToNode[node.parent]
         if (!parent) {
-            console.log(node)
-            continue
+            throw new Error(`Parent with id ${node.parent} not found for node ${node.id}`)
         }
 
         let delta = parent.sector[0] + deltaFromSiblings[parent.id]

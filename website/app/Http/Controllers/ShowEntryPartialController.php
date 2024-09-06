@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
 
-class ShowEntryController
+class ShowEntryPartialController
 {
     public function __invoke(Notion $notion, int $id, int $entryId)
     {
@@ -13,7 +13,7 @@ class ShowEntryController
 
         abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
 
-        return view('entries.show', [
+        return view('partials.entry', [
             // This is used only in development to conditionally load
             // the CSS before the entry's HTML to debug it directly on the page
             // instead of through the map's interface.

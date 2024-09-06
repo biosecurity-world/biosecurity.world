@@ -48,7 +48,11 @@ class Tree
     /** @return Collection<int, Activity> */
     public function activities(): Collection
     {
-        return $this->entries()->flatMap(fn (Entry $e) => $e->activities)->unique('id')->values();
+        $activities = $this->entries()->flatMap(fn (Entry $e) => $e->activities)->unique('id')->values();
+
+        return collect(Activity::$seen)->map(function (int $id) use ($activities) {
+            return $activities->first(fn (Activity $a) => $a->id === $id);
+        });
     }
 
     /** @return Collection<int, InterventionFocus> */
@@ -121,7 +125,7 @@ class Tree
             $node = self::getNode($tree, $id, $parentId);
 
             if (! $parentToChildrenMap->has($id) && $tree->lookup[$id] instanceof Category) {
-                $tree->errors[] = HydrationError::fromString('Category contains 0 entries.', $tree->lookup[$id]);
+                $tree->errors[] = HydrationError::fromString('Category is empty.', $tree->lookup[$id]);
 
                 return [];
             }

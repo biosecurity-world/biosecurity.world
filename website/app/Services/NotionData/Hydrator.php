@@ -134,7 +134,6 @@ class Hydrator
                 return Activity::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
             'interventionFocuses' => array_map(function (SelectOption $opt) {
-                //                dump($opt);
                 return InterventionFocus::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
             'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,

@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ShowEntryController;
+use App\Http\Controllers\ShowEntryPartialController;
+use App\Http\Controllers\ShowMapPartialController;
 use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\DataObjects\Entrygroup;
 use App\Services\NotionData\Notion;
@@ -15,7 +16,8 @@ Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
-Route::get('/e/{id}/{entryId}', ShowEntryController::class)->name('entries.show');
+Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
+Route::get('/m', ShowMapPartialController::class);
 Route::get('/_/entries', function (Notion $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 

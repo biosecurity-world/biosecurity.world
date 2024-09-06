@@ -1,27 +1,21 @@
-export function shouldFilterEntry(state: { activities: string, lens_technical: string, lens_governance: string, activityCount: number}, entry: { activities: number, lenses: number}) {
-    let lens = 0
-    if (state.lens_technical === "1") {
-        lens |= 1 << 0
-    }
+// This a bad abstraction. We shouldn't generalize here.
+export function shouldFilterEntry(mask: string, cmp: string): boolean {
+    let andOrMask = window.andOrMask.toString(2).padStart(window.bitmaskLength, "0")
 
-    if (state.lens_governance === "1") {
-        lens |= 1 << 1
-    }
+    mask = mask.padStart(window.bitmaskLength, "0")
+    cmp = cmp.padStart(window.bitmaskLength, "0")
 
-    if (lens !== 0 && (entry.lenses & lens) === 0) {
-        return true
-    }
-
-    let stateActivities = state.activities.padStart(state.activityCount, '0').split("")
-    let entryActivities = entry.activities.toString(2).padStart(state.activityCount, '0').split("")
-
-    let shouldFilter = true
-    for (let i = 0; i < entryActivities.length; i++) {
-        if (stateActivities[i] === "1" && entryActivities[i] === "1") {
-            shouldFilter = false
-            break
+    for (let i = 0; i < mask.length; i++) {
+        if (andOrMask[i] === '1' && mask[i] === '1' && cmp[i] === '0') {
+            return true
         }
     }
 
-    return shouldFilter
+    for (let i = 0; i < mask.length; i++) {
+        if (andOrMask[i] === '0' && mask[i] === "1" && cmp[i] === "1") {
+            return false
+        }
+    }
+
+    return true
 }
