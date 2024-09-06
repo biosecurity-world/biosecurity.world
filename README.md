@@ -1,25 +1,18 @@
 # biosecurity.world
 
 ### me
-- [ ] [hours] Good mobile experience
-- [ ] [????] Safari Fun
-- [ ] [hour] Plumbing: search
-- [ ] [hour] Implement the 'Report error' button on the entry page
+- [ ] How to contribute?
 - [ ] [hour] color the tree so that it's easy to see the different levels (alternate colors for depth=1? is easiest, see
   then)
+- [ ] Have a "strict mode" for hydration where you run checks that take longer (like active_url)
+- [ ] [hours] Good mobile experience
+- [ ] [????] Safari Fun
 - [ ] [minutes] Highlight the path to the highlighted entry
 - [ ] [minutes] Make the edges nicer
+- [ ] [hour] Implement the 'Report error' button on the entry page
 - [ ] [minute] Link Give feedback to feedback form for now
-s 
-### next sprint (ideas)
-- [ ] take a look at the TSC issues
-- [ ] [hour] Privacy policy (not needed for now)
-- [ ] Expand the map+filter to full screen once scrolling 
-- [ ] Easy way to reset the filters (button?) 
-- [ ] Have a "strict mode" for hydration where you run checks that take longer (like active_url) 
-
-### Fun ideas
-- RSS feed
-
-#### postponed (needs rethinking)
-- [ ] [hour] Add the "changelog" to the navigation bar that lists the new entries since the last visit
+- [ ] Inclusion Criteria
+- [ ] Rejected entries
+- [ ] Analytics
+- [ ] Document contribution workflows
+- [ ] Write a lot more doc, clean up the code and the little abominations
