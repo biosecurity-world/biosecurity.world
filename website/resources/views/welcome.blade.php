@@ -1,5 +1,5 @@
 @php use App\Services\NotionData\DataObjects\Activity; @endphp
-<!doctype html>
+    <!doctype html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -21,8 +21,8 @@
     @vite('resources/css/app.css')
 </head>
 <body class="h-full antialiased w-full bg-gray-100">
-<header class="w-full pb-52 lg:pb-[14.25rem] bg-gradient-to-tl from-emerald-600 to-emerald-950 pt-4 lg:pt-8">
-    <x-navbar class="lg:bg-white/20 lg:shadow-inner lg:shadow-white/30" invert />
+<header class="w-full pb-52 lg:pb-[14.25rem] bg-gradient-to-tl from-primary-600 to-primary-950 pt-4 lg:pt-8">
+    <x-navbar class="lg:bg-white/20 lg:shadow-inner lg:shadow-white/30" invert/>
 
     <h1 class="px-6 mt-8 lg:mt-24 max-w-3xl lg:text-center text-3xl font-bold tracking-tight lg:text-6xl font-display text-white mx-auto">
         Explore the complete map of the biosecurity field.
@@ -46,7 +46,7 @@
                 We encourage submissions and corrections, which are individually reviewed by
                 researchers from
                 <a href="https://www.ens.psl.eu" class="underline text-white hover:text-white/70">ENS</a>
-                 and <a href="https://ox.ac.uk" class="underline text-white hover:text-white/70">Oxford University</a>.
+                and <a href="https://ox.ac.uk" class="underline text-white hover:text-white/70">Oxford University</a>.
             </p>
         </li>
         <li>
@@ -54,7 +54,9 @@
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
-                As a scientific non-profit, we diligently adhere to <a href="" class="underline text-white hover:text-white/70">open processes</a> and keep a record of
+                As a scientific non-profit, we diligently adhere to <a href=""
+                                                                       class="underline text-white hover:text-white/70">open
+                    processes</a> and keep a record of
                 our inclusion decisions for people to challenge.
             </p>
         </li>
@@ -62,9 +64,10 @@
 </header>
 
 <div class="w-full h-full flex duration-500 transition-[padding,border-radius]" id="map-wrapper">
-    <aside class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
+    <aside
+        class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
         <section class="p-6">
-            <h3 class="text-xl font-display flex-grow text-emerald-950">
+            <h3 class="text-xl font-display flex-grow text-primary-950">
                 About the map.
             </h3>
             <p class="text-gray-700 text-sm">
@@ -74,19 +77,11 @@
                 </time>
             </p>
 
-            <p class="mt-2 text-gray-900">
-                Biosecurity is about protecting against biological agents and the people who might release them, either accidentally or on purpose.
-            </p>
+            <h5 class="font-display mt-4 text-primary-950">Inclusion criteria</h5>
 
-            <h5 class="font-display mt-4 text-emerald-950">Inclusion criteria</h5>
-            <ul>
-                <li>
-
-                </li>
-            </ul>
         </section>
         <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
-            <h4 class="text-lg font-display text-emerald-950">Filters</h4>
+            <h4 class="text-lg font-display text-primary-950">Filters</h4>
 
             <fieldset class="mt-4">
                 <legend class="font-medium leading-6 text-gray-900">
@@ -126,7 +121,7 @@
                       </span>
                 <input type="checkbox" class="sr-only peer" aria-hidden="true" id="recent" name="recent">
                 <label for="recent" data-toggle="off"
-                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-600 peer-focus:ring-offset-2">
+                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-600 peer-focus:ring-offset-2">
                 <span aria-hidden="true"
                       class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
 
@@ -152,7 +147,7 @@
                                    value="{{ $activity->id }}" class="sr-only peer">
                             <label
                                 for="activity_{{ $activity->id }}"
-                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-emerald-600 peer-focus:ring-opacity-50 transition"
+                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
                                 style="background-color: {{ $activity->color->foreground() }}"
                                 type="button"
                             >
@@ -181,7 +176,6 @@
             <div class="text-center">
                 <h3 class="text-xl">An error has occurred.</h3>
                 <p class="reason mt-1"></p>
-                <pre class="debug my-2 text-left border px-4 py-2 bg-white" hidden></pre>
                 <p>
                     You can try reloading the page or checking the <a href="{{ $databaseUrl }}"
                                                                       rel="noopener noreferrer nofollow"
@@ -202,7 +196,7 @@
         </section>
         <section data-state="loading" aria-hidden="false" class="app-state state-active">
             <div>
-                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-emerald-600"
+                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-primary-600"
                      viewBox="0 0 100 101" fill="none"
                      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path
@@ -220,7 +214,7 @@
             <div
                 class="absolute inset-0 z-20 w-full h-full max-w-md border-y pointer-events-none flex justify-center border-r bg-gray-50 rounded-r-3xl pt-16"
                 id="entry-loader">
-                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-emerald-600"
+                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-primary-600"
                      viewBox="0 0 100 101" fill="none"
                      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path
@@ -240,11 +234,13 @@
                         <g id="background"></g>
 
 
-                        {{-- It could be a <rect>, but this way there's one code path. --}}
                         <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
                                        aria-hidden="true"
                                        data-node="{{ $tree->rootNodeId }}">
-                            <div class="size-4 bg-white border"></div>
+                            <p class="bg-white border max-w-[65ch] rounded-xl px-4 py-2 text-center">
+                                Biosecurity is about protecting against biological agents and the people who might
+                                release them, either accidentally or on purpose.
+                            </p>
                         </foreignObject>
 
                         <g>
@@ -301,50 +297,7 @@
     </main>
 </div>
 
-<footer aria-labelledby="footer-heading" class="lg:px-4 xl:px-36">
-    <div class="mt-12 border-t border-gray-900/10 py-4 px-4 lg:px-0 ">
-        <h2 id="footer-heading" class="sr-only">Footer</h2>
-        <div class="lg:flex justify-between">
-            <p>
-                <a href="{{ route('welcome') }}" class="font-display">biosecurity.world</a>
-
-                <span class="text-gray-700">
-                        &mdash; Understand the biosecurity landscape.
-                    </span>
-            </p>
-
-            <ul class="flex space-x-4 overflow-x-scroll mt-2 lg:mt-0">
-                <li>
-                    <a href="{{ $databaseUrl }}" class="inline-flex text-sm underline text-gray-700 whitespace-nowrap">
-                        <span class="mr-0.5">Notion Database</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                             class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px"
-                             aria-label="External link icon">
-                            <path
-                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-                            <path
-                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
-                        </svg>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/biosecurity-world/biosecurity.world"
-                       class="inline-flex text-sm underline text-gray-700 whitespace-nowrap">
-                        <span class="mr-0.5">GitHub</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                             class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px"
-                             aria-label="External link icon">
-                            <path
-                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-                            <path
-                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
-                        </svg>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</footer>
+    <x-footer />
 
 {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>

@@ -27,12 +27,6 @@ function showError(message: string, err: unknown) {
     let reason = elStateContainer.querySelector(
         ".reason",
     ) as HTMLParagraphElement
-    let debug = elStateContainer.querySelector(".debug") as HTMLPreElement
-
-    // if (!IN_PRODUCTION) {
-    //     debug.hidden = false
-    //     debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
-    // }
 
     reason.innerHTML = message
 
@@ -136,7 +130,7 @@ elsEntryButtons.forEach((el: HTMLButtonElement) => {
 // Handle hiding entries that do not match current filters
 
 let elEntryLoader = document.getElementById("entry-loader")
-let elEntryWrapper = document.getElementById("entry-wrapper")
+let elEntryWrapper = document.getElementById("entry-wrapper")!
 function openEntry(url: string) {
     elEntryLoader.classList.add("loading-entry")
 
@@ -248,7 +242,7 @@ try {
         }
     }
 
-    document.addEventListener('scroll', (e: Event) => {
+    document.addEventListener('scroll', () => {
         if (isMapFixed() || nextScrollShouldBeIgnored) {
             nextScrollShouldBeIgnored = false
             return

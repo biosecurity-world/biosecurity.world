@@ -3,7 +3,7 @@
     <nav class="lg:py-3 @if($border) lg:border @endif lg:rounded-full lg:px-8 xl:-mx-8 {{ $attributes->get('class') }}">
         <ul class="lg:flex lg:items-center">
             <li class="font-display  flex-1">
-                <a href="{{ route('welcome') }}" class="hover:underline lg:text-lg xl:text-xl @if ($invert) text-white @else text-emerald-900 @endif">
+                <a href="{{ route('welcome') }}" class="hover:underline lg:text-lg xl:text-xl @if ($invert) text-white @else text-primary-900 @endif">
                     biosecurity.world
                 </a>
             </li>

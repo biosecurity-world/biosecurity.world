@@ -10,7 +10,7 @@
                         data-entrygroup="{{ $entrygroup->id }}"
                         data-entry-url="{{ route('entries.show', ['id' => $entrygroup->id, 'entryId' => $entry->id], absolute: false) }}/"
                     >
-                        <x-entry-logo :logo="$entry->logo" class="hover:border-emerald-600" />
+                        <x-entry-logo :logo="$entry->logo" class="hover:border-primary-600" />
                     </button>
                 @endforeach
             </div>

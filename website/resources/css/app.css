@@ -109,7 +109,7 @@ label[for^="activity_"].inactive {
 }
 
 [data-toggle="on"] {
-    @apply bg-emerald-600;
+    @apply bg-primary-600;
 }
 
 [data-toggle="on"] > span {
@@ -130,7 +130,7 @@ label[for^="activity_"].inactive {
 }
 
 #entrygroups.hovered [data-sum].active > .entry-logo {
-    @apply border border-emerald-600;
+    @apply border border-primary-600;
 }
 
 #entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
@@ -138,5 +138,5 @@ label[for^="activity_"].inactive {
 }
 
 #entrygroups.hovered .intervention-type:has(+ div > [data-sum].active) {
-    @apply text-emerald-600;
+    @apply text-primary-600;
 }

@@ -31,6 +31,8 @@ Route::get('/', function (Notion $notion) {
 Route::get('/about', fn () => view('about'))->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
+Route::get('/legal/privacy-policy', fn () => view('privacy'))->name('privacy-policy');
+Route::get('/legal/terms-of-service', fn () => view('terms-of-service'))->name('terms-of-service');
 
 Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
     $tree = Tree::buildFromPages($notion->pages());

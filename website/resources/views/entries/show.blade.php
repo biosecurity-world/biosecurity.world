@@ -60,7 +60,7 @@
 
             <button class="flex items-center duration-300 hover:bg-gray-50 transition p-2 -m-2 rounded-xl group close-entry">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                     class="size-5 text-gray-700 group-hover:text-emerald-600">
+                     class="size-5 text-gray-700 group-hover:text-primary-600">
                     <path
                         d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/>
                 </svg>
@@ -68,14 +68,14 @@
         </div>
 
         @if ($entry->gcbrFocus)
-            <div class="px-4 py-1.5 bg-emerald-50">
+            <div class="px-4 py-1.5 bg-primary-50">
                 <p class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-emerald-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-primary-600">
                         <path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .692.462l1.41 3.393 3.664.293a.75.75 0 0 1 .428 1.317l-2.791 2.39.853 3.575a.75.75 0 0 1-1.12.814L7.998 12.08l-3.135 1.915a.75.75 0 0 1-1.12-.814l.852-3.574-2.79-2.39a.75.75 0 0 1 .427-1.318l3.663-.293 1.41-3.393A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd" />
                     </svg>
 
 
-                    <span class="text-xs ml-1 text-emerald-700">
+                    <span class="text-xs ml-1 text-primary-700">
                  This {{ $entry->nounForOrganizationType() }} focuses on <abbr title="Global Catastrophic Biological Risks">GCBRs</abbr>.
                 </span>
                 </p>
@@ -84,10 +84,10 @@
 
         <div class="px-4 pb-2 mt-6">
             <h2 class="text-xl font-display font-bold">
-                <a class="text-emerald-600 underline" target="_blank" href="{{ $entry->link }}">
+                <a class="text-primary-600 underline" target="_blank" href="{{ $entry->link }}">
                     {{ $entry->label }}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                         class="inline mb-3 size-4 text-gray-400 group-hover:text-emerald-700" aria-label="External link icon">
+                         class="inline mb-3 size-4 text-gray-400 group-hover:text-primary-700" aria-label="External link icon">
                         <path
                             d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
                         <path
@@ -144,7 +144,7 @@
         <a class="inline-flex text-sm underline text-gray-700" href="{{ $entry->notionUrl() }}">
             <span class=mr-0.5">Open in Notion</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                 class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px" aria-label="External link icon">
+                 class="size-4 text-gray-400 group-hover:text-primary-700 mt-px" aria-label="External link icon">
                 <path
                     d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
                 <path
@@ -154,7 +154,7 @@
         <a class="inline-flex text-sm underline text-gray-700">
             <span class="mr-0.5">Report a problem</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                 class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px" aria-label="External link icon">
+                 class="size-4 text-gray-400 group-hover:text-primary-700 mt-px" aria-label="External link icon">
                 <path
                     d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
                 <path
