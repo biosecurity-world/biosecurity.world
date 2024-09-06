@@ -7,6 +7,8 @@ import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
 
+const IS_OK_WITH_MOTION = !window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
+
 function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
         let isActive = newState === state.dataset.state
@@ -187,78 +189,80 @@ try {
 
     $centerWrapper.attr("transform", `translate(${computeMapCenter()})`)
 
-    let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
-    let directionalIncrements = 0
-    let nextScrollShouldBeIgnored = false
-    let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-    let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+    if (IS_OK_WITH_MOTION) {
+        let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
+        let directionalIncrements = 0
+        let nextScrollShouldBeIgnored = false
+        let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+        let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
 
-    window.addEventListener('resize', () => {
-        comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-        mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-    })
+        window.addEventListener('resize', () => {
+            comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+            mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+        })
 
-    if (elMapWrapper.getBoundingClientRect().top < 0) {
-        elMapWrapper.classList.add('fullscreen')
-    }
-
-    const handleMovement = (direction: number) => {
-        if (!isMapFixed()) {
-            return
-        }
-
-        directionalIncrements += direction
-
-        if (directionalIncrements === -2) {
-            elMapWrapper.classList.remove('fullscreen')
-            comingFromTop = true
-            directionalIncrements = 0
-            window.scrollTo(0, mapDistanceToTop - 1 - 1)
-
-            return;
-        }
-
-        if (directionalIncrements === 5) {
-            elMapWrapper.classList.remove('fullscreen')
-            directionalIncrements = 0
-            comingFromTop = false
-            nextScrollShouldBeIgnored = true
-            window.scrollTo(0, mapDistanceToTop + 1 + 1)
-        }
-    }
-
-    document.addEventListener('scroll', () => {
-        if (isMapFixed() || nextScrollShouldBeIgnored) {
-            nextScrollShouldBeIgnored = false
-            return
-        }
-
-        // noinspection PointlessBooleanExpressionJS
-        if (comingFromTop === true && elMapWrapper.getBoundingClientRect().top < 0) {
+        if (elMapWrapper.getBoundingClientRect().top < 0) {
             elMapWrapper.classList.add('fullscreen')
         }
 
-        // noinspection PointlessBooleanExpressionJS
-        if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
-            elMapWrapper.classList.add('fullscreen')
-        }
-    })
+        const handleMovement = (direction: number) => {
+            if (!isMapFixed()) {
+                return
+            }
 
-    document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+            directionalIncrements += direction
 
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-            closeEntry()
+            if (directionalIncrements === -2) {
+                elMapWrapper.classList.remove('fullscreen')
+                comingFromTop = true
+                directionalIncrements = 0
+                window.scrollTo(0, mapDistanceToTop - 1 - 1)
+
+                return;
+            }
+
+            if (directionalIncrements === 5) {
+                elMapWrapper.classList.remove('fullscreen')
+                directionalIncrements = 0
+                comingFromTop = false
+                nextScrollShouldBeIgnored = true
+                window.scrollTo(0, mapDistanceToTop + 1 + 1)
+            }
         }
 
-        if (e.key === 'ArrowDown') {
-            handleMovement(1)
-        }
+        document.addEventListener('scroll', () => {
+            if (isMapFixed() || nextScrollShouldBeIgnored) {
+                nextScrollShouldBeIgnored = false
+                return
+            }
 
-        if (e.key === 'ArrowUp') {
-            handleMovement(-1)
-        }
-    })
+            // noinspection PointlessBooleanExpressionJS
+            if (comingFromTop === true && elMapWrapper.getBoundingClientRect().top < 0) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+
+            // noinspection PointlessBooleanExpressionJS
+            if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+        })
+
+        document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+
+        document.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closeEntry()
+            }
+
+            if (e.key === 'ArrowDown') {
+                handleMovement(1)
+            }
+
+            if (e.key === 'ArrowUp') {
+                handleMovement(-1)
+            }
+        })
+    }
 
     let zoomHandler = zoom<SVGElement, unknown>()
         .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
