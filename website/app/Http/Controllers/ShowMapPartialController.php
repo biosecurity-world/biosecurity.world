@@ -12,7 +12,7 @@ class ShowMapPartialController
         $tree = Tree::buildFromPages($notion->pages());
 
         return view('partials.map', [
-         'tree' => $tree,
-     ]);
+            'tree' => $tree,
+        ]);
     }
 }

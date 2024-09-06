@@ -64,7 +64,6 @@ class Entry
         return $host;
     }
 
-
     public function hasActivity(int $id): bool
     {
         foreach ($this->activities as $activity) {
@@ -76,16 +75,18 @@ class Entry
         return false;
     }
 
-    public static function  bitmaskLength(): int {
+    public static function bitmaskLength(): int
+    {
         return count(Activity::$seen) + 3;
     }
 
-    public static function andOrBitmask(): int {
+    public static function andOrBitmask(): int
+    {
         return 0b111 << count(Activity::$seen);
     }
 
-
-    public function isTechnical(): bool {
+    public function isTechnical(): bool
+    {
         foreach ($this->interventionFocuses as $focus) {
             if ($focus->isTechnical()) {
                 return true;
@@ -95,7 +96,8 @@ class Entry
         return false;
     }
 
-    public function isGovernance(): bool {
+    public function isGovernance(): bool
+    {
         foreach ($this->interventionFocuses as $focus) {
             if ($focus->isGovernance()) {
                 return true;

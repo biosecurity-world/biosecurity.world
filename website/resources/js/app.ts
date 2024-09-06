@@ -304,6 +304,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     let nodes: ProcessedNode[] = []
     let stack = []
 
+    // Reset the map
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node &
             Partial<ProcessedNode> & { el: SVGElement }
@@ -315,6 +316,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 
     $svg.selectAll('.background-sector').remove()
 
+    // Prepare the nodes
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node &
             Partial<ProcessedNode> & { el: SVGElement }
@@ -399,9 +401,8 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     }
 
     showNode(root)
-    // let minX = Infinity, minY = Infinity
-    // let maxX = -Infinity, maxY = -Infinity
 
+    // Position, and draw the nodes
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
 
@@ -415,8 +416,15 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         }
 
         let delta = parent.sector[0] + deltaFromSiblings[parent.id]
-        let alpha = (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
-        node.sector = [delta, delta + alpha]
+        let siblingsWeight = parent.weight - parent.size[0] * parent.size[1]
+        let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
+        let theta = delta + alpha
+        node.sector = [delta, theta]
+
+        if (node.depth === 2) {
+            console.log([delta, theta], parent.sector, node.weight, parent.weight);
+        }
+
 
         parentIdToNode[node.id] = node
         deltaFromSiblings[parent.id] += alpha
@@ -427,24 +435,13 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 
         node.position = fitToSector(node)
 
-        // minX = Math.min(minX, node.position[0])
-        // minY = Math.min(minY, node.position[1])
-        // maxX = Math.max(maxX, node.position[0] + node.size[0])
-        // maxY = Math.max(maxY, node.position[1] + node.size[1])
-
         showNode(node)
-    }
-
-    for (let i = 0; i < nodes.length; i++) {
-        let node = nodes[i]
 
         if (node.depth !== 2) {
             continue
         }
 
-        let [delta, theta] = node.sector
         let r = 2 * window.innerWidth
-
         let color = i % 2 === 0 ? "#f3f4f6" : "#f9fafb"
 
         $svg.append("path")
@@ -457,6 +454,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
             ].join(" "))
             .attr("fill", color)
     }
+
 }
 
 function showNode(node: ProcessedNode) {

@@ -2,7 +2,6 @@
     "type": "project",
     "require": {
         "php": "^8.3",
-        "beyondcode/laravel-visual-diff": "dev-main",
         "blade-ui-kit/blade-heroicons": "^2.4",
         "blade-ui-kit/blade-icons": "^1.6",
         "laravel/framework": "^11.9",
@@ -57,12 +56,6 @@
             "dont-discover": []
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../packages/*"
-        }
-    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

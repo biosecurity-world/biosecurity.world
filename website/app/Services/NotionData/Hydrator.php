@@ -176,7 +176,6 @@ class Hydrator
             })->toArray();
         }
 
-
         $data = Validator::make($rawPage, $rules)->validate();
 
         $data['createdAt'] = $page->createdTime;

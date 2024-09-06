@@ -30,7 +30,7 @@ Route::get('/_/entries', function (Notion $notion) {
     return view('entries.index', ['links' => $links]);
 });
 
-if (app()->runningUnitTests()) {
+if (app()->runningUnitTests() || app()->isLocal()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
     // the code for the website which includes the code for tests the tree

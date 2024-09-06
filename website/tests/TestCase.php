@@ -3,23 +3,35 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
+use Tests\Browser\Utils\Differ;
 
 abstract class TestCase extends BaseTestCase
 {
-    public function assertTreeRenderingMatchesSnapshot(array $boxes, ?string $name = null): void
+    public function assertTreeRenderingMatchesSnapshot(array $boxes, ?string $extra = null): void
     {
-        $id = \Illuminate\Support\Str::uuid();
+        $id = Str::uuid();
         // We use the cache as an ad-hoc IPC mechanism
         // This way we can have boxes be as large as we want without
         // being limited by the query string length or using a non-GET method.
-        \Cache::rememberForever('tree-'.$id, fn () => $boxes);
+        cache()->forever('tree-'.$id, $boxes);
 
-        $url = route('tree-rendering', ['caseId' => $id]);
-        $response = $this->get($url);
-        $response->assertStatus(200);
+        $name = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+        if ($extra) {
+            $name .= '-'. Str::slug($extra);
+        }
 
-        $response->visualDiff($name !== null ? \Illuminate\Support\Str::slug($name) : null, $url);
+        (new Differ(
+            name: $name,
+            url: route('tree-rendering', ['caseId' => $id]),
+            browserWidth: 1920,
+            browserHeight: 1080,
+            nodeBinary: config('services.differ.node_path'),
+            chromePath: config('services.differ.chrome_path'),
+            antialias: false,
+            threshold: 0.1,
+            errorPercentage: 0
+        ))->runTest();
     }
 
     public function node(float $delta, float $theta, $width = 25, $length = 100): array

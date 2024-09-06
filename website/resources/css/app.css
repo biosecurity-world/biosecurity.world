@@ -39,13 +39,17 @@
     max-height: unset;
 }
 
-#map-wrapper.fullscreen > .rounded-l-3xl {
+#map-wrapper.fullscreen .rounded-l-3xl {
     border-bottom-left-radius: 0 !important;
     border-top-left-radius: 0 !important;
 }
 
-#map-wrapper.fullscreen > .rounded-r-3xl {
+#map-wrapper.fullscreen .rounded-r-3xl {
     border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+#map-wrapper.fullscreen .rounded-tr-3xl {
     border-top-right-radius: 0 !important;
 }
 

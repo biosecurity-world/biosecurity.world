@@ -39,4 +39,9 @@ return [
         'database' => env('NOTION_DATABASE'),
         'token' => env('NOTION_TOKEN'),
     ],
+
+    'differ' => [
+        'node_path' => env('NODE_PATH', 'node'),
+        'chrome_path' => env('CHROME_PATH', 'chromium'),
+    ]
 ];

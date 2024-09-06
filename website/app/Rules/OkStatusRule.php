@@ -7,7 +7,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\Http;
 
 class OkStatusRule implements ValidationRule
 {
@@ -43,7 +42,7 @@ class OkStatusRule implements ValidationRule
                 if ($head->getStatusCode() >= 200 && $head->getStatusCode() < 300) {
                     return;
                 }
-            } catch (RequestException | ConnectException) {
+            } catch (RequestException|ConnectException) {
                 // Continue to GET request
             }
 
@@ -54,7 +53,7 @@ class OkStatusRule implements ValidationRule
             }
 
             $fail('The URL is not reachable.');
-        } catch (RequestException $e ) {
+        } catch (RequestException $e) {
             $fail('The URL is not reachable.');
         }
     }

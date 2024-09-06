@@ -145,7 +145,19 @@ export function getQuadrant(angle: number): number {
         throw new Error(`Angle ${angle} is not in the range [0, 2*PI]`)
     }
 
-    return Math.floor(angle / PI_2)
+    if (inIE(angle, 0, PI_2)) {
+        return 1
+    }
+
+    if (inIE(angle, PI_2, PI)) {
+        return 2
+    }
+
+    if (inIE(angle, PI, PI + PI_2)) {
+        return 3
+    }
+
+    return 4
 }
 
 export function shortestDistanceBetweenRectangles(

@@ -228,7 +228,7 @@
             </div>
 
             <div id="above-map"></div>
-            <svg id="map" width="100%" height="100%">
+            <svg id="map" width="100%" height="100%" class="rounded-tr-3xl">
                 <!-- The map will be dynamically inserted here -->
             </svg>
             <div class="absolute bottom-6 right-6">
