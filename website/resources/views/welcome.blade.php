@@ -272,11 +272,11 @@
             </svg>
             <div class="absolute bottom-6 right-6">
                 <div class="flex flex-col bg-white shadow divide-y rounded-lg">
-                    <button class="p-2 hover:bg-gray-50 rounded-t-lg" onclick="zoomIn()">
+                    <button class="p-2 hover:bg-gray-50 rounded-t-lg" id="zoom-in">
                         <x-heroicon-s-plus class="size-5 text-gray-700"/>
                     </button>
 
-                    <button class="p-2 hover:bg-gray-50 rounded-b-lg" onclick="zoomOut()">
+                    <button class="p-2 hover:bg-gray-50 rounded-b-lg" id="zoom-out">
                         <x-heroicon-s-minus class="size-5 text-gray-700"/>
                     </button>
                 </div>

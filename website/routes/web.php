@@ -2,51 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Services\NotionData\DataObjects\Activity;
-use App\Services\NotionData\DataObjects\Entry;
+use App\Http\Controllers\ShowEntryController;
+use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\DataObjects\Entrygroup;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Notion $notion) {
-    $tree = Tree::buildFromPages($notion->pages());
-
-    return view('welcome', [
-        'tree' => $tree,
-        'lookup' => [
-            'entries' => $tree->entries()->map(fn (Entry $entry) => [
-                'id' => $entry->id,
-                'activities' => $entry->getActivityBitmask(Activity::$seen),
-                'lenses' => $entry->lens(),
-            ]),
-            'entrygroups' => $tree->entrygroups(),
-        ],
-        'databaseUrl' => $notion->databaseUrl(),
-        'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
-    ]);
-})->name('welcome');
-
-Route::get('/about', fn () => view('about'))->name('about');
+Route::get('/', ShowWelcomeController::class)->name('welcome');
+Route::view('/about', 'about')->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
-Route::get('/legal/privacy-policy', fn () => view('privacy'))->name('privacy-policy');
-Route::get('/legal/terms-of-service', fn () => view('terms-of-service'))->name('terms-of-service');
-
-Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
-    $tree = Tree::buildFromPages($notion->pages());
-
-    abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
-
-    return view('entries.show', [
-        'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
-        'entrygroup' => $tree->lookup[$id],
-        'entry' => $tree->lookup[$entryId],
-        'breadcrumbs' => $tree->getNodeById($id)->breadcrumbs($tree),
-    ]);
-})->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
-
+Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
+Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
+Route::get('/e/{id}/{entryId}', ShowEntryController::class)->name('entries.show');
 Route::get('/_/entries', function (Notion $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
@@ -66,9 +35,9 @@ if (app()->runningUnitTests()) {
     // These routes are ignored by the crawler that builds the static version
     // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {
-        abort_if(! Cache::has('tree-'.$caseId), 404);
+        abort_if(! cache()->has('tree-'.$caseId), 404);
 
-        $case = Cache::get('tree-'.$caseId);
+        $case = cache()->get('tree-'.$caseId);
 
         return view('render-testcase', ['case' => $case]);
     })->name('tree-rendering');

@@ -1,4 +1,4 @@
-import {D3ZoomEvent, map, select, zoom, zoomIdentity} from "d3"
+import {D3ZoomEvent, select, zoom} from "d3"
 import {debug, gt, lt, PIPI} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
@@ -19,14 +19,13 @@ function showAppState(newState: AppState): void {
 }
 
 function showError(message: string, err: unknown) {
+    console.error(err)
     const elStateContainer = document.querySelector("[data-state='error']")
     if (!elStateContainer) {
         throw new Error("No error state container found")
     }
 
-    let reason = elStateContainer.querySelector(
-        ".reason",
-    ) as HTMLParagraphElement
+    let reason = elStateContainer.querySelector(".reason") as HTMLParagraphElement
 
     reason.innerHTML = message
 
@@ -67,7 +66,7 @@ filtersStore.persist(
                 return;
             }
 
-            mask |= 1 << parseInt(el.dataset.offset)
+            mask |= 1 << parseInt(el.dataset.offset!)
         })
 
         return mask.toString(2)
@@ -76,12 +75,12 @@ filtersStore.persist(
         let mask = parseInt(value, 2)
 
         activityInputs.forEach((el: HTMLInputElement) => {
-                el.checked = (mask & (1 << parseInt(el.dataset.offset))) !== 0
+            el.checked = (mask & (1 << parseInt(el.dataset.offset!))) !== 0
 
-                document
-                    .querySelector(`label[for="${el.id}"]`)!
-                    .classList.toggle("inactive", !el.checked)
-            })
+            document
+                .querySelector(`label[for="${el.id}"]`)!
+                .classList.toggle("inactive", !el.checked)
+        })
     },
     "1".repeat(activityInputs.length)
 )
@@ -89,55 +88,58 @@ filtersStore.persist(
 activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["activities"])))
 
 document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
-    let reversed = filtersStore.getState('activities').padStart(activityInputs.length, '0').split('').map((bit: string) => bit === '0' ? '1' : '0').join('')
+    let reversed = filtersStore
+        .getState('activities')
+        .padStart(activityInputs.length, '0')
+        .split('')
+        .map((bit: string) => bit === '0' ? '1' : '0')
+        .join('')
+
     filtersStore.setState('activities', reversed)
 })
 
 
 let elEntrygroupContainer = document.getElementById("entrygroups")!
 
-// Handle highlights based on sum.
-let elsEntryButtons = document.querySelectorAll("button[data-sum]") as NodeListOf<HTMLButtonElement>
-function highlightEntriesWithSum(sum: number) {
+let elsEntryButtons = document.querySelectorAll("button[data-entry]") as NodeListOf<HTMLButtonElement>
+
+function highlightEntriesWithId(id: number) {
     let instances = 0
 
     elsEntryButtons.forEach((btn: HTMLButtonElement) => {
-        let isActive = btn.dataset.sum === sum.toString()
+        let isActive = btn.dataset.entry === id.toString()
         btn.classList.toggle("active", isActive)
-        if (isActive) {
-            instances++
-        }
+        instances += isActive ? 1 : 0
     })
 
-    if (instances > 1) {
-        elEntrygroupContainer.classList.add("hovered")
-    }
+    elEntrygroupContainer.classList.toggle("hovered", instances > 1)
 }
+
 function removeHighlight() {
     elEntrygroupContainer.classList.remove("hovered")
 }
+
 elsEntryButtons.forEach((el: HTMLButtonElement) => {
-    el.addEventListener("mouseenter", () =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("focus", (e: FocusEvent) =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("mouseleave", (e: MouseEvent) => removeHighlight())
-    el.addEventListener("blur", (e: FocusEvent) => removeHighlight())
+    let entryId = parseInt(el.dataset.entry!, 10)
+
+    el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
+    el.addEventListener("focus", () => highlightEntriesWithId(entryId))
+    el.addEventListener("mouseleave", () => removeHighlight())
+    el.addEventListener("blur", () => removeHighlight())
+    el.addEventListener("click", () => openEntry(el))
 })
 
 // Handle hiding entries that do not match current filters
-
-let elEntryLoader = document.getElementById("entry-loader")
+let elEntryLoader = document.getElementById("entry-loader")!
 let elEntryWrapper = document.getElementById("entry-wrapper")!
-function openEntry(url: string) {
+
+function openEntry(entry: HTMLElement) {
     elEntryLoader.classList.add("loading-entry")
 
-    let el = document.querySelector(
-        `button[data-entry-url="${url}"]`,
-    ) as HTMLButtonElement
-    fetch(el.dataset.entryUrl!, {
+    let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
+    let entryId = parseInt(entry.dataset.entry!, 10)
+
+    fetch(`/e/${entrygroup}/${entryId}`, {
         headers: {
             "X-Requested-With": "XMLHttpRequest",
         },
@@ -146,24 +148,16 @@ function openEntry(url: string) {
         .then((html: string) => {
             elEntryWrapper.innerHTML = html
 
-            window.persistedMapState.setFocusedEntry(
-                +el.dataset.entrygroup,
-                +el.dataset.entry,
-            )
+            window.persistedMapState.setFocusedEntry(entrygroup, entryId)
 
             elEntryWrapper
                 .querySelector("button.close-entry")!
                 .addEventListener("click", () => closeEntry())
         })
-        .catch((err: unknown) =>
-            showError(
-                "An error occurred while loading the entry. Please try again later.",
-                err,
-            ),
-        )
-        .finally(() => {
-            elEntryLoader.classList.remove("loading-entry")
+        .catch((err: unknown) => {
+            showError("An error occurred while loading the entry. Please try again later.", err,)
         })
+        .finally(() => elEntryLoader.classList.remove("loading-entry"))
 }
 
 function closeEntry() {
@@ -171,26 +165,15 @@ function closeEntry() {
     window.persistedMapState.resetFocusedEntry()
 }
 
-document
-    .querySelectorAll("button[data-entry-url]")
-    .forEach((el: HTMLButtonElement) => {
-        el.addEventListener("click", (e: MouseEvent) =>
-            openEntry(el.dataset.entryUrl!),
-        )
-    })
-
-
 if (window.persistedMapState.focusedEntry) {
     let [entrygroup, entry] = window.persistedMapState.focusedEntry
-    let el = document.querySelector(
-        `button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`,
-    ) as HTMLButtonElement
-    openEntry(el.dataset.entryUrl!)
+    let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
+    openEntry(el)
 }
 
 try {
     let elMapWrapper = document.getElementById('map-wrapper')!
-    let $map = select<SVGElement,  any>("#map")
+    let $map = select<SVGElement, any>("#map")
     let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
     let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
     let $background = select<SVGGElement, any>("#background")
@@ -254,7 +237,7 @@ try {
         }
 
         // noinspection PointlessBooleanExpressionJS
-         if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
+        if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
             elMapWrapper.classList.add('fullscreen')
         }
     })
@@ -281,13 +264,11 @@ try {
 
     $map.call(zoomHandler)
 
-    window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
-    window.zoomOut = () => zoomHandler.scaleBy($map, 0.8)
+    document.getElementById('zoom-in')!.addEventListener('click', () => zoomHandler.scaleBy($map, 1.2))
+    document.getElementById('zoom-out')!.addEventListener('click', () => zoomHandler.scaleBy($map, 0.8))
 
     for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
-        let el = document.querySelector(
-            `[data-node="${node.id}"]`,
-        ) as SVGElement | null
+        let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
         if (!el) {
             throw new Error(`Node with id ${node.id} has no corresponding element in the DOM`)
         }
@@ -300,29 +281,15 @@ try {
         renderMap()
         debug().flush($background)
     }
-
     filtersStore.sync().onChange(cb)
-
     cb()
 } catch (err: unknown) {
-    // if (IN_PRODUCTION) {
-        // Sentry?
-    // }
-
     console.error(err)
 
     showError(
         "An error occurred while loading the map. Please try again later.",
         err,
     )
-}
-
-function drawSectorArea(node: {
-    size: [number, number];
-    position?: [number, number];
-    sector: Sector;
-} & Node) {
-    // TODO
 }
 
 function renderMap() {
@@ -333,7 +300,7 @@ function renderMap() {
 
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & {el: SVGElement}
+            Partial<ProcessedNode> & { el: SVGElement }
 
         node.el.classList.add("invisible")
         node.el.ariaHidden = "true"
@@ -342,7 +309,7 @@ function renderMap() {
 
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & {el: SVGElement}
+            Partial<ProcessedNode> & { el: SVGElement }
 
         if (node.od === 0) {
             let entryIds = window.lookup.entrygroups[node.id].entries
@@ -359,7 +326,6 @@ function renderMap() {
                     activityCount: activityInputs.length
                 }, entry)
 
-
                 elEntry.classList.toggle("matches-filters", !shouldFilter)
 
                 if (!shouldFilter) {
@@ -371,9 +337,7 @@ function renderMap() {
         }
 
         if (!(node.el instanceof SVGForeignObjectElement)) {
-            throw new Error(
-                `Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`,
-            )
+            throw new Error(`Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`)
         }
 
         // We set the <foreignObject> with a height of 100% and a w of 100%
@@ -381,13 +345,15 @@ function renderMap() {
         // but this means that we get the wrong bounds.
         if (node.el.firstElementChild === null) {
             throw new Error(
-                "It is expected that the foreignObject representing the node has a single child to compute its real bounding box, not the advertised (100%, 100%)",
+                "It is expected that the foreignObject representing the node " +
+                "has a single child to compute its real bounding box, not " +
+                "the advertised (100%, 100%)",
             )
         }
 
-        // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
-        // We need to use offsetWidth and offsetHeight instead.
         node.size = [
+            // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
+            // We need to use offsetWidth and offsetHeight instead.
             node.el.firstElementChild!.offsetWidth,
             node.el.firstElementChild!.offsetHeight,
         ]
@@ -420,14 +386,16 @@ function renderMap() {
 
     let root = stack.pop()
     root.sector = [0, PIPI]
+    root.position = fitToSector(root)
 
     let parentIdToNode: Record<number, ProcessedNode> = {[root.id]: root}
     let deltaFromSiblings: Record<number, number> = {}
 
     if (nodes.length === 0) {
-        showAppState("empty")
-        return
+        return showAppState("empty")
     }
+
+    showNode(root)
 
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
@@ -459,10 +427,22 @@ function renderMap() {
             drawSectorArea(node)
         }
 
-        node.el.classList.remove("invisible")
-        node.el.ariaHidden = "false"
-        node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+        showNode(node)
     }
 
     showAppState("success")
+}
+
+function drawSectorArea(node: {
+    size: [number, number];
+    position?: [number, number];
+    sector: Sector;
+} & Node) {
+    // TODO
+}
+
+function showNode(node: ProcessedNode) {
+    node.el.classList.remove("invisible")
+    node.el.ariaHidden = "false"
+    node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
 }

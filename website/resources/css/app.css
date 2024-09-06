@@ -1,5 +1,3 @@
-@tailwind base;
-
 @font-face {
     font-family: "Gilroy";
     font-display: swap;
@@ -8,6 +6,7 @@
     font-style: normal;
 }
 
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -50,12 +49,6 @@
     border-top-right-radius: 0 !important;
 }
 
-.invisible {
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-}
-
 #entry-wrapper:not(:has(> .entry)) {
     display: none;
 }
@@ -64,7 +57,6 @@
     display: block;
 }
 
-/** Style the 'focus on' filter **/
 input[name^="lens_"]:checked + label > .check {
     opacity: 1;
 }
@@ -100,6 +92,31 @@ label[for^="activity_"].inactive {
     opacity: 1;
 }
 
+[data-entry]:not(.matches-filters) {
+    display: none;
+}
+
+#entrygroups .intervention-type:not(:has(+ div > [data-entry].matches-filters)) {
+    margin-top: 0;
+    display: none;
+}
+
+#entrygroups.hovered [data-entry]:not(.active) {
+    opacity: 0.25;
+}
+
+#entrygroups.hovered [data-sum].active > .entry-logo {
+    @apply border border-primary-600;
+}
+
+#entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
+    opacity: 0.25;
+}
+
+#entrygroups.hovered .intervention-type:has(+ div > [data-sum].active) {
+    @apply text-primary-600;
+}
+
 [data-toggle="off"] {
     @apply bg-gray-200;
 }
@@ -116,27 +133,12 @@ label[for^="activity_"].inactive {
     @apply translate-x-5;
 }
 
-[data-sum]:not(.matches-filters) {
-    display: none;
+.intervention-type {
+    @apply mt-2 text-xs uppercase tracking-tight text-gray-500 font-display;
 }
 
-#entrygroups .intervention-type:not(:has(+ div > [data-sum].matches-filters)) {
-    margin-top: 0;
-    display: none;
-}
-
-#entrygroups.hovered [data-sum]:not(.active) {
-    opacity: 0.25;
-}
-
-#entrygroups.hovered [data-sum].active > .entry-logo {
-    @apply border border-primary-600;
-}
-
-#entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
-    opacity: 0.25;
-}
-
-#entrygroups.hovered .intervention-type:has(+ div > [data-sum].active) {
-    @apply text-primary-600;
+.invisible {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
 }
