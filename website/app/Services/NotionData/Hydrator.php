@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
+use App\Rules\OkStatusRule;
 use App\Services\Logosnatch\IconSnatch;
 use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Category;
@@ -20,6 +21,13 @@ use Notion\Pages\Page;
 
 class Hydrator
 {
+    public static bool $strict = false;
+
+    public static function setStrictMode(bool $strict): void
+    {
+        self::$strict = $strict;
+    }
+
     /*
      * The IDs are hardcoded (no other way is much better) but they do not change,
      * even if the database is duplicated or the column changes, so they are _very_ stable.
@@ -57,7 +65,7 @@ class Hydrator
 
             if (count($parents) === 0) {
                 if (! $isCategory) {
-                    $errors[] = HydrationError::fromString('Entries must belong to a category.<', $page);
+                    $errors[] = HydrationError::fromString('Entries must belong to a category.', $page);
 
                     continue;
                 }
@@ -139,7 +147,8 @@ class Hydrator
             'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
             'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
-        $data = Validator::make($rawPage, [
+
+        $rules = [
             'id' => ['required', 'int'],
             'label' => ['required', 'string'],
             'description' => ['required'],
@@ -156,7 +165,19 @@ class Hydrator
             }],
             'activities' => ['required', 'array'],
             'location' => ['required', 'array'],
-        ])->validate();
+        ];
+
+        if (self::$strict) {
+            $rules = collect($rules)->mapWithKeys(function ($previousRules, $key) {
+                return [$key => match ($key) {
+                    'link' => [...$previousRules, new OkStatusRule()],
+                    default => $previousRules
+                }];
+            })->toArray();
+        }
+
+
+        $data = Validator::make($rawPage, $rules)->validate();
 
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;

@@ -34,23 +34,6 @@
     </section>
 
     <section class="mt-12 lg:mt-24">
-        <h2 class="text-lg lg:text-2xl font-display text-primary-950">Our values</h2>
-        <ul>
-            <li>
-                <span>Openness</span>
-
-                <p>Our work , and our processes are transparent for the world to see.</p>
-            </li>
-
-            <li>
-                <span>Efficiency</span>
-
-                <p> strive to make the most of our resources and time to achieve our goals.</p>
-            </li>
-        </ul>
-    </section>
-
-    <section class="mt-12 lg:mt-24">
         <h2 class="text-lg lg:text-2xl font-display text-primary-950">Contact us at</h2>
         <p class="max-w-3xl  text-3xl font-bold tracking-tight lg:text-6xl font-display text-primary-900">
             team@biosecurity.world
