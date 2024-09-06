@@ -131,15 +131,7 @@
             <p>You may not break the law using the website.</p>
         </li>
         <li>
-            <p>You may not use or try to use anyone else’s account on the website without their specific permission.</p>
-        </li>
-        <li>
-            <p>You may not buy, sell, or otherwise trade in addresses, user names, or other unique identifiers on the
-                website.</p>
-        </li>
-        <li>
-            <p>You may not send advertisements, chain letters, or other solicitations through the website, or use the
-                website to gather addresses for distribution lists.</p>
+            <p>You may not falsely imply that you’re affiliated with or endorsed by the operator.</p>
         </li>
         <li>
             <p>You may automate access to the website, or monitor the website. You may crawl the website to
@@ -147,31 +139,12 @@
                 file on the website.</p>
         </li>
         <li>
-            <p>You may not use the website to send e-mail to distribution lists, newsgroups, or group mail aliases.</p>
-        </li>
-        <li>
-            <p>You may not falsely imply that you’re affiliated with or endorsed by the operator.</p>
-        </li>
-        <li>
-            <p>You may not hyperlink to images or other non-hypertext content on the website.</p>
-        </li>
-        <li>
-            <p>You may not show any part of the website on other websites with iframes or similar methods.</p>
-        </li>
-        <li>
-            <p>You may not remove any marks showing proprietary ownership from materials you download from the
-                website.</p>
-        </li>
-        <li>
-            <p>You may not disable, avoid, or circumvent any security or access restrictions of the website.</p>
-        </li>
-        <li>
             <p>You may not strain infrastructure of the website with an unreasonable volume of requests, or requests
                 designed to impose an unreasonable load on information systems the operator uses to provide the
                 website.</p>
         </li>
         <li>
-            <p>You may not impersonate others through the website.</p>
+            <p>You may not disable, avoid, or circumvent any security or access restrictions of the website.</p>
         </li>
         <li>
             <p>You may not encourage or help anyone in violation of these terms.</p>
