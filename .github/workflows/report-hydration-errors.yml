@@ -42,7 +42,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Report hydration errors
-        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan app:report-hydration-errors /home/runner/report.md
+        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan app:report-hydration-errors /home/runner/report.md --strict
         env:
           NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
