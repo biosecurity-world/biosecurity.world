@@ -1,5 +1,5 @@
 import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
-import {debug, gt, lt, PIPI} from "./utils"
+import {debug, eq, gt, lt, PI, PIPI} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
@@ -113,10 +113,18 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 
     $svg.selectAll('.background-sector').remove()
 
+    let maxDepth = 0
+
+    let idToNode: Record<number, ProcessedNode> = {}
     // Prepare the nodes
     for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & { el: SVGElement }
+        let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
+
+        idToNode[node.id] = node
+
+        if (node.depth >= maxDepth) {
+            maxDepth = node.depth
+        }
 
         if (node.od === 0) {
             let entryIds = node.entries
@@ -159,7 +167,6 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
             node.el.firstElementChild!.offsetWidth,
             node.el.firstElementChild!.offsetHeight,
         ]
-
         node.weight = node.size[0] * node.size[1]
 
         let children = []
@@ -189,9 +196,8 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     let root = stack.pop()
     root.sector = [0, PIPI]
     root.position = fitToSector(root)
-
-    let parentIdToNode: Record<number, ProcessedNode> = {[root.id]: root}
-    let deltaFromSiblings: Record<number, number> = {}
+    //
+    // let deltaFromSiblings: Record<number, number> = {}
 
     if (nodes.length === 0) {
         return showAppState("empty")
@@ -199,40 +205,30 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 
     showNode(root)
 
-    // Position, and draw the nodes
+    let deltaFromSiblings: Record<number, number> = {}
+
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
 
+        let parent = idToNode[node.parent]
+
         if (!deltaFromSiblings[node.parent]) {
-            deltaFromSiblings[node.parent] = 0
+            deltaFromSiblings[node.parent] = parent.sector[0]
         }
 
-        let parent = parentIdToNode[node.parent]
-        if (!parent) {
-            throw new Error(`Parent with id ${node.parent} not found for node ${node.id}`)
-        }
-
-        let delta = parent.sector[0] + deltaFromSiblings[parent.id]
-        let siblingsWeight = parent.weight - parent.size[0] * parent.size[1]
+        let delta = deltaFromSiblings[node.parent]
+        let siblingsWeight = parent.weight - (parent.size[0] * parent.size[1])
         let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
         let theta = delta + alpha
         node.sector = [delta, theta]
-
-        if (node.depth === 2) {
-            console.log([delta, theta], parent.sector, node.weight, parent.weight);
-        }
-
-
-        parentIdToNode[node.id] = node
-        deltaFromSiblings[parent.id] += alpha
-
-        if (lt(node.sector[0], 0) || gt(node.sector[1], PIPI)) {
-            throw new Error(`Sector ${node.sector} is not in the range [0, 2*PI]`,)
-        }
-
         node.position = fitToSector(node)
 
+        debug().ray({ angle: delta})
+        debug().ray({ angle: theta})
+
         showNode(node)
+
+        deltaFromSiblings[node.parent] = theta
 
         if (node.depth !== 2) {
             continue
@@ -251,7 +247,6 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
             ].join(" "))
             .attr("fill", color)
     }
-
 }
 
 function showNode(node: ProcessedNode) {

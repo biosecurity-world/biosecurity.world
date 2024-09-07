@@ -1,5 +1,4 @@
-@php use App\Services\NotionData\DataObjects\Activity; @endphp
-    <!doctype html>
+<!doctype html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Understand the biosecurity landscape. - Biosecurity World</title>
 
+    <link rel="preload" href="/fonts/Gilroy-Bold.woff2" crossorigin>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700" rel="stylesheet"/>
+    <link href="https://fonts.bunny.net/css?family=Nunito:500,600,700" rel="stylesheet"/>
 
     <script>
         window.nodes = @json($nodes);
@@ -99,6 +99,9 @@
             </ul>
 
 
+            <a class="inline-block mt-4 text-gray-700  underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-gray-100 transition">
+                Learn more
+            </a>
         </section>
         <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
             <h4 class="text-lg font-display text-primary-950">Filters</h4>

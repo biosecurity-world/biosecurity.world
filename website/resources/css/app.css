@@ -137,8 +137,13 @@ label[for^="activity_"].inactive {
     @apply translate-x-5;
 }
 
+
+.entrygroup div:last-child{
+    @apply mb-2;
+}
+
 .intervention-type {
-    @apply mt-2 text-xs uppercase tracking-tight text-gray-500 font-display;
+    @apply text-xs tracking-tight text-gray-500 font-semibold px-3 mt-2;
 }
 
 .invisible {

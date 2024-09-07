@@ -14,7 +14,7 @@
                     @foreach([
     [route('how-to-contribute', absolute: false), 'Contribute'],
     [route('give-feedback', absolute: false), 'Give feedback'],
-    [route('about', absolute: false), 'About'],
+    [route('about', absolute: false), 'About us'],
 ] as [$url, $label])
                         <li class="">
                             <a href="{{ $url }}" class="whitespace-nowrap underline @if ($invert) text-white @else text-black @endif lg:no-underline text-sm lg:text-base font-medium hover:underline xl:text-lg">
