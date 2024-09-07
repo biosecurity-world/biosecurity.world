@@ -1,0 +1,15 @@
+gsschema = 3
+
+[mod]
+  [mod."github.com/davecgh/go-spew"]
+    version = "v1.1.1"
+    hash = "sha256-nhzSUrE1fCkN0+RL04N4h8jWmRFPPPWbCuDc7Ss0akI="
+  [mod."github.com/kolesa-team/go-webp"]
+    version = "v1.0.4"
+    hash = "sha256-9yXYck2+V3UiYoceKEVCwfX4RUbo2xmD6hsjDPwtQnY="
+  [mod."golang.org/x/image"]
+    version = "v0.19.0"
+    hash = "sha256-IPl8LVdhq8YNxFBgnVa5k64J3zZjuE99TxrkDvzmYVk="
+  [mod."golang.org/x/net"]
+    version = "v0.28.0"
+    hash = "sha256-WdH/mgsX/CB+CiYtXEwJAXHN8FgtW2YhFcWwrrHNBLo="
