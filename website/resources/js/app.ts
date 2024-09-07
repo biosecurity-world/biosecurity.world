@@ -1,11 +1,13 @@
-import {D3ZoomEvent, map, select, zoom, zoomIdentity} from "d3"
-import {debug, gt, lt, PIPI} from "./utils"
+import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
+import {debug, eq, gt, lt, PI, PIPI} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
 import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
+
+const IS_OK_WITH_MOTION = !window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
 
 function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
@@ -19,20 +21,13 @@ function showAppState(newState: AppState): void {
 }
 
 function showError(message: string, err: unknown) {
+    console.error(err)
     const elStateContainer = document.querySelector("[data-state='error']")
     if (!elStateContainer) {
         throw new Error("No error state container found")
     }
 
-    let reason = elStateContainer.querySelector(
-        ".reason",
-    ) as HTMLParagraphElement
-    let debug = elStateContainer.querySelector(".debug") as HTMLPreElement
-
-    // if (!IN_PRODUCTION) {
-    //     debug.hidden = false
-    //     debug.textContent = `${err.name}: ${err.message}\n${err.stack}`
-    // }
+    let reason = elStateContainer.querySelector(".reason") as HTMLParagraphElement
 
     reason.innerHTML = message
 
@@ -44,339 +39,102 @@ window.persistedMapState.sync()
 
 const filtersStore = new FiltersStateStore()
 
-document
-    .getElementById("filters-reset")!
-    .addEventListener("click", () => filtersStore.reset())
-// Handle the 'Focus on' filter
-for (const lens of ["lens_technical", "lens_governance"]) {
-    let elLens = document.querySelector(
-        `input[name="${lens}"]`,
-    ) as HTMLInputElement
-    filtersStore.persist(
-        lens,
-        () => `${+elLens.checked}`,
-        (checked: string) => (elLens.checked = checked === "1"),
-        "0",
-    )
-
-    elLens.addEventListener("change", () => filtersStore.syncOnly([lens]))
-}
+document.getElementById("filters-reset")!.addEventListener("click", () => filtersStore.reset())
 
 // Handle the 'By activity' filter
 let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
+let technicalLens = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
+let governanceLens = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
+let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
 filtersStore.persist(
-    "activities",
+    "mask",
     () => {
         let mask = 0
-        activityInputs.forEach((el: HTMLInputElement) => {
-            if (!el.checked) {
-                return;
-            }
+        let offset = 0
 
-            mask |= 1 << parseInt(el.dataset.offset)
-        })
+        activityInputs.forEach((el) => mask |= (el.checked ? 1 : 0) << offset++)
+        mask |= (technicalLens.checked ? 1 : 0) << offset++
+        mask |= (governanceLens.checked ? 1 : 0) << offset++
+        mask |= (gcbrFocus.checked ? 1 : 0) << offset
 
         return mask.toString(2)
     },
-    (value: string) => {
-        let mask = parseInt(value, 2)
+    (maskStr: string) => {
+        let mask = parseInt(maskStr, 2)
+        let offset = 0
 
         activityInputs.forEach((el: HTMLInputElement) => {
-                el.checked = (mask & (1 << parseInt(el.dataset.offset))) !== 0
+            el.checked = (mask & (1 << offset++)) !== 0
 
-                document
-                    .querySelector(`label[for="${el.id}"]`)!
-                    .classList.toggle("inactive", !el.checked)
-            })
+            document
+                .querySelector(`label[for="${el.id}"]`)!
+                .classList.toggle("inactive", !el.checked)
+        })
+
+        technicalLens.checked = (mask & (1 << offset++)) !== 0
+        governanceLens.checked = (mask & (1 << offset++)) !== 0
+        gcbrFocus.checked = (mask & (1 << offset)) !== 0
+
+        document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
     },
-    "1".repeat(activityInputs.length)
+    "0".repeat(window.bitmaskLength),
 )
 
-activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["activities"])))
+activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["mask"])))
+technicalLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
+governanceLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
+gcbrFocus.addEventListener("change", (e) => {
+    document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
+    return filtersStore.syncOnly(["mask"]);
+})
 
 document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
-    let reversed = filtersStore.getState('activities').padStart(activityInputs.length, '0').split('').map((bit: string) => bit === '0' ? '1' : '0').join('')
-    filtersStore.setState('activities', reversed)
+    activityInputs.forEach((el: HTMLInputElement) => {
+        el.checked = !el.checked
+        document.querySelector(`label[for="${el.id}"]`)!.classList.toggle("inactive", !el.checked)
+    })
+
+    filtersStore.syncOnly(["mask"])
 })
 
-// Handle the 'highlight recently added entries' toggle
-let elRecentToggle = document.querySelector('input[name="recent"]') as HTMLInputElement
-filtersStore.persist(
-    "recent",
-    () => `${+elRecentToggle.checked}`,
-    (value: string) => {
-        elRecentToggle.checked = value === "1"
-
-        let label = document.querySelector(
-            'label[for="recent"]',
-        ) as HTMLLabelElement
-        label.dataset.toggle = elRecentToggle.checked ? "on" : "off"
-    },
-    "0",
-)
-elRecentToggle.addEventListener("click", () => filtersStore.syncOnly(["recent"]))
-
-
-let elEntrygroupContainer = document.getElementById("entrygroups")!
-
-// Handle highlights based on sum.
-let elsEntryButtons = document.querySelectorAll("button[data-sum]") as NodeListOf<HTMLButtonElement>
-function highlightEntriesWithSum(sum: number) {
-    let instances = 0
-
-    elsEntryButtons.forEach((btn: HTMLButtonElement) => {
-        let isActive = btn.dataset.sum === sum.toString()
-        btn.classList.toggle("active", isActive)
-        if (isActive) {
-            instances++
-        }
-    })
-
-    if (instances > 1) {
-        elEntrygroupContainer.classList.add("hovered")
-    }
-}
-function removeHighlight() {
-    elEntrygroupContainer.classList.remove("hovered")
-}
-elsEntryButtons.forEach((el: HTMLButtonElement) => {
-    el.addEventListener("mouseenter", () =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("focus", (e: FocusEvent) =>
-        highlightEntriesWithSum(+el.dataset.sum),
-    )
-    el.addEventListener("mouseleave", (e: MouseEvent) => removeHighlight())
-    el.addEventListener("blur", (e: FocusEvent) => removeHighlight())
-})
-
-// Handle hiding entries that do not match current filters
-
-let elEntryLoader = document.getElementById("entry-loader")
-let elEntryWrapper = document.getElementById("entry-wrapper")
-function openEntry(url: string) {
-    elEntryLoader.classList.add("loading-entry")
-
-    let el = document.querySelector(
-        `button[data-entry-url="${url}"]`,
-    ) as HTMLButtonElement
-    fetch(el.dataset.entryUrl!, {
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
-    })
-        .then((response: Response) => response.text())
-        .then((html: string) => {
-            elEntryWrapper.innerHTML = html
-
-            window.persistedMapState.setFocusedEntry(
-                +el.dataset.entrygroup,
-                +el.dataset.entry,
-            )
-
-            elEntryWrapper
-                .querySelector("button.close-entry")!
-                .addEventListener("click", () => closeEntry())
-        })
-        .catch((err: unknown) =>
-            showError(
-                "An error occurred while loading the entry. Please try again later.",
-                err,
-            ),
-        )
-        .finally(() => {
-            elEntryLoader.classList.remove("loading-entry")
-        })
-}
-
-function closeEntry() {
-    elEntryWrapper.innerHTML = ""
-    window.persistedMapState.resetFocusedEntry()
-}
-
-document
-    .querySelectorAll("button[data-entry-url]")
-    .forEach((el: HTMLButtonElement) => {
-        el.addEventListener("click", (e: MouseEvent) =>
-            openEntry(el.dataset.entryUrl!),
-        )
-    })
-
-
-if (window.persistedMapState.focusedEntry) {
-    let [entrygroup, entry] = window.persistedMapState.focusedEntry
-    let el = document.querySelector(
-        `button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`,
-    ) as HTMLButtonElement
-    openEntry(el.dataset.entryUrl!)
-}
-
-try {
-    let elMapWrapper = document.getElementById('map-wrapper')!
-    let $map = select<SVGElement,  any>("#map")
-    let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
-    let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
-    let $background = select<SVGGElement, any>("#background")
-
-    // Resize-, zoom-dependent variables
-    let mapWidth = $map.node()!.clientWidth
-    let mapHeight = $map.node()!.clientHeight
-    let computeMapCenter = () => [mapWidth / 2, mapHeight / 2]
-
-    $centerWrapper.attr("transform", `translate(${computeMapCenter()})`)
-
-    let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
-    let directionalIncrements = 0
-    let nextScrollShouldBeIgnored = false
-    let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-    let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-
-    if (elMapWrapper.getBoundingClientRect().top < 0) {
-        elMapWrapper.classList.add('fullscreen')
-    }
-
-    const handleMovement = (direction: number) => {
-        if (!isMapFixed()) {
-            return
-        }
-
-        directionalIncrements += direction
-
-        if (directionalIncrements === -2) {
-            elMapWrapper.classList.remove('fullscreen')
-            comingFromTop = true
-            directionalIncrements = 0
-            window.scrollTo(0, mapDistanceToTop - 1 - 1)
-
-            return;
-        }
-
-        if (directionalIncrements === 5) {
-            elMapWrapper.classList.remove('fullscreen')
-            directionalIncrements = 0
-            comingFromTop = false
-            nextScrollShouldBeIgnored = true
-            window.scrollTo(0, mapDistanceToTop + 1 + 1)
-        }
-    }
-
-    document.addEventListener('scroll', (e: Event) => {
-        if (isMapFixed() || nextScrollShouldBeIgnored) {
-            nextScrollShouldBeIgnored = false
-            return
-        }
-
-        // noinspection PointlessBooleanExpressionJS
-        if (comingFromTop === true && elMapWrapper.getBoundingClientRect().top < 0) {
-            elMapWrapper.classList.add('fullscreen')
-        }
-
-        // noinspection PointlessBooleanExpressionJS
-         if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
-            elMapWrapper.classList.add('fullscreen')
-        }
-    })
-
-    document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
-
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-            closeEntry()
-        }
-
-        if (e.key === 'ArrowDown') {
-            handleMovement(1)
-        }
-
-        if (e.key === 'ArrowUp') {
-            handleMovement(-1)
-        }
-    })
-
-    let zoomHandler = zoom<SVGElement, unknown>()
-        .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
-        .scaleExtent([0.5, 2.5])
-
-    $map.call(zoomHandler)
-
-    window.zoomIn = () => zoomHandler.scaleBy($map, 1.2)
-    window.zoomOut = () => zoomHandler.scaleBy($map, 0.8)
-
-    for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
-        let el = document.querySelector(
-            `[data-node="${node.id}"]`,
-        ) as SVGElement | null
-        if (!el) {
-            throw new Error(`Node with id ${node.id} has no corresponding element in the DOM`)
-        }
-
-        node.el = el
-    }
-
-    let cb = () => {
-        debug().clear()
-        renderMap()
-        debug().flush($background)
-    }
-
-    filtersStore.sync().onChange(cb)
-
-    cb()
-} catch (err: unknown) {
-    // if (IN_PRODUCTION) {
-        // Sentry?
-    // }
-
-    console.error(err)
-
-    showError(
-        "An error occurred while loading the map. Please try again later.",
-        err,
-    )
-}
-
-function drawSectorArea(node: {
-    size: [number, number];
-    position?: [number, number];
-    sector: Sector;
-} & Node) {
-    // TODO
-}
-
-function renderMap() {
-    showAppState("loading")
-
+function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     let nodes: ProcessedNode[] = []
     let stack = []
 
+    // Reset the map
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & {el: SVGElement}
+            Partial<ProcessedNode> & { el: SVGElement }
 
         node.el.classList.add("invisible")
         node.el.ariaHidden = "true"
         node.el.style.transform = ""
     }
 
+    $svg.selectAll('.background-sector').remove()
+
+    let maxDepth = 0
+
+    let idToNode: Record<number, ProcessedNode> = {}
+    // Prepare the nodes
     for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & {el: SVGElement}
+        let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
+
+        idToNode[node.id] = node
+
+        if (node.depth >= maxDepth) {
+            maxDepth = node.depth
+        }
 
         if (node.od === 0) {
-            let entryIds = window.lookup.entrygroups[node.id].entries
+            let entryIds = node.entries
             let filteredIds = []
 
             for (const entryId of entryIds) {
-                let entry = window.lookup.entries[entryId]
+                let entryMask = window.masks[entryId]
                 let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
 
-                let shouldFilter = shouldFilterEntry({
-                    activities: filtersStore.getState('activities'),
-                    lens_technical: filtersStore.getState('lens_technical'),
-                    lens_governance: filtersStore.getState('lens_governance'),
-                    activityCount: activityInputs.length
-                }, entry)
-
+                let shouldFilter = shouldFilterEntry(filtersStore.getState('mask'), entryMask.toString(2))
 
                 elEntry.classList.toggle("matches-filters", !shouldFilter)
 
@@ -389,9 +147,7 @@ function renderMap() {
         }
 
         if (!(node.el instanceof SVGForeignObjectElement)) {
-            throw new Error(
-                `Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`,
-            )
+            throw new Error(`Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`)
         }
 
         // We set the <foreignObject> with a height of 100% and a w of 100%
@@ -399,17 +155,18 @@ function renderMap() {
         // but this means that we get the wrong bounds.
         if (node.el.firstElementChild === null) {
             throw new Error(
-                "It is expected that the foreignObject representing the node has a single child to compute its real bounding box, not the advertised (100%, 100%)",
+                "It is expected that the foreignObject representing the node " +
+                "has a single child to compute its real bounding box, not " +
+                "the advertised (100%, 100%)",
             )
         }
 
-        // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
-        // We need to use offsetWidth and offsetHeight instead.
         node.size = [
+            // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
+            // We need to use offsetWidth and offsetHeight instead.
             node.el.firstElementChild!.offsetWidth,
             node.el.firstElementChild!.offsetHeight,
         ]
-
         node.weight = node.size[0] * node.size[1]
 
         let children = []
@@ -438,49 +195,260 @@ function renderMap() {
 
     let root = stack.pop()
     root.sector = [0, PIPI]
-
-    let parentIdToNode: Record<number, ProcessedNode> = {[root.id]: root}
-    let deltaFromSiblings: Record<number, number> = {}
+    root.position = fitToSector(root)
+    //
+    // let deltaFromSiblings: Record<number, number> = {}
 
     if (nodes.length === 0) {
-        showAppState("empty")
-        return
+        return showAppState("empty")
     }
+
+    showNode(root)
+
+    let deltaFromSiblings: Record<number, number> = {}
 
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
 
-        if (!deltaFromSiblings[node.parentId]) {
-            deltaFromSiblings[node.parentId] = 0
+        let parent = idToNode[node.parent]
+
+        if (!deltaFromSiblings[node.parent]) {
+            deltaFromSiblings[node.parent] = parent.sector[0]
         }
 
-        let parent = parentIdToNode[node.parentId]
-        if (!parent) {
-            console.log(node)
+        let delta = deltaFromSiblings[node.parent]
+        let siblingsWeight = parent.weight - (parent.size[0] * parent.size[1])
+        let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
+        let theta = delta + alpha
+        node.sector = [delta, theta]
+        node.position = fitToSector(node)
+
+        debug().ray({ angle: delta})
+        debug().ray({ angle: theta})
+
+        showNode(node)
+
+        deltaFromSiblings[node.parent] = theta
+
+        if (node.depth !== 2) {
             continue
         }
 
-        let delta = parent.sector[0] + deltaFromSiblings[parent.id]
-        let alpha = (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
-        node.sector = [delta, delta + alpha]
+        let r = 2 * window.innerWidth
+        let color = i % 2 === 0 ? "#f3f4f6" : "#f9fafb"
 
-        parentIdToNode[node.id] = node
-        deltaFromSiblings[parent.id] += alpha
-
-        if (lt(node.sector[0], 0) || gt(node.sector[1], PIPI)) {
-            throw new Error(`Sector ${node.sector} is not in the range [0, 2*PI]`,)
-        }
-
-        node.position = fitToSector(node)
-
-        if (node.depth === 1) {
-            drawSectorArea(node)
-        }
-
-        node.el.classList.remove("invisible")
-        node.el.ariaHidden = "false"
-        node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+        $svg.append("path")
+            .classed('background-sector', true)
+            .attr('d', [
+                `M 0,0`,
+                `L ${r * Math.cos(delta)} ${r * Math.sin(delta)}`,
+                `A ${r} ${r} 0 0 1 ${r * Math.cos(theta)} ${r * Math.sin(theta)}`,
+                `Z`,
+            ].join(" "))
+            .attr("fill", color)
     }
-
-    showAppState("success")
 }
+
+function showNode(node: ProcessedNode) {
+    node.el.classList.remove("invisible")
+    node.el.ariaHidden = "false"
+    node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+}
+
+;(async function () {
+    try {
+        let elMapWrapper = document.getElementById('map-wrapper')!
+        let $map = select<SVGElement, any>("#map")
+
+        let mapContentRes = await fetch('/m')
+        let mapContent = await mapContentRes.text()
+
+        $map.html(mapContent)
+
+        let elEntrygroupContainer = document.getElementById("entrygroups")!
+        let elsEntryButtons = document.querySelectorAll("button[data-entry]") as NodeListOf<HTMLButtonElement>
+
+        function highlightEntriesWithId(id: number) {
+            let instances = 0
+
+            elsEntryButtons.forEach((btn: HTMLButtonElement) => {
+                let isActive = btn.dataset.entry === id.toString()
+                btn.classList.toggle("active", isActive)
+                instances += isActive ? 1 : 0
+            })
+
+            elEntrygroupContainer.classList.toggle("hovered", instances > 1)
+        }
+
+        function removeHighlight() {
+            elEntrygroupContainer.classList.remove("hovered")
+        }
+
+        elsEntryButtons.forEach((el: HTMLButtonElement) => {
+            let entryId = parseInt(el.dataset.entry!, 10)
+
+            el.addEventListener("click", () => {
+                openEntry(el);
+            })
+            el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
+            el.addEventListener("mouseleave", () => removeHighlight())
+            el.addEventListener("focus", () => highlightEntriesWithId(entryId))
+            el.addEventListener("blur", () => removeHighlight())
+        })
+
+// Handle hiding entries that do not match current filters
+        let elEntryLoader = document.getElementById("entry-loader")!
+        let elEntryWrapper = document.getElementById("entry-wrapper")!
+
+        function openEntry(entry: HTMLElement) {
+            elEntryLoader.classList.add("loading-entry")
+
+            let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
+            let entryId = parseInt(entry.dataset.entry!, 10)
+
+            fetch(`/e/${entrygroup}/${entryId}`, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+                .then((response: Response) => response.text())
+                .then((html: string) => {
+                    elEntryWrapper.innerHTML = html
+
+                    window.persistedMapState.setFocusedEntry(entrygroup, entryId)
+
+                    elEntryWrapper
+                        .querySelector("button.close-entry")!
+                        .addEventListener("click", () => closeEntry())
+                })
+                .catch((err: unknown) => {
+                    showError("An error occurred while loading the entry. Please try again later.", err,)
+                })
+                .finally(() => elEntryLoader.classList.remove("loading-entry"))
+        }
+
+        function closeEntry() {
+            elEntryWrapper.innerHTML = ""
+            window.persistedMapState.resetFocusedEntry()
+        }
+
+        if (window.persistedMapState.focusedEntry) {
+            let [entrygroup, entry] = window.persistedMapState.focusedEntry
+            let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
+            openEntry(el)
+        }
+
+        let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
+        let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
+
+        let mapWidth = $map.node()!.clientWidth
+        let mapHeight = $map.node()!.clientHeight
+
+        $centerWrapper.attr(
+            "transform",
+            `translate(${mapWidth / 2}, ${mapHeight / 2})`,
+        )
+
+        if (IS_OK_WITH_MOTION) {
+            let directionalIncrements = 0
+            let nextScrollShouldBeIgnored = false
+            let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+            let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+            let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
+
+            if (elMapWrapper.getBoundingClientRect().top < 0) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+
+            const handleMovement = (direction: number) => {
+                if (!isMapFixed()) {
+                    return
+                }
+
+                directionalIncrements += direction
+
+                if (directionalIncrements === -2) {
+                    elMapWrapper.classList.remove('fullscreen')
+                    comingFromTop = true
+                    directionalIncrements = 0
+                    window.scrollTo(0, mapDistanceToTop - 10)
+
+                    return;
+                }
+
+                if (directionalIncrements === 2) {
+                    elMapWrapper.classList.remove('fullscreen')
+                    directionalIncrements = 0
+                    comingFromTop = false
+                    nextScrollShouldBeIgnored = true
+                    window.scrollTo(0, mapDistanceToTop + 10)
+                }
+            }
+            document.addEventListener('scroll', () => {
+                if (isMapFixed() || nextScrollShouldBeIgnored) {
+                    nextScrollShouldBeIgnored = false
+                    return
+                }
+
+                if (comingFromTop && elMapWrapper.getBoundingClientRect().top < 0) {
+                    elMapWrapper.classList.add('fullscreen')
+                }
+
+                if (!comingFromTop && elMapWrapper.getBoundingClientRect().top > 0) {
+                    elMapWrapper.classList.add('fullscreen')
+                }
+            })
+            document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+            document.addEventListener("keydown", (e: KeyboardEvent) => {
+                if (e.key === "Escape") {
+                    closeEntry()
+                }
+
+                if (e.key === 'ArrowDown') {
+                    handleMovement(1)
+                }
+
+                if (e.key === 'ArrowUp') {
+                    handleMovement(-1)
+                }
+            })
+        }
+
+        let zoomHandler = zoom<SVGElement, unknown>()
+            .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
+            .scaleExtent([0.5, 2.5])
+
+        $map.call(zoomHandler)
+
+        document.getElementById('zoom-in')!.addEventListener('click', () => zoomHandler.scaleBy($map, 1.2))
+        document.getElementById('zoom-out')!.addEventListener('click', () => zoomHandler.scaleBy($map, 0.8))
+
+        for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
+            let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
+            if (!el) {
+                throw new Error(`Node with id ${node.id} has no corresponding element in the DOM`)
+            }
+
+            node.el = el
+        }
+
+        let cb = () => {
+            debug().clear()
+            showAppState('loading')
+
+            renderMap(select('#background'))
+
+            showAppState('success')
+            debug().flush($centerWrapper)
+        }
+        filtersStore.sync().onChange(cb)
+        cb()
+    } catch (err: unknown) {
+        console.error(err)
+
+        showError(
+            "An error occurred while loading the map. Please try again later.",
+            err,
+        )
+    }
+})()

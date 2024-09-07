@@ -4,9 +4,12 @@ export type Node = {
     id: number
     od: number
     depth: number
-    trail: number[]
-    parentId: number
+    parent: number
     filtered: boolean
+
+    entries?: number[]
+    activities?: number
+    lenses?: number
 }
 
 export type ProcessedNode = {

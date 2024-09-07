@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\NotionData\HydrationError;
+use App\Services\NotionData\Hydrator;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Console\Command;
@@ -11,13 +12,17 @@ use Notion\Pages\Page;
 
 class ReportHydrationErrors extends Command
 {
-    protected $signature = 'app:report-hydration-errors {path?}';
+    protected $signature = 'app:report-hydration-errors {path?} {--strict}';
 
     /**
      * Execute the console command.
      */
     public function handle(Notion $notion): void
     {
+        if ($this->option('strict')) {
+            Hydrator::setStrictMode(true);
+        }
+
         $pages = $notion->pages();
         $tree = Tree::buildFromPages($pages);
 

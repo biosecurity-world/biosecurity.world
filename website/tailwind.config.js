@@ -9,9 +9,10 @@ export default {
             colors: {
                 technical: colors.amber[700],
                 governance: colors.blue[600],
+                primary: colors.emerald,
             },
             fontFamily: {
-                sans: ["Inter", ...defaultConfig.theme.fontFamily.sans],
+                sans: ["Nunito", ...defaultConfig.theme.fontFamily.sans],
                 display: ["Gilroy", ...defaultConfig.theme.fontFamily.sans],
             },
         },

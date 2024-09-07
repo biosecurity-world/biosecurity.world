@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/h2non/bimg"
 	"github.com/kolesa-team/go-webp/encoder"
 	"github.com/kolesa-team/go-webp/webp"
 	_ "golang.org/x/image/bmp"
@@ -155,7 +156,20 @@ func FindLogo(URL *url.URL, targetSize int) (*Logo, error) {
 		}
 
 		logo.Format = "webp"
-		logo.Body = buf.Bytes()
+		if logo.Size > targetSize {
+			if !useJSON {
+				fmt.Printf("- [RESIZING] from %d to %d\n", logo.Size, targetSize)
+			}
+			resized, err := bimg.NewImage(buf.Bytes()).Resize(targetSize, targetSize)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			logo.Body = resized
+		} else {
+			logo.Body = buf.Bytes()
+		}
 
 		return logo, nil
 	}

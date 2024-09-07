@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData;
 
-use App\Services\Logosnatch\IconSnatch;
+use App\Rules\OkStatusRule;
+use App\Services\Logosnatch\LogoSnatch;
 use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
@@ -20,6 +21,13 @@ use Notion\Pages\Page;
 
 class Hydrator
 {
+    public static bool $strict = false;
+
+    public static function setStrictMode(bool $strict): void
+    {
+        self::$strict = $strict;
+    }
+
     /*
      * The IDs are hardcoded (no other way is much better) but they do not change,
      * even if the database is duplicated or the column changes, so they are _very_ stable.
@@ -57,7 +65,7 @@ class Hydrator
 
             if (count($parents) === 0) {
                 if (! $isCategory) {
-                    $errors[] = HydrationError::fromString('Only categories can be top-level but these are entries.', $page);
+                    $errors[] = HydrationError::fromString('Entries must belong to a category.', $page);
 
                     continue;
                 }
@@ -134,13 +142,13 @@ class Hydrator
                 return Activity::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
             'interventionFocuses' => array_map(function (SelectOption $opt) {
-                //                dump($opt);
                 return InterventionFocus::fromNotionOption($opt);
             }, $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
             'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
             'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
-        $data = Validator::make($rawPage, [
+
+        $rules = [
             'id' => ['required', 'int'],
             'label' => ['required', 'string'],
             'description' => ['required'],
@@ -148,8 +156,8 @@ class Hydrator
             'link' => ['required', 'string', 'url'],
             'organizationType' => ['required', 'string'],
             'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {
-                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isTechnical());
-                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance());
+                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaTechnicalFocus());
+                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaGovernanceFocus());
 
                 if ((! $isTechnical && ! $isGovernance)) {
                     $fail('The entry must have at least either a [TECHNICAL] or [GOVERNANCE] focus, or both');
@@ -157,12 +165,23 @@ class Hydrator
             }],
             'activities' => ['required', 'array'],
             'location' => ['required', 'array'],
-        ])->validate();
+        ];
+
+        if (self::$strict) {
+            $rules = collect($rules)->mapWithKeys(function ($previousRules, $key) {
+                return [$key => match ($key) {
+                    'link' => [...$previousRules, new OkStatusRule],
+                    default => $previousRules
+                }];
+            })->toArray();
+        }
+
+        $data = Validator::make($rawPage, $rules)->validate();
 
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
         $data['location'] = Location::fromNotionOptions($data['location']);
-        $data['logo'] = IconSnatch::retrieve($data['link']);
+        $data['logo'] = LogoSnatch::retrieve($data['link'], targetSize: 64);
 
         return new Entry(...$data);
     }

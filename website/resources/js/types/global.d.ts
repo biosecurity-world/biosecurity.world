@@ -5,9 +5,10 @@ export {}
 
 declare global {
     interface Window {
-        // Set in welcome.blade.php
         nodes: Node[]
-        activityIds: number[]
+        bitmaskLength: number
+        masks: Record<number, number>
+        andOrMask: number
 
         persistedMapState: MapStateStore
     }

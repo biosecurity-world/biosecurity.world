@@ -1,5 +1,4 @@
-@php use App\Services\NotionData\DataObjects\Activity; @endphp
-    <!doctype html>
+<!doctype html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -8,135 +7,169 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Understand the biosecurity landscape. - Biosecurity World</title>
 
+    <link rel="preload" href="/fonts/Gilroy-Bold.woff2" crossorigin>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet"/>
+    <link href="https://fonts.bunny.net/css?family=Nunito:500,600,700" rel="stylesheet"/>
 
     <script>
-        window.nodes = @json($tree->nodes);
-        // TODO: This is wasteful and will be removed. We want it to work before optimizing it.
-        window.lookup = @json($lookup);
+        window.nodes = @json($nodes);
+        window.masks = @json($entries);
+        window.bitmaskLength = {{ $bitmaskLength }};
+        window.andOrMask = {{ $andOrMask }};
     </script>
 
     @vite('resources/js/app.ts')
     @vite('resources/css/app.css')
 </head>
-<body class="h-full antialiased w-full">
-<header class="w-full pb-8  pt-6 px-8 xl:px-0">
-    <div class="max-w-7xl mx-auto">
-        <nav>
-            <ul class="flex justify-between">
-                <li class="font-display">
-                    <a href="{{ route('welcome') }}" class="hover:underline">
-                        biosecurity.world
-                    </a>
-                </li>
-                <li>
-                    <span class="sr-only">Menu items</span>
+<body class="h-full antialiased w-full bg-gray-100">
+<header class="w-full pb-52 lg:pb-[14.25rem] bg-gradient-to-tl from-primary-600 to-primary-950 pt-4 lg:pt-8">
+    <x-navbar class="lg:bg-white/20 lg:shadow-inner lg:shadow-white/30" invert/>
 
-                    <ul class="flex space-x-6">
-                        <li><a href="{{ route('how-to-contribute', absolute: false) }}" class="underline">
-                                Contribute
-                            </a></li>
-                        <li><a href="{{ route('give-feedback', absolute: false) }}" class="underline">
-                                Give feedback
-                            </a></li>
-                        <li><a href="{{ route('about', absolute: false) }}" class="underline">
-                                About
-                            </a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <div class="mt-8">
-            <h1 class="text-4xl font-display font-bold">Understand the biosecurity landscape.</h1>
-            <p class="mt-2">Explore the organizations, initiatives, and projects shaping the future of biosecurity.</p>
-        </div>
-    </div>
+    <h1 class="px-6 mt-8 lg:mt-24 max-w-3xl lg:text-center text-3xl font-bold tracking-tight lg:text-6xl font-display text-white mx-auto">
+        Understand the biosecurity landscape.
+    </h1>
+
+    <ul class="max-w-7xl space-y-6 lg:space-y-0 mx-auto px-6 xl:px-0 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:gap-x-12 mt-6 lg:mt-20">
+        <li>
+            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Up-to-date</h3>
+            <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
+
+            <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
+                Humans update regularly the map and our team monitors privileged channels for announcements about new
+                organizations.
+            </p>
+        </li>
+        <li>
+            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Crowd-sourced</h3>
+            <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
+
+            <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
+                We encourage submissions and corrections, which are individually reviewed by
+                researchers from
+                <a href="https://www.ens.psl.eu" class="underline text-white hover:text-white/70">ENS</a>
+                and <a href="https://ox.ac.uk" class="underline text-white hover:text-white/70">Oxford University</a>.
+            </p>
+        </li>
+        <li>
+            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Transparent</h3>
+            <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
+
+            <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
+                As an <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>, <a
+                    class="underline" href="{{ $databaseUrl }}">open-data</a>, scientific non-profit, we keep a record of
+                our inclusion decisions for people to challenge.
+            </p>
+        </li>
+    </ul>
 </header>
 
-<div class="w-full h-full flex duration-500 transition-[padding] " id="map-wrapper">
-    <aside class="w-full h-full border-r divide-y border-y border-l max-w-md rounded-l-3xl flex flex-col">
-        <section class="p-6 bg-white rounded-l-3xl">
-            <h3 class="text-xl font-display flex-grow">
-                Explore the map.
+<div class="w-full h-full flex duration-500 transition-[padding,border-radius]" id="map-wrapper">
+    <aside
+        class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
+        <section class="p-6">
+            <h3 class="text-xl font-display flex-grow text-primary-950">
+                About the map
             </h3>
-
-            <p class="text-gray-700 mt-1">
+            <p class="text-gray-700 text-sm">
                 Last updated on
-                <time datetime="{{ $lastEditedAt->toIso8601String() }}"
-                      title="{{ $lastEditedAt->toIso8601String() }}">
+                <time datetime="{{ $lastEditedAt->toIso8601String() }}" class="font-medium">
                     {{ $lastEditedAt->format('F j, Y') }}.
                 </time>
             </p>
 
-            <div class="mt-4 flex items-center justify-between">
+            <h5 class="font-display mt-4 text-lg text-primary-950">
+                Criteria for inclusion
+            </h5>
+
+            <ul class="space-y-4 mt-1">
+                <li>
+                    <span class="font-bold font-display text-gray-700">Productive</span>
+                    <p class="text-gray-700 mt-0.5">Has relevant research or policy output, or a relevant product, device, published funding decision.</p>
+                </li>
+                <li>
+                    <span class="font-bold font-display text-gray-700">Active</span>
+                    <p class="text-gray-700 mt-0.5">Is likely to produce more relevant outputs.</p>
+                </li>
+                <li>
+                    <span class="font-bold font-display text-gray-700">Focused</span>
+                    <p class="text-gray-700 mt-0.5">
+                        Aims to prevent large scale pandemics, or is a key player in one of the <a href="" class="underline">intervention focuses</a>.
+                    </p>
+                </li>
+            </ul>
+
+
+            <a class="inline-block mt-4 text-gray-700  underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-gray-100 transition">
+                Learn more
+            </a>
+        </section>
+        <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
+            <h4 class="text-lg font-display text-primary-950">Filters</h4>
+
+            <fieldset class="mt-4">
+                <legend class="font-medium leading-6 text-gray-900">
+                    Domain
+                </legend>
+
+                <div class="shadow-sm rounded-xl mt-2 bg-white">
+                    <div>
+                        <input type="checkbox" name="lens_technical" id="lens_technical" value="technical"
+                               class="sr-only peer">
+                        <label for="lens_technical"
+                               class="py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
+                            <x-at-technical class="flex-grow"/>
+                            <x-heroicon-m-check class="size-5 text-white check"/>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="checkbox" name="lens_governance" id="lens_governance" value="governance"
+                               class="sr-only peer">
+                        <label for="lens_governance"
+                               class="py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition rounded-b-xl px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
+                            <x-at-governance class="flex-grow"/>
+                            <x-heroicon-m-check class="size-5 text-white check"/>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="mt-8 flex items-center justify-between">
                       <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-gray-900">
-                            Highlight recently added entries
+                        <span class="font-medium leading-6 text-gray-900">
+                            Focus on GCBRs prevention
                         </span>
-                        <span class="text-sm text-gray-500">
-                            Highlight entries added in the last month.
+                        <span class="text-sm text-gray-500 mt-1">
+                            Include only organizations focused on large-scale pandemics prevention.
                         </span>
                       </span>
-                <input type="checkbox" class="sr-only peer" aria-hidden="true" id="recent" name="recent">
-                <label for="recent" data-toggle="off"
-                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-600 peer-focus:ring-offset-2">
+                <input type="checkbox" class="sr-only peer" aria-hidden="true" id="gcbr_focus" name="gcbr_focus">
+                <label for="gcbr_focus" data-toggle="off"
+                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-600 peer-focus:ring-offset-2">
                 <span aria-hidden="true"
                       class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
 
                 </label>
             </div>
-        </section>
-        <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
-            <h4 class="text-lg font-display">Filters</h4>
 
-            <div class="mt-2">
-                <fieldset>
-                    <legend class="font-medium leading-6 text-gray-900">Focus on</legend>
-
-                    <div class="shadow-sm rounded-xl mt-1 bg-white">
-                        <div>
-                            <input type="checkbox" name="lens_technical" id="lens_technical" value="technical"
-                                   class="sr-only peer">
-                            <label for="lens_technical"
-                                   class="block py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
-                                <x-at-technical class="flex-grow"/>
-                                <x-heroicon-m-check class="size-5 text-white check"/>
-                            </label>
-                        </div>
-                        <div>
-                            <input type="checkbox" name="lens_governance" id="lens_governance" value="governance"
-                                   class="sr-only peer">
-                            <label for="lens_governance"
-                                   class="block py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition rounded-b-xl px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
-                                <x-at-governance class="flex-grow"/>
-                                <x-heroicon-m-check class="size-5 text-white check"/>
-                            </label>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-
-            <div class="mt-6">
-                <div class="flex justify-between">
-                    <span class="font-medium leading-6 text-gray-900">By activity type</span>
-                    <button class="text-sm text-gray-700  underline px-4 py-1.5 -my-1.5 -mx-4 rounded-xl hover:bg-gray-100 transition" id="toggle-all-activities">
+            <div class="mt-8">
+                <div class="flex">
+                    <span class="font-medium leading-6 text-gray-900 mr-4 flex-1">Activities</span>
+                    <button
+                        class="text-sm text-gray-700  underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-gray-100 transition"
+                        id="toggle-all-activities">
                         Toggle all
                     </button>
                 </div>
 
-                <p class="text-sm text-gray-700 mt-0.5">Click on an activity type to filter it out of the map.</p>
-
-                <ul class="mt-2 flex flex-wrap gap-x-2 gap-y-2">
+                <ul class="mt-2.5 flex flex-wrap gap-x-2 gap-y-2">
                     @foreach($tree->activities() as $activity)
                         <li>
                             <input type="checkbox" checked name="activity_{{ $activity->id }}"
                                    id="activity_{{ $activity->id }}"
-                                   data-offset="{{ array_search($activity->id, Activity::$seen) }}"
                                    value="{{ $activity->id }}" class="sr-only peer">
                             <label
                                 for="activity_{{ $activity->id }}"
-                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-emerald-600 peer-focus:ring-opacity-50 transition"
+                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
                                 style="background-color: {{ $activity->color->foreground() }}"
                                 type="button"
                             >
@@ -159,13 +192,12 @@
         </section>
     </aside>
 
-    <main class="w-full h-full relative border-y border-r rounded-r-3xl">
+    <main class="w-full h-full relative border-b border-r bg-gray-50 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
         <section data-state="error" aria-hidden="true"
                  class="app-state state-inactive">
             <div class="text-center">
                 <h3 class="text-xl">An error has occurred.</h3>
                 <p class="reason mt-1"></p>
-                <pre class="debug my-2 text-left border px-4 py-2 bg-white" hidden></pre>
                 <p>
                     You can try reloading the page or checking the <a href="{{ $databaseUrl }}"
                                                                       rel="noopener noreferrer nofollow"
@@ -186,7 +218,7 @@
         </section>
         <section data-state="loading" aria-hidden="false" class="app-state state-active">
             <div>
-                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-emerald-600"
+                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-primary-600"
                      viewBox="0 0 100 101" fill="none"
                      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path
@@ -199,12 +231,12 @@
                 <span class="sr-only">Loading...</span>
             </div>
         </section>
-        <section data-state="success" class="app-state state-inactive !sticky" aria-hidden="true">
+        <section data-state="success" class="app-state state-inactive" aria-hidden="true">
             <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y" id="entry-wrapper"></div>
             <div
                 class="absolute inset-0 z-20 w-full h-full max-w-md border-y pointer-events-none flex justify-center border-r bg-gray-50 rounded-r-3xl pt-16"
                 id="entry-loader">
-                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-emerald-600"
+                <svg class="inline h-8 w-8 animate-spin text-gray-200 fill-primary-600"
                      viewBox="0 0 100 101" fill="none"
                      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path
@@ -218,53 +250,16 @@
             </div>
 
             <div id="above-map"></div>
-            <svg role="main" id="map" width="100%" height="100%">
-                <g id="zoom-wrapper">
-                    <g id="center-wrapper">
-                        <g id="background"></g>
-
-
-                        {{-- It could be a <rect>, but this way, there's one code path. --}}
-                        <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
-                                       aria-hidden="true"
-                                       data-node="{{ $tree->rootNodeId }}">
-                            <div class="size-4 bg-white border"></div>
-                        </foreignObject>
-
-                        <g>
-                            @foreach($tree->categories() as $category)
-                                <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
-                                               aria-hidden="true"
-                                               data-node="{{ $category->id }}">
-                                    <x-category :category="$category"/>
-                                </foreignObject>
-                            @endforeach
-                        </g>
-
-                        <g id="entrygroups">
-                            @foreach($tree->entrygroups() as $entrygroup)
-                                <foreignObject width="100%"
-                                               height="100%"
-                                               class="invisible pointer-events-none"
-                                               aria-hidden="true"
-                                               data-node="{{ $entrygroup->id }}">
-                                    <x-entrygroup
-                                        :entries="array_map(fn (string $id) => $tree->lookup[$id], $entrygroup->entries)"
-                                        :entrygroup="$entrygroup"
-                                    />
-                                </foreignObject>
-                            @endforeach
-                        </g>
-                    </g>
-                </g>
+            <svg id="map" width="100%" height="100%" class="rounded-tr-3xl">
+                <!-- The map will be dynamically inserted here -->
             </svg>
             <div class="absolute bottom-6 right-6">
                 <div class="flex flex-col bg-white shadow divide-y rounded-lg">
-                    <button class="p-2 hover:bg-gray-50 rounded-t-lg" onclick="zoomIn()">
+                    <button class="p-2 hover:bg-gray-50 rounded-t-lg" id="zoom-in">
                         <x-heroicon-s-plus class="size-5 text-gray-700"/>
                     </button>
 
-                    <button class="p-2 hover:bg-gray-50 rounded-b-lg" onclick="zoomOut()">
+                    <button class="p-2 hover:bg-gray-50 rounded-b-lg" id="zoom-out">
                         <x-heroicon-s-minus class="size-5 text-gray-700"/>
                     </button>
                 </div>
@@ -283,53 +278,9 @@
             </div>
         </section>
     </main>
-
 </div>
 
-<footer aria-labelledby="footer-heading" class="px-4 xl:px-36">
-    <div class="mt-12 border-t border-gray-900/10 py-4 ">
-        <h2 id="footer-heading" class="sr-only">Footer</h2>
-        <div class="flex justify-between">
-            <p>
-                <a href="{{ route('welcome') }}" class="font-display">biosecurity.world</a>
-
-                <span class="text-gray-700">
-                        &mdash; Understand the biosecurity landscape.
-                    </span>
-            </p>
-
-            <ul class="flex space-x-4">
-                <li>
-                    <a href="{{ $databaseUrl }}" class="inline-flex text-sm underline text-gray-700">
-                        <span class="mr-0.5">Notion Database</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                             class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px"
-                             aria-label="External link icon">
-                            <path
-                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-                            <path
-                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
-                        </svg>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/biosecurity-world/biosecurity.world"
-                       class="inline-flex text-sm underline text-gray-700">
-                        <span class="mr-0.5">GitHub</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                             class="size-4 text-gray-400 group-hover:text-emerald-700 mt-px"
-                             aria-label="External link icon">
-                            <path
-                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-                            <path
-                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
-                        </svg>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</footer>
+    <x-footer />
 
 {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>

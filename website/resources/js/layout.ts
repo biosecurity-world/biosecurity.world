@@ -1,5 +1,6 @@
 import {ProcessedNode, Sector} from "./types";
-import {eq, getQuadrant, gt, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
+import {debug, eq, getQuadrant, gt, gte, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
+
 
 export function fitToSector(node: ProcessedNode): [number, number] {
     if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
@@ -10,111 +11,122 @@ export function fitToSector(node: ProcessedNode): [number, number] {
         return [-node.size[0] / 2, -node.size[1] / 2]
     }
 
-    return findPositionForRect(node)
-}
-
-export function findPositionForRect(node: ProcessedNode): [number, number] {
     let [od, ot] = node.sector
+    // These checks will save you at some point, don't remove them.
+    if (eq(od, ot)) {
+        throw new Error(`Sector has a 0 angle: ${node.sector}`)
+    }
+    if (gt(od, ot)) {
+        throw new Error(`Sector is not correct (delta > theta): ${node.sector}`)
+    }
+    if (lt(od, 0) || gt(od, PIPI)) {
+        throw new Error(`Sector is not in the range [0, 2*PI]: ${node.sector}`)
+    }
+
     let [d, t] = getEffectiveSector(node.sector)
+    if (gt(d, t)) {
+        throw new Error(`Effective sector is not correct (delta > theta): ${node.sector} -> ${[d, t]}`)
+    }
+    if (lt(d, 0) || gt(d, PIPI)) {
+        throw new Error(`Effective sector is not in the range [0, 2*PI]: ${node.sector} -> ${[d, t]}`)
+    }
+    if (!eq(ot - od, t - d)) {
+        throw new Error(`Effective sector is not correct (delta != theta): ${node.sector} -> ${[d, t]}`)
+    }
+
     let [l, w] = node.size
-    let qD = getQuadrant(d)
-    let qT = getQuadrant(t)
+    let q_od = getQuadrant(od)
+    let q_ot = getQuadrant(ot)
+    let q_d = getQuadrant(d)
+    let q_t = getQuadrant(t)
     let tan_d = Math.tan(d)
     let tan_t = Math.tan(t)
 
-    if (eq(d, 0) && inIE(t, PI, PIPI)) {
-        return [-l / 2, 0]
-
-    }
-
-    if (qD + 2 === qT) {
-        return [-l, -w]
-    }
-
-    if (inIE(d, 0, t) && inEI(t, d, PI_2)) {
+    if (q_d === q_t) {
         let x = ((w + l * tan_d) / (tan_t - tan_d))
         let y = (tan_d * (x + l))
 
-        if (getQuadrant(od) === 1 || getQuadrant(od) === 2) {
+        if (q_od === 2 || q_od === 3) {
             x = -x - l
         }
 
-        if (getQuadrant(od) >= 2) {
+        if (q_od > 2) {
             y = -y - w
         }
 
         return [x, y]
     }
 
-    if (qD + 1 === qT && getQuadrant(od) === 1) {
+    // This is a special case only because we don't have to deal with
+    // its symmetry, q_od=4 and q_ot=1, as our sectors start and end
+    // at 0 and 2*PI.
+    if (q_od === 2 && q_ot === 3) {
+        console.log("here");
         let x = (w / (Math.tan(od) - Math.tan(ot)) - l)
+        let y = Math.tan(ot) * (x + l)
 
-        return [x, Math.tan(ot) * (x + l)]
+        return [x, y]
     }
 
-    if (qD + 1 === qT) {
+    if (q_d + 1 === q_t) {
         let x = (tan_d * l) / (tan_t - tan_d)
         let y = tan_t * x
 
-        if (getQuadrant(od) === 1 || getQuadrant(od) === 2) {
+        if (q_od === 2 || q_od === 3) {
             x = -x - l
         }
 
-        if (getQuadrant(od) >= 2) {
+        if (q_od > 2) {
             y = -y - w
         }
 
         return [x, y]
+    }
+
+    if (eq(d, 0) && gte(t, PI)) {
+        let x =  - l / 2
+        let y = 0
+
+        if (q_od > 2) {
+            y = -y - w
+        }
+
+        return [x, y]
+    }
+
+    // This happens only if q_od = 2 and q_ot = 4, where d is close to PI
+    // and t close to 3*PI/2, because there is necessarily a bigger sector
+    // that precedes this one.
+    if (q_d + 2 === q_t) {
+        return [-l, -w]
     }
 
     throw new Error(`Could not fit sector ${node.size} in ${node.sector} (effective sector: ${[d, t]})`)
 }
 
 export function getEffectiveSector(sector: Sector): Sector {
-    // This could be simplified a lot.
     let [od, ot] = sector
+    let q_od = getQuadrant(od)
+    let q_ot = getQuadrant(ot)
 
-    let d = od % PI_2
-    let t = ot % PI_2
+    if (q_od + 1 == q_ot || q_od === q_ot) {
+        let d = od % PI
+        let t = d + (ot - od)
 
-    if (lt(ot - od, PI_2) && eq(od, PI_2)) {
-        return [PI - ot, PI_2]
-    }
+        if (gte(d, PI_2)) {
+            if (lt(PI - t, 0)) {
+                return [d, t]
+            }
 
-    if (lt(ot - od, PI_2) && eq(od, 3 * PI_2)) {
-        return [2 * PI - ot, PI_2]
-    }
+            d = PI - d
+            t = PI - t
 
-    if (getQuadrant(od) + 1 === getQuadrant(ot) && lt(ot - od, PI) && !eq(ot, PI) && !eq(ot, PIPI)) {
-        return [
-            -getQuadrant(od) * PI_2 + od,
-            -getQuadrant(od) * PI_2 + ot
-        ]
-    }
-
-    if (getQuadrant(od) === getQuadrant(ot)) {
-        d = od % PI
-        t = ot % PI
-
-        if (inIE(d, 0, PI_2) && inEI(t, 0, PI_2)) {
-            return [d, t]
+            return [t, d]
         }
 
-        return [PI - d, PI - t].sort() as [number, number]
-    }
-
-    if (lt(t, d)) {
-        let tmp = d
-        d = t
-        t = tmp
-    }
-
-    if (eq(t - d, ot - od)) {
         return [d, t]
     }
 
-
-    return [d, d + ot - od]
-
+    return [od, ot]
 }
 

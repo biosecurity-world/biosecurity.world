@@ -28,6 +28,7 @@ class Debug {
     point(options: { p: [number, number], color?: string }) {
         this.buffer.push(($svg) => {
             $svg.append('circle')
+                .classed('debug', true)
                 .attr('cx', options.p[0])
                 .attr('cy', options.p[1])
                 .attr('r', 2)
@@ -38,6 +39,7 @@ class Debug {
     rect(options: { p: [number, number], width: number, length: number, color?: string, cb?: (rect: Selection<SVGRectElement, {}, HTMLElement, unknown>) => void }) {
         this.buffer.push(($svg) => {
             let $rect = $svg.append('rect')
+                .classed('debug', true)
                 .attr('x', options.p[0])
                 .attr('y', options.p[1])
                 .attr('width', options.length)
@@ -66,6 +68,7 @@ class Debug {
             let color = options.color ?? 'black'
 
             $svg.append('line')
+                .classed('debug', true)
                 .attr('x1', x)
                 .attr('y1', y)
                 .attr('x2', x + Math.cos(options.angle) * length)
@@ -75,7 +78,7 @@ class Debug {
     }
 
     clear() {
-        this.buffer = [($svg) => $svg.selectAll('*').remove()]
+        this.buffer = [($svg) => $svg.selectAll('.debug').remove()]
 
         return this
     }
@@ -142,7 +145,19 @@ export function getQuadrant(angle: number): number {
         throw new Error(`Angle ${angle} is not in the range [0, 2*PI]`)
     }
 
-    return Math.floor(angle / PI_2)
+    if (inIE(angle, 0, PI_2)) {
+        return 1
+    }
+
+    if (inIE(angle, PI_2, PI)) {
+        return 2
+    }
+
+    if (inIE(angle, PI, PI + PI_2)) {
+        return 3
+    }
+
+    return 4
 }
 
 export function shortestDistanceBetweenRectangles(

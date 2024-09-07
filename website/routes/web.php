@@ -2,49 +2,22 @@
 
 declare(strict_types=1);
 
-use App\Services\NotionData\DataObjects\Activity;
-use App\Services\NotionData\DataObjects\Entry;
+use App\Http\Controllers\ShowEntryPartialController;
+use App\Http\Controllers\ShowMapPartialController;
+use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\DataObjects\Entrygroup;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Notion $notion) {
-    $tree = Tree::buildFromPages($notion->pages());
-
-    return view('welcome', [
-        'tree' => $tree,
-        'lookup' => [
-            'entries' => $tree->entries()->map(fn (Entry $entry) => [
-                'id' => $entry->id,
-                'activities' => $entry->getActivityBitmask(Activity::$seen),
-                'lenses' => $entry->lens(),
-            ]),
-            'entrygroups' => $tree->entrygroups(),
-        ],
-        'databaseUrl' => $notion->databaseUrl(),
-        'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
-    ]);
-})->name('welcome');
-
-Route::get('/about', fn () => '')->name('about');
+Route::get('/', ShowWelcomeController::class)->name('welcome');
+Route::view('/about', 'about')->name('about');
 Route::get('/give-feedback', fn () => '')->name('give-feedback');
-Route::get('/how-to-contribute', fn () => '')->name('how-to-contribute');
-
-Route::get('/e/{id}/{entryId}', function (Notion $notion, int $id, int $entryId) {
-    $tree = Tree::buildFromPages($notion->pages());
-
-    abort_if(! isset($tree->lookup[$id]) || ! isset($tree->lookup[$entryId]), 404);
-
-    return view('entries.show', [
-        'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
-        'entrygroup' => $tree->lookup[$id],
-        'entry' => $tree->lookup[$entryId],
-        'breadcrumbs' => $tree->getNodeById($id)->breadcrumbs($tree),
-    ]);
-})->where('id', '\d+')->where('entryId', '\d+')->name('entries.show');
-
+Route::view('/how-to-contribute', 'how-to-contribute')->name('how-to-contribute');
+Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
+Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
+Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
+Route::get('/m', ShowMapPartialController::class);
 Route::get('/_/entries', function (Notion $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
@@ -57,16 +30,16 @@ Route::get('/_/entries', function (Notion $notion) {
     return view('entries.index', ['links' => $links]);
 });
 
-if (app()->runningUnitTests()) {
+if (app()->runningUnitTests() || app()->isLocal()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
     // the code for the website which includes the code for tests the tree
     // These routes are ignored by the crawler that builds the static version
     // of this website.
     Route::get('/tree-rendering/{caseId}', function (string $caseId) {
-        abort_if(! Cache::has('tree-'.$caseId), 404);
+        abort_if(! cache()->has('tree-'.$caseId), 404);
 
-        $case = Cache::get('tree-'.$caseId);
+        $case = cache()->get('tree-'.$caseId);
 
         return view('render-testcase', ['case' => $case]);
     })->name('tree-rendering');
