@@ -156,8 +156,8 @@ class Hydrator
             'link' => ['required', 'string', 'url'],
             'organizationType' => ['required', 'string'],
             'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {
-                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isTechnical());
-                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isGovernance());
+                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaTechnicalFocus());
+                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaGovernanceFocus());
 
                 if ((! $isTechnical && ! $isGovernance)) {
                     $fail('The entry must have at least either a [TECHNICAL] or [GOVERNANCE] focus, or both');
@@ -170,7 +170,7 @@ class Hydrator
         if (self::$strict) {
             $rules = collect($rules)->mapWithKeys(function ($previousRules, $key) {
                 return [$key => match ($key) {
-                    'link' => [...$previousRules, new OkStatusRule()],
+                    'link' => [...$previousRules, new OkStatusRule],
                     default => $previousRules
                 }];
             })->toArray();

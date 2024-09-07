@@ -26,7 +26,7 @@
     <x-navbar class="lg:bg-white/20 lg:shadow-inner lg:shadow-white/30" invert/>
 
     <h1 class="px-6 mt-8 lg:mt-24 max-w-3xl lg:text-center text-3xl font-bold tracking-tight lg:text-6xl font-display text-white mx-auto">
-        Explore the complete map of the biosecurity field.
+        Understand the biosecurity landscape.
     </h1>
 
     <ul class="max-w-7xl space-y-6 lg:space-y-0 mx-auto px-6 xl:px-0 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:gap-x-12 mt-6 lg:mt-20">
@@ -55,9 +55,8 @@
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
-                As a scientific non-profit, we diligently adhere to <a href=""
-                                                                       class="underline text-white hover:text-white/70">open
-                    processes</a> and keep a record of
+                As an <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>, <a
+                    class="underline" href="{{ $databaseUrl }}">open-data</a>, scientific non-profit, we keep a record of
                 our inclusion decisions for people to challenge.
             </p>
         </li>
@@ -69,7 +68,7 @@
         class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
         <section class="p-6">
             <h3 class="text-xl font-display flex-grow text-primary-950">
-                About the map.
+                About the map
             </h3>
             <p class="text-gray-700 text-sm">
                 Last updated on
@@ -78,7 +77,27 @@
                 </time>
             </p>
 
-            <h5 class="font-display mt-4 text-primary-950">Inclusion criteria</h5>
+            <h5 class="font-display mt-4 text-lg text-primary-950">
+                Criteria for inclusion
+            </h5>
+
+            <ul class="space-y-4 mt-1">
+                <li>
+                    <span class="font-bold font-display text-gray-700">Productive</span>
+                    <p class="text-gray-700 mt-0.5">Has relevant research or policy output, or a relevant product, device, published funding decision.</p>
+                </li>
+                <li>
+                    <span class="font-bold font-display text-gray-700">Active</span>
+                    <p class="text-gray-700 mt-0.5">Is likely to produce more relevant outputs.</p>
+                </li>
+                <li>
+                    <span class="font-bold font-display text-gray-700">Focused</span>
+                    <p class="text-gray-700 mt-0.5">
+                        Aims to prevent large scale pandemics, or is a key player in one of the <a href="" class="underline">intervention focuses</a>.
+                    </p>
+                </li>
+            </ul>
+
 
         </section>
         <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">

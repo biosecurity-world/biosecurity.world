@@ -43,5 +43,5 @@ return [
     'differ' => [
         'node_path' => env('NODE_PATH', 'node'),
         'chrome_path' => env('CHROME_PATH', 'chromium'),
-    ]
+    ],
 ];

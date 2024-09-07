@@ -9,7 +9,7 @@
             <directory>tests/Browser</directory>
         </testsuite>
         <testsuite name="Unit">
-            <directory>tests/Unit</directory>
+            <directory>tests/Feature</directory>
         </testsuite>
 
     </testsuites>

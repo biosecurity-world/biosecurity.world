@@ -355,16 +355,11 @@ function showNode(node: ProcessedNode) {
         )
 
         if (IS_OK_WITH_MOTION) {
-            let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
             let directionalIncrements = 0
             let nextScrollShouldBeIgnored = false
             let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
             let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-
-            window.addEventListener('resize', () => {
-                comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-                mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-            })
+            let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
 
             if (elMapWrapper.getBoundingClientRect().top < 0) {
                 elMapWrapper.classList.add('fullscreen')
@@ -381,17 +376,17 @@ function showNode(node: ProcessedNode) {
                     elMapWrapper.classList.remove('fullscreen')
                     comingFromTop = true
                     directionalIncrements = 0
-                    window.scrollTo(0, mapDistanceToTop - 1 - 1)
+                    window.scrollTo(0, mapDistanceToTop - 10)
 
                     return;
                 }
 
-                if (directionalIncrements === 5) {
+                if (directionalIncrements === 2) {
                     elMapWrapper.classList.remove('fullscreen')
                     directionalIncrements = 0
                     comingFromTop = false
                     nextScrollShouldBeIgnored = true
-                    window.scrollTo(0, mapDistanceToTop + 1 + 1)
+                    window.scrollTo(0, mapDistanceToTop + 10)
                 }
             }
             document.addEventListener('scroll', () => {
@@ -400,13 +395,11 @@ function showNode(node: ProcessedNode) {
                     return
                 }
 
-                // noinspection PointlessBooleanExpressionJS
-                if (comingFromTop === true && elMapWrapper.getBoundingClientRect().top < 0) {
+                if (comingFromTop && elMapWrapper.getBoundingClientRect().top < 0) {
                     elMapWrapper.classList.add('fullscreen')
                 }
 
-                // noinspection PointlessBooleanExpressionJS
-                if (comingFromTop === false && elMapWrapper.getBoundingClientRect().top > 0) {
+                if (!comingFromTop && elMapWrapper.getBoundingClientRect().top > 0) {
                     elMapWrapper.classList.add('fullscreen')
                 }
             })

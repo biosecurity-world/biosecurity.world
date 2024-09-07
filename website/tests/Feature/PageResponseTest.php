@@ -1,14 +1,21 @@
 <?php
 
-namespace Tests\Browser;
+namespace Tests\Unit;
 
 use Tests\TestCase;
 
-class PageResponseTest extends TestCase
+class
+PageResponseTest extends TestCase
 {
     public function test_the_homepage_is_ok()
     {
         $response = $this->get('/');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_the_map_page_is_ok() {
+        $response = $this->get('/m');
 
         $response->assertStatus(200);
     }
@@ -25,6 +32,8 @@ class PageResponseTest extends TestCase
         $this->get('/about')->assertStatus(200);
         $this->get('/give-feedback')->assertStatus(200);
         $this->get('/how-to-contribute')->assertStatus(200);
+        $this->get('/legal/privacy-policy')->assertStatus(200);
+        $this->get('/legal/terms-of-service')->assertStatus(200);
     }
 
     public function test_the_entry_page_is_ok()

@@ -185,7 +185,7 @@
         <h2 id="your-content">Your Content</h2>
 
         <ol>
-            <li><p>For all content that you share with the website, you grant the operate and its affiliates a
+            <li><p>For all content that you share with the website, you grant the operator and its affiliates a
                     worldwide,
                     royalty-free (meaning that there is no ongoing payment to you required), sub-licensable, and
                     transferable

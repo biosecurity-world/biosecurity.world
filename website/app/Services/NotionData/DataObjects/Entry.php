@@ -88,7 +88,7 @@ class Entry
     public function isTechnical(): bool
     {
         foreach ($this->interventionFocuses as $focus) {
-            if ($focus->isTechnical()) {
+            if ($focus->isMetaTechnicalFocus()) {
                 return true;
             }
         }
@@ -99,7 +99,7 @@ class Entry
     public function isGovernance(): bool
     {
         foreach ($this->interventionFocuses as $focus) {
-            if ($focus->isGovernance()) {
+            if ($focus->isMetaGovernanceFocus()) {
                 return true;
             }
         }

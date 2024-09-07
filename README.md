@@ -7,7 +7,6 @@
 - [ ] [minutes] Make the edges nicer
 - [ ] [hour] Implement the 'Report error' button on the entry page
 - [ ] [minute] Link Give feedback to feedback form for now
-- [ ] Inclusion Criteria
 - [ ] Rejected entries
 - [ ] Analytics
 - [ ] Document contribution workflows

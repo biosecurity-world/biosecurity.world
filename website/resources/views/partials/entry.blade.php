@@ -106,9 +106,9 @@
                 @foreach($entry->interventionFocuses as $focus)
                     <li>
                         <a href="" class="underline">
-                            @if ($focus->isTechnical())
+                            @if ($focus->isMetaTechnicalFocus())
                                 <x-at-technical class="underline" />
-                            @elseif($focus->isGovernance())
+                            @elseif($focus->isMetaGovernanceFocus())
                                 <x-at-governance class="underline" />
                             @else
                                 <span>{{ $focus->label }}</span>
