@@ -20,5 +20,7 @@ buildGoApplication {
   modules = ./gomod2nix.toml;
   buildInputs = [
     pkgs.libwebp
+    pkgs.vips
+    pkgs.pkg-config
   ];
 }

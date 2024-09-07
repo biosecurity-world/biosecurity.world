@@ -16,6 +16,7 @@ import (
 var savePath string
 var defaultLogoPath string
 var useJSON bool
+var targetSize int
 
 func run() error {
 	scanner := bufio.NewScanner(os.Stdin)
@@ -74,7 +75,7 @@ func run() error {
 			fmt.Printf("- [TRY] %s\n", URL)
 		}
 
-		logo, err := FindLogo(parsedURL, 128)
+		logo, err := FindLogo(parsedURL, targetSize)
 
 		if err != nil {
 			if !useJSON {
@@ -134,6 +135,7 @@ func run() error {
 func main() {
 	flag.StringVar(&savePath, "o", "", "directory where paths are written")
 	flag.StringVar(&defaultLogoPath, "d", "", "default logo")
+	flag.IntVar(&targetSize, "s", 128, "desired size for the logo")
 	flag.BoolVar(&useJSON, "json", false, "output useJSON")
 
 	flag.Parse()

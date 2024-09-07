@@ -4,26 +4,27 @@ namespace App\Services\Logosnatch;
 
 use Illuminate\Support\Facades\Cache;
 
-class IconSnatch
+class LogoSnatch
 {
-    public static function retrieve(string $url): Logo
+    public static function retrieve(string $url, int $targetSize = 128): Logo
     {
-        $cacheKey = 'iconsnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url);
+        $cacheKey = 'logosnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url) . '-' . $targetSize;
         if (Cache::has($cacheKey)) {
             /** @phpstan-ignore-next-line  */
             return Cache::get($cacheKey);
         }
 
-        $iconsnatchBinary = base_path('/../tools/logosnatch/logosnatch');
-        if (! is_string($iconsnatchBinary) || ! file_exists($iconsnatchBinary)) {
-            throw new \RuntimeException('IconSnatch binary not configured');
+        $logosnatchBinary = base_path('/../tools/logosnatch/result/bin/logosnatch');
+        if (! is_string($logosnatchBinary) || ! file_exists($logosnatchBinary)) {
+            throw new \RuntimeException('Could not find logosnatch binary at '.$logosnatchBinary);
         }
 
         $process = proc_open(
             [
-                $iconsnatchBinary,
+                $logosnatchBinary,
                 '-o', storage_path('app/public/logos'),
                 '-d', storage_path('app/public/missing-logo.svg'),
+                '-s', (string) $targetSize,
                 '-json',
             ],
             [
@@ -52,16 +53,16 @@ class IconSnatch
                 throw new \RuntimeException('Failed to download logo: '.$error);
             }
         } else {
-            throw new \RuntimeException('Failed to start iconsnatch process');
+            throw new \RuntimeException('Failed to start logosnatch process');
         }
 
         if (! $body) {
             throw new \RuntimeException("Failed to download logo: $error");
         }
 
-        $decoded = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+        $decoded = json_decode($body, true);
         if (! is_array($decoded) || ! array_key_exists('format', $decoded) || ! array_key_exists('path', $decoded) || ! array_key_exists('filled', $decoded)) {
-            throw new \RuntimeException(sprintf('Unexpected response from iconsnatch, got %s, expected key format, path, filled', $body));
+            throw new \RuntimeException(sprintf('Unexpected response from logosnatch, got %s, expected key format, path, filled', $body));
         }
 
         $logo = new Logo(

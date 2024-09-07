@@ -20,7 +20,8 @@ pkgs.mkShell {
   packages = [
     goEnv
     gomod2nix
-    pkgs.golangci-lint
     pkgs.libwebp
+    pkgs.vips
+    pkgs.pkg-config
   ];
 }
