@@ -267,4 +267,5 @@
 
 {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
+<a href="/m"class="hidden" aria-hidden="true">map</a>
 </x-layouts.default>
