@@ -51,7 +51,13 @@ class Tree
         $activities = $this->entries()->flatMap(fn (Entry $e) => $e->activities)->unique('id')->values();
 
         return collect(Activity::$seen)->map(function (int $id) use ($activities) {
-            return $activities->first(fn (Activity $a) => $a->id === $id);
+            $activity = $activities->first(fn (Activity $a) => $a->id === $id);
+
+            if (is_null($activity)) {
+                throw new Exception("Should not happen: Activity with id `$id` not found.");
+            }
+
+            return $activity;
         });
     }
 
@@ -59,11 +65,6 @@ class Tree
     public function interventionFocuses(): Collection
     {
         return $this->entries()->flatMap(fn (Entry $e) => $e->interventionFocuses)->unique('id')->values();
-    }
-
-    public function getNodeById(int $id): ?Node
-    {
-        return Arr::first($this->nodes, fn (Node $node) => $node->id === $id);
     }
 
     public static function buildFromPages(HydratedPages $pages): Tree

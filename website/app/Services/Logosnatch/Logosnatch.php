@@ -11,7 +11,7 @@ class Logosnatch
     {
         $cacheKey = 'logosnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url).'-'.$targetSize;
         if (Cache::has($cacheKey)) {
-            /** @phpstan-ignore-next-line */
+            /** @var array{format: string, path: string, size: int, filled: bool} $decoded */
             $decoded = Cache::get($cacheKey);
 
             return self::createFromLogosnatchResponse($decoded);
@@ -73,7 +73,8 @@ class Logosnatch
         return self::createFromLogosnatchResponse($decoded);
     }
 
-    private static function createFromLogosnatchResponse(array $decoded)
+    /** @param array{format: string, path: string, size: int, filled: bool} $decoded */
+    private static function createFromLogosnatchResponse(array $decoded): Logo
     {
         return new Logo(
             $decoded['format'],

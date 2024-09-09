@@ -36,8 +36,9 @@ class OkStatusRule implements ValidationRule
                 'http_errors' => false,
             ]);
 
-            if (!is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
+            if (! is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
                 $fail("The $attribute is not a valid URL");
+
                 return;
             }
 
