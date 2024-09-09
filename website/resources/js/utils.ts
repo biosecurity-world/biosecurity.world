@@ -172,3 +172,25 @@ export function shortestDistanceBetweenRectangles(
 
     return Math.sqrt(dx * dx + dy * dy)
 }
+
+export function throttle(callback: (...args: any[]) => void, wait: number, immediate: boolean = false) {
+    let timeout: number|null = null
+    let initialCall = true
+
+    return function() {
+        const callNow = immediate && initialCall
+        const next = () => {
+            callback.apply(this, arguments)
+            timeout = null
+        }
+
+        if (callNow) {
+            initialCall = false
+            next()
+        }
+
+        if (!timeout) {
+            timeout = setTimeout(next, wait)
+        }
+    }
+}

@@ -1,13 +1,11 @@
 import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
-import {debug, eq, gt, lt, PI, PIPI} from "./utils"
+import {debug, eq, gt, lt, PI, PIPI, throttle} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
 import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
-
-const IS_OK_WITH_MOTION = !window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
 
 function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
@@ -234,12 +232,6 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         let r = 2 * window.innerWidth
 
         if (node.depth === 1) {
-            console.log("here");
-            // const [x, y] = options.p ?? [0, 0]
-            //
-            // let length = options.length ?? window.innerWidth
-            // let color = options.color ?? 'black'
-            //
             $fg.append('line')
                 .classed('ray', true)
                 .attr('x1', 0)
@@ -255,7 +247,6 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
                 .attr('x2', Math.cos(theta) * r * 2)
                 .attr('y2', Math.sin(theta) * r * 2)
                 .attr('stroke', '#d1d5db')
-            continue
         } else if (node.depth === 2) {
             let color = level2NodeCount % 2 === 0 ? "#f3f4f6" : "#f9fafb"
             $bg.append("path")
@@ -282,8 +273,8 @@ function showNode(node: ProcessedNode) {
 ;(async function () {
     try {
         let elMapWrapper = document.getElementById('map-wrapper')!
-        let $map = select<SVGElement, any>("#map")
 
+        let $map = select<SVGElement, any>("#map")
         let mapContentRes = await fetch('/m')
         let mapContent = await mapContentRes.text()
 
@@ -373,73 +364,10 @@ function showNode(node: ProcessedNode) {
             `translate(${mapWidth / 2}, ${mapHeight / 2})`,
         )
 
-        if (IS_OK_WITH_MOTION) {
-            let directionalIncrements = 0
-            let nextScrollShouldBeIgnored = false
-            let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-            let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-            let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
-
-            if (elMapWrapper.getBoundingClientRect().top < 0) {
-                elMapWrapper.classList.add('fullscreen')
-            }
-
-            const handleMovement = (direction: number) => {
-                if (!isMapFixed()) {
-                    return
-                }
-
-                directionalIncrements += direction
-
-                if (directionalIncrements === -2) {
-                    elMapWrapper.classList.remove('fullscreen')
-                    comingFromTop = true
-                    directionalIncrements = 0
-                    window.scrollTo(0, mapDistanceToTop - 10)
-
-                    return;
-                }
-
-                if (directionalIncrements === 2) {
-                    elMapWrapper.classList.remove('fullscreen')
-                    directionalIncrements = 0
-                    comingFromTop = false
-                    nextScrollShouldBeIgnored = true
-                    window.scrollTo(0, mapDistanceToTop + 10)
-                }
-            }
-            document.addEventListener('scroll', () => {
-                if (isMapFixed() || nextScrollShouldBeIgnored) {
-                    nextScrollShouldBeIgnored = false
-                    return
-                }
-
-                if (comingFromTop && elMapWrapper.getBoundingClientRect().top < 0) {
-                    elMapWrapper.classList.add('fullscreen')
-                }
-
-                if (!comingFromTop && elMapWrapper.getBoundingClientRect().top > 0) {
-                    elMapWrapper.classList.add('fullscreen')
-                }
-            })
-            document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
-            document.addEventListener("keydown", (e: KeyboardEvent) => {
-                if (e.key === "Escape") {
-                    closeEntry()
-                }
-
-                if (e.key === 'ArrowDown') {
-                    handleMovement(1)
-                }
-
-                if (e.key === 'ArrowUp') {
-                    handleMovement(-1)
-                }
-            })
-        }
-
         let zoomHandler = zoom<SVGElement, unknown>()
-            .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
+            .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => {
+                $zoomWrapper.attr("transform", e.transform.toString());
+            })
             .scaleExtent([0.5, 2.5])
             .translateExtent([
                 [-mapWidth * 1.5, -mapHeight * 1.5],
@@ -450,6 +378,89 @@ function showNode(node: ProcessedNode) {
 
         document.getElementById('zoom-in')!.addEventListener('click', () => zoomHandler.scaleBy($map, 1.2))
         document.getElementById('zoom-out')!.addEventListener('click', () => zoomHandler.scaleBy($map, 0.8))
+
+        let directionalIncrements = 0
+        let nextScrollShouldBeIgnored = false
+        let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+        let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+
+        if (elMapWrapper.getBoundingClientRect().top < 0) {
+            elMapWrapper.classList.add('fullscreen')
+        }
+
+        const handleMovement = (direction: number) => {
+            if (!elMapWrapper.classList.contains('fullscreen')) {
+                return;
+            }
+
+            directionalIncrements += direction
+
+            if (Math.abs(directionalIncrements) !== 2) {
+                return;
+            }
+
+            elMapWrapper.classList.remove('fullscreen')
+            comingFromTop = directionalIncrements < 0
+            directionalIncrements = 0
+
+            if (directionalIncrements > 0) {
+                nextScrollShouldBeIgnored = true
+            }
+
+            window.scrollTo(0, mapDistanceToTop + 10 * Math.sign(directionalIncrements))
+        }
+
+        document.addEventListener('scroll', throttle(() => {
+            if (nextScrollShouldBeIgnored) {
+                nextScrollShouldBeIgnored = false
+                return;
+            }
+
+            if (elMapWrapper.classList.contains('fullscreen')) {
+                return
+            }
+
+            if (
+                comingFromTop && elMapWrapper.getBoundingClientRect().top < 0 ||
+                !comingFromTop && elMapWrapper.getBoundingClientRect().top > 0
+            ) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+        }, 100))
+        document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+        document.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closeEntry()
+            }
+
+            if (e.key === 'ArrowDown') {
+                handleMovement(1)
+            }
+
+            if (e.key === 'ArrowUp') {
+                handleMovement(-1)
+            }
+        })
+        window.addEventListener('resize', () => {
+            mapWidth = $map.node()!.clientWidth
+            mapHeight = $map.node()!.clientHeight
+
+            $centerWrapper.attr(
+                "transform",
+                `translate(${mapWidth / 2}, ${mapHeight / 2})`,
+            )
+
+            zoomHandler.translateExtent([
+                [-mapWidth * 1.5, -mapHeight * 1.5],
+                [mapWidth * 1.5, mapHeight * 1.5],
+            ])
+
+            $map.call(zoomHandler.transform, zoomIdentity)
+
+            if (elMapWrapper.getBoundingClientRect().top < 0) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+        })
 
         for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
             let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
