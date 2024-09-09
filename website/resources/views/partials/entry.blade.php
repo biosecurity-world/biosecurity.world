@@ -33,7 +33,7 @@
                 @endforeach
 
                 <li class="flex items-center">
-                    <x-entry-logo class="ml-2" :logo="$entry->logo" />
+                    <x-entry-logo :logo="$entry->logo" alt="{{ $entry->label }}'s logo" />
                 </li>
             </ol>
 

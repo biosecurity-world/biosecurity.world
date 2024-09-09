@@ -124,7 +124,7 @@
                 <p>You may not falsely imply that you’re affiliated with or endorsed by the operator.</p>
             </li>
             <li>
-                <p>You may automate access to the website, or monitor the website. You may crawl the website to
+                <p>You may automate access to the website, or monitor the website, so long as you identify yourself, for example through a unique User-Agent header. You may crawl the website to
                     index it for a publicly available search engine, so long as you abide by the rules of any robots.txt
                     file on the website.</p>
             </li>
@@ -144,6 +144,11 @@
         <h2 id="content-standards">Content Standards</h2>
         <ol>
             <li>
+                <p><b>You may not use the website to disclose information from or about others that you don’t have the
+                        right to
+                        disclose.</b></p>
+            </li>
+            <li>
                 <p>You may not submit content to the website that is illegal, offensive, or otherwise harmful to others.
                     This includes content that is harassing, inappropriate, or abusive.</p>
             </li>
@@ -156,11 +161,6 @@
                 <p>You may not submit content to the website containing malicious computer code, such as computer
                     viruses or
                     spyware.</p>
-            </li>
-            <li>
-                <p>You may not use the website to disclose information from or about others that you don’t have the
-                    right to
-                    disclose.</p>
             </li>
         </ol>
 

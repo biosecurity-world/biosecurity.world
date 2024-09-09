@@ -3,20 +3,23 @@
 namespace App\Services\Logosnatch;
 
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
-class LogoSnatch
+class Logosnatch
 {
     public static function retrieve(string $url, int $targetSize = 128): Logo
     {
-        $cacheKey = 'logosnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url) . '-' . $targetSize;
+        $cacheKey = 'logosnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url).'-'.$targetSize;
         if (Cache::has($cacheKey)) {
-            /** @phpstan-ignore-next-line  */
-            return Cache::get($cacheKey);
+            /** @phpstan-ignore-next-line */
+            $decoded = Cache::get($cacheKey);
+
+            return self::createFromLogosnatchResponse($decoded);
         }
 
-        $logosnatchBinary = base_path('/../tools/logosnatch/result/bin/logosnatch');
+        $logosnatchBinary = base_path('/../tools/logosnatch/logosnatch');
         if (! is_string($logosnatchBinary) || ! file_exists($logosnatchBinary)) {
-            throw new \RuntimeException('Could not find logosnatch binary at '.$logosnatchBinary);
+            throw new RuntimeException('Could not find logosnatch binary at '.$logosnatchBinary);
         }
 
         $process = proc_open(
@@ -50,29 +53,33 @@ class LogoSnatch
             $return_value = proc_close($process);
 
             if ($return_value !== 0) {
-                throw new \RuntimeException('Failed to download logo: '.$error);
+                throw new RuntimeException('Failed to download logo: '.$error);
             }
         } else {
-            throw new \RuntimeException('Failed to start logosnatch process');
+            throw new RuntimeException('Failed to start logosnatch process');
         }
 
         if (! $body) {
-            throw new \RuntimeException("Failed to download logo: $error");
+            throw new RuntimeException("Failed to download logo: $error");
         }
 
         $decoded = json_decode($body, true);
-        if (! is_array($decoded) || ! array_key_exists('format', $decoded) || ! array_key_exists('path', $decoded) || ! array_key_exists('filled', $decoded)) {
-            throw new \RuntimeException(sprintf('Unexpected response from logosnatch, got %s, expected key format, path, filled', $body));
+        if (! is_array($decoded) || ! array_key_exists('format', $decoded) || ! array_key_exists('path', $decoded) || ! array_key_exists('filled', $decoded) || ! array_key_exists('size', $decoded)) {
+            throw new RuntimeException(sprintf('Unexpected response from logosnatch, got %s, expected key format, path, filled', $body));
         }
 
-        $logo = new Logo(
+        Cache::forever($cacheKey, $decoded);
+
+        return self::createFromLogosnatchResponse($decoded);
+    }
+
+    private static function createFromLogosnatchResponse(array $decoded)
+    {
+        return new Logo(
             $decoded['format'],
             'storage/logos/'.$decoded['path'],
+            $decoded['size'],
             $decoded['filled']
         );
-
-        Cache::forever($cacheKey, $logo);
-
-        return $logo;
     }
 }

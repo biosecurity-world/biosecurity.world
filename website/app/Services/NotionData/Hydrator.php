@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\NotionData;
 
 use App\Rules\OkStatusRule;
-use App\Services\Logosnatch\LogoSnatch;
+use App\Services\Logosnatch\Logosnatch;
 use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
@@ -181,7 +181,7 @@ class Hydrator
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
         $data['location'] = Location::fromNotionOptions($data['location']);
-        $data['logo'] = LogoSnatch::retrieve($data['link'], targetSize: 64);
+        $data['logo'] = Logosnatch::retrieve($data['link'], targetSize: 64);
 
         return new Entry(...$data);
     }

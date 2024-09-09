@@ -1,37 +1,24 @@
-<!doctype html>
-<html lang="en" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="length=device-length, user-scalable=yes, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Understand the biosecurity landscape. - Biosecurity World</title>
+<x-layouts.default class="h-full antialiased w-full bg-gray-100" title="Understand the biosecurity landscape.">
+<x-slot:head>
+        <script>
+            window.nodes = @json($nodes);
+            window.masks = @json($entries);
+            window.bitmaskLength = {{ $bitmaskLength }};
+            window.andOrMask = {{ $andOrMask }};
+        </script>
 
-    <link rel="preload" href="/fonts/Gilroy-Bold.woff2" crossorigin>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito:500,600,700" rel="stylesheet"/>
-
-    <script>
-        window.nodes = @json($nodes);
-        window.masks = @json($entries);
-        window.bitmaskLength = {{ $bitmaskLength }};
-        window.andOrMask = {{ $andOrMask }};
-    </script>
-
-    @vite('resources/js/app.ts')
-    @vite('resources/css/app.css')
-</head>
-<body class="h-full antialiased w-full bg-gray-100">
+        @vite('resources/js/app.ts')
+    </x-slot:head>
 <header class="w-full pb-52 lg:pb-[14.25rem] bg-gradient-to-tl from-primary-600 to-primary-950 pt-4 lg:pt-8">
-    <x-navbar class="lg:bg-white/20 lg:shadow-inner lg:shadow-white/30" invert/>
+    <x-navbar class="md:bg-white/20 md:shadow-inner md:shadow-white/30" invert/>
 
-    <h1 class="px-6 mt-8 lg:mt-24 max-w-3xl lg:text-center text-3xl font-bold tracking-tight lg:text-6xl font-display text-white mx-auto">
+    <h1 class="px-6 mt-6 sm:mt-16  lg:mt-24 max-w-3xl lg:text-center text-3xl font-bold tracking-tight lg:text-6xl font-display text-white mx-auto md:text-center">
         Understand the biosecurity landscape.
     </h1>
 
-    <ul class="max-w-7xl space-y-6 lg:space-y-0 mx-auto px-6 xl:px-0 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:gap-x-12 mt-6 lg:mt-20">
+    <ul class="max-w-7xl space-y-6 md:space-y-0 mx-auto px-6 xl:px-0  md:grid md:grid-cols-3 md:gap-x-8 xl:gap-x-12 mt-6 md:mt-16 lg:mt-20">
         <li>
-            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Up-to-date</h3>
+            <h2 class="font-display lg:text-lg xl:text-2xl text-white">Up-to-date</h2>
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
@@ -40,7 +27,7 @@
             </p>
         </li>
         <li>
-            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Crowd-sourced</h3>
+            <h2 class="font-display lg:text-lg xl:text-2xl text-white">Crowd-sourced</h2>
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
@@ -51,7 +38,7 @@
             </p>
         </li>
         <li>
-            <h3 class="font-display lg:text-lg xl:text-2xl text-white">Transparent</h3>
+            <h2 class="font-display lg:text-lg xl:text-2xl text-white">Transparent</h2>
             <hr class="w-8 mt-1.5 border-white/40 hidden lg:block">
 
             <p class="max-w-[65ch] mt-1 lg:mt-2 text-white/95 xl:text-lg">
@@ -62,6 +49,8 @@
         </li>
     </ul>
 </header>
+
+<h2 class="sr-only">Map</h2>
 
 <div class="w-full h-full flex duration-500 transition-[padding,border-radius]" id="map-wrapper">
     <aside
@@ -97,11 +86,6 @@
                     </p>
                 </li>
             </ul>
-
-
-            <a class="inline-block mt-4 text-gray-700  underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-gray-100 transition">
-                Learn more
-            </a>
         </section>
         <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
             <h4 class="text-lg font-display text-primary-950">Filters</h4>
@@ -193,19 +177,18 @@
     </aside>
 
     <main class="w-full h-full relative border-b border-r bg-gray-50 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
-        <section data-state="error" aria-hidden="true"
-                 class="app-state state-inactive">
+        <section data-state="error" aria-hidden="true" class="app-state state-inactive">
             <div class="text-center">
                 <h3 class="text-xl">An error has occurred.</h3>
                 <p class="reason mt-1"></p>
                 <p>
                     You can try reloading the page or checking the <a href="{{ $databaseUrl }}"
                                                                       rel="noopener noreferrer nofollow"
-                                                                      class="text-blue-500 underline">Notion
+                                                                      class="text-emerald-700 underline">Notion
                         table</a> directly.
                 </p>
                 <a href="javascript:window.location.reload();"
-                   class="reload-button border px-4 py-1 rounded-md mt-4 bg-white inline-flex items-center space-x-2">
+                   class="focusable border px-4 py-1 rounded-md mt-4 bg-white inline-flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
                         <path fill-rule="evenodd"
                               d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z"
@@ -255,11 +238,11 @@
             </svg>
             <div class="absolute bottom-6 right-6">
                 <div class="flex flex-col bg-white shadow divide-y rounded-lg">
-                    <button class="p-2 hover:bg-gray-50 rounded-t-lg" id="zoom-in">
+                    <button class="p-2 hover:bg-gray-50 rounded-t-lg focusable" id="zoom-in">
                         <x-heroicon-s-plus class="size-5 text-gray-700"/>
                     </button>
 
-                    <button class="p-2 hover:bg-gray-50 rounded-b-lg" id="zoom-out">
+                    <button class="p-2 hover:bg-gray-50 rounded-b-lg focusable" id="zoom-out">
                         <x-heroicon-s-minus class="size-5 text-gray-700"/>
                     </button>
                 </div>
@@ -272,7 +255,7 @@
                 </h3>
 
                 <button id="filters-reset"
-                        class="border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2">
+                        class=focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2">
                     Reset the filters
                 </button>
             </div>
@@ -280,9 +263,8 @@
     </main>
 </div>
 
-    <x-footer />
+<x-footer />
 
 {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
-</body>
-</html>
+</x-layouts.default>

@@ -133,9 +133,7 @@ class Tree
             $node->trail = $trail;
             $node->depth = $depth;
 
-            if ($node->id !== $tree->rootNodeId) {
-                $trail[] = $node->id;
-            }
+            $trail[] = $node->id;
 
             $od = 0;
             foreach ($parentToChildrenMap->get($id, []) as $child) {

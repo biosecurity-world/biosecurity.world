@@ -1,8 +1,7 @@
 import {ProcessedNode, Sector} from "./types";
-import {debug, eq, getQuadrant, gt, gte, inEI, inIE, lt, PI, PI_2, PIPI} from "@/utils"
+import {debug, eq, getQuadrant, gt, gte, lt, PI, PI_2, PIPI, shortestDistanceBetweenRectangles} from "@/utils"
 
-
-export function fitToSector(node: ProcessedNode): [number, number] {
+export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'position' | 'size'>[]): [number, number] {
     if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -11,30 +10,78 @@ export function fitToSector(node: ProcessedNode): [number, number] {
         return [-node.size[0] / 2, -node.size[1] / 2]
     }
 
-    let [od, ot] = node.sector
+    let pos = fitRectToSector(node.sector, node.size)
+    let size = [node.size[0], node.size[1]]
+
+    // Take the closest node in the trail, ensure that there's 100 pixels between this one and the one in the trail.
+    let neighbour = null
+    let distanceToNeighbour = Infinity
+    for (const candidate of trail) {
+        let candidateDistance = shortestDistanceBetweenRectangles(
+            [pos[0], pos[1], node.size[0], node.size[1]],
+            [candidate.position[0], candidate.position[1], candidate.size[0], candidate.size[1]]
+        )
+
+        if (candidateDistance < distanceToNeighbour) {
+            neighbour = candidate
+            distanceToNeighbour = candidateDistance
+        }
+    }
+
+    let k = 0
+
+    while (k < 5 && shortestDistanceBetweenRectangles(
+        [...pos, ...node.size],
+        [...neighbour.position, ...neighbour.size]
+    ) < 100) {
+        size[0] += 20
+        size[1] += 20
+
+        let nextPos = fitRectToSector(node.sector, size)
+
+        if (eq(pos[0], nextPos[0]) && eq(pos[1], nextPos[1])) {
+            break
+        }
+
+        pos = nextPos
+
+        k++
+    }
+
+    // debug().rect({
+    //     p: pos,
+    //     width: size[1],
+    //     length: size[0],
+    // })
+
+    return pos
+}
+
+export function fitRectToSector(sector: Sector, size: [number, number]): [number, number] {
+    let [od, ot] = sector
     // These checks will save you at some point, don't remove them.
     if (eq(od, ot)) {
-        throw new Error(`Sector has a 0 angle: ${node.sector}`)
+        throw new Error(`Sector has a 0 angle: ${sector}`)
     }
     if (gt(od, ot)) {
-        throw new Error(`Sector is not correct (delta > theta): ${node.sector}`)
+        throw new Error(`Sector is not correct (delta > theta): ${sector}`)
     }
     if (lt(od, 0) || gt(od, PIPI)) {
-        throw new Error(`Sector is not in the range [0, 2*PI]: ${node.sector}`)
+        throw new Error(`Sector is not in the range [0, 2*PI]: ${sector}`)
     }
 
-    let [d, t] = getEffectiveSector(node.sector)
+    let [d, t] = getEffectiveSector(sector)
     if (gt(d, t)) {
-        throw new Error(`Effective sector is not correct (delta > theta): ${node.sector} -> ${[d, t]}`)
+        throw new Error(`Effective sector is not correct (delta > theta): ${sector} -> ${[d, t]}`)
     }
     if (lt(d, 0) || gt(d, PIPI)) {
-        throw new Error(`Effective sector is not in the range [0, 2*PI]: ${node.sector} -> ${[d, t]}`)
+        throw new Error(`Effective sector is not in the range [0, 2*PI]: ${sector} -> ${[d, t]}`)
     }
     if (!eq(ot - od, t - d)) {
-        throw new Error(`Effective sector is not correct (delta != theta): ${node.sector} -> ${[d, t]}`)
+        throw new Error(`Effective sector is not correct (delta != theta): ${sector} -> ${[d, t]}`)
     }
 
-    let [l, w] = node.size
+    let [l, w] = size
     let q_od = getQuadrant(od)
     let q_ot = getQuadrant(ot)
     let q_d = getQuadrant(d)
@@ -61,7 +108,6 @@ export function fitToSector(node: ProcessedNode): [number, number] {
     // its symmetry, q_od=4 and q_ot=1, as our sectors start and end
     // at 0 and 2*PI.
     if (q_od === 2 && q_ot === 3) {
-        console.log("here");
         let x = (w / (Math.tan(od) - Math.tan(ot)) - l)
         let y = Math.tan(ot) * (x + l)
 
@@ -84,7 +130,7 @@ export function fitToSector(node: ProcessedNode): [number, number] {
     }
 
     if (eq(d, 0) && gte(t, PI)) {
-        let x =  - l / 2
+        let x = -l / 2
         let y = 0
 
         if (q_od > 2) {
@@ -101,7 +147,7 @@ export function fitToSector(node: ProcessedNode): [number, number] {
         return [-l, -w]
     }
 
-    throw new Error(`Could not fit sector ${node.size} in ${node.sector} (effective sector: ${[d, t]})`)
+    throw new Error(`Unexpected: could not fit sector ${size} in ${sector} (effective sector: ${[d, t]})`)
 }
 
 export function getEffectiveSector(sector: Sector): Sector {
@@ -129,4 +175,3 @@ export function getEffectiveSector(sector: Sector): Sector {
 
     return [od, ot]
 }
-

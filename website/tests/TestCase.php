@@ -32,7 +32,8 @@ abstract class TestCase extends BaseTestCase
         })->runTest();
     }
 
-    public function assertDesktopPageMatchesSnapshot(string $url): void {
+    public function assertDesktopPageMatchesSnapshot(string $url): void
+    {
         $name = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
         (new Differ(
             name: $name,
@@ -44,7 +45,8 @@ abstract class TestCase extends BaseTestCase
         })->runTest();
     }
 
-    public function assertMobilePageMatchesSnapshot(string $url): void {
+    public function assertMobilePageMatchesSnapshot(string $url): void
+    {
         $name = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
         (new Differ(
             name: $name,
@@ -64,7 +66,6 @@ abstract class TestCase extends BaseTestCase
                 ->fullPage();
         })->runTest();
     }
-
 
     public function node(float $delta, float $theta, $width = 25, $length = 100): array
     {
