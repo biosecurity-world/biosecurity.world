@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Tree;
+use Illuminate\Contracts\View\View;
 
 class ShowEntryPartialController
 {
-    public function __invoke(Notion $notion, int $id, int $entryId)
+    public function __invoke(Notion $notion, int $id, int $entryId): View
     {
         $tree = Tree::buildFromPages($notion->pages());
 
@@ -20,7 +21,7 @@ class ShowEntryPartialController
             'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
             'entrygroup' => $tree->lookup[$id],
             'entry' => $tree->lookup[$entryId],
-            'breadcrumbs' => $tree->getNodeById($id)->breadcrumbs($tree),
+            'breadcrumbs' => collect($tree->nodes)->where('id', $id)->sole()->breadcrumbs($tree),
         ]);
     }
 }

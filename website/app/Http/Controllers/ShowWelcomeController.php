@@ -4,16 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\Notion;
 use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\Tree;
-use App\Support\IdHash;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 
 class ShowWelcomeController
 {
-    public function __invoke(Notion $notion)
+    public function __invoke(Notion $notion): View
     {
         $tree = Tree::buildFromPages($notion->pages());
 
@@ -24,6 +23,7 @@ class ShowWelcomeController
                 'od' => $node->od,
                 'depth' => $node->depth,
                 'parent' => $node->parentId,
+                'trail' => $node->trail,
             ];
 
             if ($nodeData instanceof Entrygroup) {

@@ -1,13 +1,11 @@
 import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
-import {debug, eq, gt, lt, PI, PIPI} from "./utils"
+import {debug, eq, gt, lt, PI, PIPI, throttle} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
 import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
-
-const IS_OK_WITH_MOTION = !window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
 
 function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
@@ -99,7 +97,7 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', () =
 
 function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     let nodes: ProcessedNode[] = []
-    let stack = []
+    let stack: ProcessedNode[] = []
 
     // Reset the map
     for (let i = 0; i < window.nodes.length; i++) {
@@ -111,7 +109,10 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         node.el.style.transform = ""
     }
 
-    $svg.selectAll('.background-sector').remove()
+    $svg.selectAll('.layer-bg, .layer-fg').remove()
+
+    let $bg = $svg.append('g').classed('layer-bg', true)
+    let $fg = $svg.append('g').classed('layer-fg', true)
 
     let maxDepth = 0
 
@@ -193,11 +194,9 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         stack.push(node)
     }
 
-    let root = stack.pop()
+    let root = stack.pop()!
     root.sector = [0, PIPI]
-    root.position = fitToSector(root)
-    //
-    // let deltaFromSiblings: Record<number, number> = {}
+    root.position = fitToSector(root, [{ position: [0, 0], size: root!.size}])
 
     if (nodes.length === 0) {
         return showAppState("empty")
@@ -206,6 +205,8 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     showNode(root)
 
     let deltaFromSiblings: Record<number, number> = {}
+
+    let level2NodeCount = 0
 
     for (let i = nodes.length - 1; i >= 0; i--) {
         let node = nodes[i]
@@ -221,31 +222,45 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
         let theta = delta + alpha
         node.sector = [delta, theta]
-        node.position = fitToSector(node)
-
-        debug().ray({ angle: delta})
-        debug().ray({ angle: theta})
+        node.position = fitToSector(node, node.trail.map((id) => idToNode[id]))
 
         showNode(node)
 
         deltaFromSiblings[node.parent] = theta
 
-        if (node.depth !== 2) {
-            continue
-        }
 
         let r = 2 * window.innerWidth
-        let color = i % 2 === 0 ? "#f3f4f6" : "#f9fafb"
 
-        $svg.append("path")
-            .classed('background-sector', true)
-            .attr('d', [
-                `M 0,0`,
-                `L ${r * Math.cos(delta)} ${r * Math.sin(delta)}`,
-                `A ${r} ${r} 0 0 1 ${r * Math.cos(theta)} ${r * Math.sin(theta)}`,
-                `Z`,
-            ].join(" "))
-            .attr("fill", color)
+        if (node.depth === 1) {
+            $fg.append('line')
+                .classed('ray', true)
+                .attr('x1', 0)
+                .attr('y1', 0)
+                .attr('x2', Math.cos(alpha) * r * 2)
+                .attr('y2', Math.sin(alpha) * r * 2)
+                .attr('stroke', '#d1d5db')
+
+            $fg.append('line')
+                .classed('ray', true)
+                .attr('x1', 0)
+                .attr('y1', 0)
+                .attr('x2', Math.cos(theta) * r * 2)
+                .attr('y2', Math.sin(theta) * r * 2)
+                .attr('stroke', '#d1d5db')
+        } else if (node.depth === 2) {
+            let color = level2NodeCount % 2 === 0 ? "#f3f4f6" : "#f9fafb"
+            $bg.append("path")
+                .classed('background-sector', true)
+                .attr('d', [
+                    `M 0,0`,
+                    `L ${r * Math.cos(delta)} ${r * Math.sin(delta)}`,
+                    `A ${r} ${r} 0 0 1 ${r * Math.cos(theta)} ${r * Math.sin(theta)}`,
+                    `Z`,
+                ].join(" "))
+                .attr("fill", color)
+
+            level2NodeCount++
+        }
     }
 }
 
@@ -258,8 +273,8 @@ function showNode(node: ProcessedNode) {
 ;(async function () {
     try {
         let elMapWrapper = document.getElementById('map-wrapper')!
-        let $map = select<SVGElement, any>("#map")
 
+        let $map = select<SVGElement, any>("#map")
         let mapContentRes = await fetch('/m')
         let mapContent = await mapContentRes.text()
 
@@ -296,7 +311,7 @@ function showNode(node: ProcessedNode) {
             el.addEventListener("blur", () => removeHighlight())
         })
 
-// Handle hiding entries that do not match current filters
+        // Handle hiding entries that do not match current filters
         let elEntryLoader = document.getElementById("entry-loader")!
         let elEntryWrapper = document.getElementById("entry-wrapper")!
 
@@ -349,79 +364,103 @@ function showNode(node: ProcessedNode) {
             `translate(${mapWidth / 2}, ${mapHeight / 2})`,
         )
 
-        if (IS_OK_WITH_MOTION) {
-            let directionalIncrements = 0
-            let nextScrollShouldBeIgnored = false
-            let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-            let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-            let isMapFixed = () => elMapWrapper.classList.contains('fullscreen')
-
-            if (elMapWrapper.getBoundingClientRect().top < 0) {
-                elMapWrapper.classList.add('fullscreen')
-            }
-
-            const handleMovement = (direction: number) => {
-                if (!isMapFixed()) {
-                    return
-                }
-
-                directionalIncrements += direction
-
-                if (directionalIncrements === -2) {
-                    elMapWrapper.classList.remove('fullscreen')
-                    comingFromTop = true
-                    directionalIncrements = 0
-                    window.scrollTo(0, mapDistanceToTop - 10)
-
-                    return;
-                }
-
-                if (directionalIncrements === 2) {
-                    elMapWrapper.classList.remove('fullscreen')
-                    directionalIncrements = 0
-                    comingFromTop = false
-                    nextScrollShouldBeIgnored = true
-                    window.scrollTo(0, mapDistanceToTop + 10)
-                }
-            }
-            document.addEventListener('scroll', () => {
-                if (isMapFixed() || nextScrollShouldBeIgnored) {
-                    nextScrollShouldBeIgnored = false
-                    return
-                }
-
-                if (comingFromTop && elMapWrapper.getBoundingClientRect().top < 0) {
-                    elMapWrapper.classList.add('fullscreen')
-                }
-
-                if (!comingFromTop && elMapWrapper.getBoundingClientRect().top > 0) {
-                    elMapWrapper.classList.add('fullscreen')
-                }
-            })
-            document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
-            document.addEventListener("keydown", (e: KeyboardEvent) => {
-                if (e.key === "Escape") {
-                    closeEntry()
-                }
-
-                if (e.key === 'ArrowDown') {
-                    handleMovement(1)
-                }
-
-                if (e.key === 'ArrowUp') {
-                    handleMovement(-1)
-                }
-            })
-        }
-
         let zoomHandler = zoom<SVGElement, unknown>()
-            .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => $zoomWrapper.attr("transform", e.transform.toString()))
+            .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => {
+                $zoomWrapper.attr("transform", e.transform.toString());
+            })
             .scaleExtent([0.5, 2.5])
+            .translateExtent([
+                [-mapWidth * 1.5, -mapHeight * 1.5],
+                [mapWidth * 1.5, mapHeight * 1.5],
+            ])
 
         $map.call(zoomHandler)
 
         document.getElementById('zoom-in')!.addEventListener('click', () => zoomHandler.scaleBy($map, 1.2))
         document.getElementById('zoom-out')!.addEventListener('click', () => zoomHandler.scaleBy($map, 0.8))
+
+        let directionalIncrements = 0
+        let nextScrollShouldBeIgnored = false
+        let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
+        let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
+
+        if (elMapWrapper.getBoundingClientRect().top < 0) {
+            elMapWrapper.classList.add('fullscreen')
+        }
+
+        const handleMovement = (direction: number) => {
+            if (!elMapWrapper.classList.contains('fullscreen')) {
+                return;
+            }
+
+            directionalIncrements += direction
+
+            if (Math.abs(directionalIncrements) !== 2) {
+                return;
+            }
+
+            elMapWrapper.classList.remove('fullscreen')
+            comingFromTop = directionalIncrements < 0
+            directionalIncrements = 0
+
+            if (directionalIncrements > 0) {
+                nextScrollShouldBeIgnored = true
+            }
+
+            window.scrollTo(0, mapDistanceToTop + 10 * Math.sign(directionalIncrements))
+        }
+
+        document.addEventListener('scroll', throttle(() => {
+            if (nextScrollShouldBeIgnored) {
+                nextScrollShouldBeIgnored = false
+                return;
+            }
+
+            if (elMapWrapper.classList.contains('fullscreen')) {
+                return
+            }
+
+            if (
+                comingFromTop && elMapWrapper.getBoundingClientRect().top < 0 ||
+                !comingFromTop && elMapWrapper.getBoundingClientRect().top > 0
+            ) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+        }, 100))
+        document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
+        document.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closeEntry()
+            }
+
+            if (e.key === 'ArrowDown') {
+                handleMovement(1)
+            }
+
+            if (e.key === 'ArrowUp') {
+                handleMovement(-1)
+            }
+        })
+        window.addEventListener('resize', () => {
+            mapWidth = $map.node()!.clientWidth
+            mapHeight = $map.node()!.clientHeight
+
+            $centerWrapper.attr(
+                "transform",
+                `translate(${mapWidth / 2}, ${mapHeight / 2})`,
+            )
+
+            zoomHandler.translateExtent([
+                [-mapWidth * 1.5, -mapHeight * 1.5],
+                [mapWidth * 1.5, mapHeight * 1.5],
+            ])
+
+            $map.call(zoomHandler.transform, zoomIdentity)
+
+            if (elMapWrapper.getBoundingClientRect().top < 0) {
+                elMapWrapper.classList.add('fullscreen')
+            }
+        })
 
         for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
             let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null

@@ -4,8 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 
-class
-PageResponseTest extends TestCase
+class PageResponseTest extends TestCase
 {
     public function test_the_homepage_is_ok()
     {
@@ -14,7 +13,8 @@ PageResponseTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_the_map_page_is_ok() {
+    public function test_the_map_page_is_ok()
+    {
         $response = $this->get('/m');
 
         $response->assertStatus(200);

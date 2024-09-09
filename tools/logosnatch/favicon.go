@@ -167,6 +167,7 @@ func FindLogo(URL *url.URL, targetSize int) (*Logo, error) {
 			}
 
 			logo.Body = resized
+			logo.Size = targetSize
 		} else {
 			logo.Body = buf.Bytes()
 		}

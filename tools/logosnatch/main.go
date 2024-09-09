@@ -89,13 +89,7 @@ func run() error {
 			}
 		}
 
-		filename := parsedURL.Hostname()
-
-		if logo.Filled {
-			filename += ".filled"
-		}
-
-		filename += "." + logo.Format
+		filename := parsedURL.Hostname() + "." + logo.Format
 
 		err = os.WriteFile(strings.TrimRight(savePath, "/")+"/"+filename, logo.Body, 0644)
 		if err != nil {
@@ -109,12 +103,14 @@ func run() error {
 				Format string `json:"format"`
 				Path   string `json:"path"`
 				Filled bool   `json:"filled"`
+				Size int `json:"size"`
 				URL    string `json:"URL"`
 			}{
 				URL:    URL,
 				Format: logo.Format,
 				Path:   filename,
 				Filled: logo.Filled,
+				Size: logo.Size,
 			})
 			if err != nil {
 				return err

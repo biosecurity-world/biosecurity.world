@@ -2,11 +2,9 @@
 
 namespace Tests\Browser\Utils;
 
-use AllowDynamicProperties;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\ExpectationFailedException;
 use Spatie\Browsershot\Browsershot;
 use Symfony\Component\Process\Process;
 
@@ -20,10 +18,10 @@ class Differ
         protected string $url,
         protected string $nodeBinary,
         protected string $chromePath,
-        public float     $threshold = 0.1,
-        public float     $errorPercentage = 0,
-        protected int    $windowWidth = 1920,
-        protected int    $windowHeight = 1080,
+        public float $threshold = 0.1,
+        public float $errorPercentage = 0,
+        protected int $windowWidth = 1920,
+        protected int $windowHeight = 1080,
 
     ) {}
 
@@ -44,8 +42,7 @@ class Differ
             ->noSandbox()
             ->setNodeBinary('node')
             ->setChromePath($this->chromePath)
-            ->windowSize($this->windowWidth, $this->windowHeight)
-        ;
+            ->windowSize($this->windowWidth, $this->windowHeight);
 
         if ($this->browsershotConfigurationCallback) {
             call_user_func($this->browsershotConfigurationCallback, $browsershot);
@@ -76,8 +73,9 @@ class Differ
 
         $result = json_decode($process->getOutput(), false, flags: JSON_THROW_ON_ERROR);
         if (isset($result->error)) {
-             if ($result->error_type === 'image_dimensions_mismatch' && $shouldUpdateScreenshots) {
+            if ($result->error_type === 'image_dimensions_mismatch' && $shouldUpdateScreenshots) {
                 rename($this->getImagePath('new'), $this->getImagePath('cmp'));
+
                 return;
             }
 
@@ -86,6 +84,7 @@ class Differ
 
         if ($shouldUpdateScreenshots) {
             rename($this->getImagePath('new'), $this->getImagePath('cmp'));
+
             return;
         }
 

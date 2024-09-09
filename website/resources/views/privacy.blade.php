@@ -17,13 +17,6 @@
                 line-height: 1.33333;
             }
 
-            .prose > ul > li > :last-child {
-                margin-bottom: 1.25em;
-            }
-
-            .prose > ul > li > :first-child {
-                margin-top: 1.25em;
-            }
 
             .prose h3 {
                 margin-top: 1.6em;
@@ -54,6 +47,11 @@
 
             .prose ul > li {
                 padding-left: .375em;
+            }
+
+            .prose li > p {
+                margin-top: 0;
+                margin-bottom: 0;
             }
 
             .prose li {
@@ -115,13 +113,10 @@
             </li>
             <li>
                 <p>
-                    Also, if you're unhappy about how we process your data, you have a <strong>right</strong> to
+                    Also, if you are unhappy about how we process your data, you have a <strong>right</strong> to
                     complain to
-                    a
-                    national data authority. We hope, however, that you will contact us first so that we can try to
-                    resolve
-                    the
-                    matter for you in a satisfactory way.
+                    a <a href="https://edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-012020-measures-supplement-transfer_en">national data authority</a>. We hope, however, that you will contact us first so that we can try to
+                    resolve the matter for you in a satisfactory way.
                 </p>
             </li>
         </ul>
@@ -143,8 +138,8 @@
         </p>
 
         <ul>
-            <li>Contact/communicate with us only (email, video calls, etc.)</li>
-            <li>Use our services/software</li>
+            <li><p>Contact/communicate with us only (email, video calls, etc.)</p></li>
+            <li><p>Use our services/software</p></li>
         </ul>
 
         <p>It is voluntary to provide us with personal data, but we cannot provide you with our services if you choose
@@ -164,10 +159,10 @@
         </p>
 
         <ol>
-            <li>Your consent</li>
-            <li>We have a contractual obligation (contract)</li>
-            <li>We have a legal obligation</li>
-            <li>We have a legitimate interest</li>
+            <li><p>Your consent</p></li>
+            <li><p>We have a contractual obligation (contract)</p></li>
+            <li><p>We have a legal obligation</p></li>
+            <li><p>We have a legitimate interest</p></li>
         </ol>
 
         <p>
@@ -196,7 +191,7 @@
         </p>
 
         <p>
-            The lawful basis is f), where our legitimate interests protect are to our business against cyberattacks and
+            The lawful basis is f), where our legitimate interests are to protect our business against cyberattacks and
             optimize
             and run our business effectively.
         </p>

@@ -1,3 +1,4 @@
+// TODO: Clean up this terrible piece of code.
 export default class FiltersStateStore {
     tracked: Record<string, [() => any, (value: any) => void, any]> = {}
     cb: (() => void) | null = null;
@@ -179,8 +180,12 @@ export class MapStateStore {
         let loc = new URL(window.location.toString())
 
         for (const part of loc.hash.split("/")) {
-            if (part.match(/(\d+):(\d+)/)) {
-                this.focusedEntry = [parseInt(part.split(":")[0]), parseInt(part.split(":")[1])]
+            if (/(\d+):(\d+)/.test(part)) {
+                let [id1, id2] = part.split(":")
+
+                 this.focusedEntry = [parseInt(id1, 10), parseInt(id2, 10)]
+
+                continue;
             }
         }
 
