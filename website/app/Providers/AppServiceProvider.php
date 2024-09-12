@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
                 throw new \Exception('No notion database specified, please set the environment variable NOTION_DATABASE.');
             }
 
+            if (str_contains($database, '-')) {
+                throw new \Exception('The database ID should not contain dashes.');
+            }
+
             if (empty($token) || ! is_string($token)) {
                 throw new \Exception('No notion token specified, please set the environment variable NOTION_TOKEN.');
             }
