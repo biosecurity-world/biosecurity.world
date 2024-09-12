@@ -39,7 +39,6 @@ const filtersStore = new FiltersStateStore()
 
 document.getElementById("filters-reset")!.addEventListener("click", () => filtersStore.reset())
 
-// Handle the 'By activity' filter
 let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
 let technicalLens = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
 let governanceLens = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
@@ -104,7 +103,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         let node = window.nodes[i] as Node &
             Partial<ProcessedNode> & { el: SVGElement }
 
-        node.el.classList.add("invisible")
+        node.el.classList.add("off-screen")
         node.el.ariaHidden = "true"
         node.el.style.transform = ""
     }
@@ -117,6 +116,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
     let maxDepth = 0
 
     let idToNode: Record<number, ProcessedNode> = {}
+
     // Prepare the nodes
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
@@ -265,7 +265,7 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 }
 
 function showNode(node: ProcessedNode) {
-    node.el.classList.remove("invisible")
+    node.el.classList.remove("off-screen")
     node.el.ariaHidden = "false"
     node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
 }

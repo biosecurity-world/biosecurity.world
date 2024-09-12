@@ -1,14 +1,14 @@
 <x-layouts.default class="h-full antialiased w-full bg-gray-100" title="Understand the biosecurity landscape.">
 <x-slot:head>
-        <script>
-            window.nodes = @json($nodes);
-            window.masks = @json($entries);
-            window.bitmaskLength = {{ $bitmaskLength }};
-            window.andOrMask = {{ $andOrMask }};
-        </script>
+    <script>
+        window.nodes = @json($nodes);
+        window.masks = @json($entries);
+        window.bitmaskLength = {{ $bitmaskLength }};
+        window.andOrMask = {{ $andOrMask }};
+    </script>
 
-        @vite('resources/js/app.ts')
-    </x-slot:head>
+    @vite('resources/js/map.ts')
+</x-slot:head>
 <header class="w-full pb-52 lg:pb-[14.25rem] bg-gradient-to-tl from-primary-600 to-primary-950 pt-4 lg:pt-8">
     <x-navbar class="md:bg-white/20 md:shadow-inner md:shadow-white/30" invert/>
 
@@ -52,7 +52,7 @@
 
 <h2 class="sr-only">Map</h2>
 
-<div class="w-full h-full flex duration-500 transition-[padding,border-radius]" id="map-wrapper">
+<div class="w-full h-full flex duration-500 transition-[padding,border-radius] mx-auto" id="map-wrapper">
     <aside
         class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
         <section class="p-6">

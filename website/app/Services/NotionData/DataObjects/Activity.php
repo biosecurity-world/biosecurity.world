@@ -3,7 +3,7 @@
 namespace App\Services\NotionData\DataObjects;
 
 use App\Services\NotionData\Enums\NotionColor;
-use App\Support\IdHash;
+use App\Support\IdMap;
 use Notion\Databases\Properties\SelectOption;
 
 class Activity
@@ -31,7 +31,7 @@ class Activity
             throw new \InvalidArgumentException('Select for the activity is missing either an id or a name');
         }
 
-        $id = IdHash::hash($opt->id);
+        $id = IdMap::hash($opt->id);
 
         if (! in_array($id, self::$seen)) {
             self::$seen[] = $id;

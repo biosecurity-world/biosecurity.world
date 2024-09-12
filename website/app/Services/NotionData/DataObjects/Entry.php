@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\NotionData\DataObjects;
 
 use App\Services\Logosnatch\Logo;
-use App\Support\IdHash;
+use App\Support\IdMap;
 use Notion\Pages\Properties\RichTextProperty;
 
 class Entry
@@ -50,7 +50,7 @@ class Entry
 
     public function notionUrl(): string
     {
-        return sprintf('https://notion.so/%s', str_replace('-', '', IdHash::reverse($this->id)));
+        return sprintf('https://notion.so/%s', str_replace('-', '', IdMap::find($this->id)));
     }
 
     public function host(): string

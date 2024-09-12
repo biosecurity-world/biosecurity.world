@@ -1,7 +1,7 @@
 <g id="zoom-wrapper">
     <g id="center-wrapper">
         <g id="background"></g>
-        <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
+        <foreignObject width="100%" height="100%" class="off-screen pointer-events-none"
                        aria-hidden="true"
                        data-node="{{ $tree->rootNodeId }}">
             <div class="size-px"></div>
@@ -9,7 +9,7 @@
 
         <g>
             @foreach($tree->categories() as $category)
-                <foreignObject width="100%" height="100%" class="invisible pointer-events-none"
+                <foreignObject width="100%" height="100%" class="off-screen pointer-events-none"
                                aria-hidden="true"
                                data-node="{{ $category->id }}">
                     <x-category :category="$category"/>
@@ -21,7 +21,7 @@
             @foreach($tree->entrygroups() as $entrygroup)
                 <foreignObject width="100%"
                                height="100%"
-                               class="invisible pointer-events-none"
+                               class="off-screen pointer-events-none"
                                aria-hidden="true"
                                data-node="{{ $entrygroup->id }}">
                     <x-entrygroup

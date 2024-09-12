@@ -11,9 +11,8 @@ use App\Services\NotionData\DataObjects\Category;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\DataObjects\Location;
-use App\Support\IdHash;
+use App\Support\IdMap;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\In;
 use Illuminate\Validation\ValidationException;
 use Notion\Databases\Database;
 use Notion\Databases\Properties\SelectOption;
@@ -79,6 +78,12 @@ class Hydrator
                 continue;
             }
 
+            if (count($parents) > 1 && $isCategory) {
+                $errors[] = HydrationError::fromString('Categories cannot have multiple parents.', $page);
+
+                continue;
+            }
+
             try {
                 $item = $isCategory ?
                     $this->categoryFromPage($page, -1) :
@@ -91,61 +96,68 @@ class Hydrator
 
             foreach ($parents as $parent) {
                 $clone = clone $item;
-                $clone->parentId = IdHash::hash($parent);
+                $clone->parentId = IdMap::hash($parent);
                 $hydrated[] = $clone;
 
-                if ($item instanceof Entry) {
-                    if (! isset($entryCountMap[$clone->parentId])) {
-                        $entryCountMap[$clone->parentId] = 0;
-                    }
-
-                    if (! isset($organizationTypeMap[$item->organizationType])) {
-                        $organizationTypeMap[$item->organizationType] = 0;
-                    }
-
-                    $entryCountMap[$clone->parentId]++;
-                    $organizationTypeMap[$item->organizationType]++;
+                if (! ($item instanceof Entry)) {
+                    continue;
                 }
+
+                $entryCountMap[$clone->parentId] ??= 0;
+                $entryCountMap[$clone->parentId]++;
+
+                $organizationTypeMap[$item->organizationType] ??= 0;
+                $organizationTypeMap[$item->organizationType]++;
             }
         }
 
         foreach ($hydrated as $item) {
-            if ($item instanceof Entry) {
-                $item->uniqueness = 1 / $entryCountMap[$item->parentId];
-                $item->organizationTypeUniqueness = 1 / $organizationTypeMap[$item->organizationType];
+            if (! ($item instanceof Entry)) {
+                continue;
             }
+
+            $item->uniqueness = 1 / $entryCountMap[$item->parentId];
+            $item->organizationTypeUniqueness = 1 / $organizationTypeMap[$item->organizationType];
         }
 
         return new HydratedPages($hydrated, $errors);
     }
 
+    /** @throws ValidationException */
     public function categoryFromPage(Page $page, ?int $parentId): Category
     {
-        $validated = Validator::validate(
+        $validated = Validator::make(
             ['title' => $page->title()?->toString()],
             ['title' => ['required', 'string']]
-        );
+        )->validate();
 
-        return new Category(IdHash::hash($page->id), $parentId, $validated['title'], $page->createdTime);
+        return new Category(IdMap::hash($page->id), $parentId, $validated['title'], $page->createdTime);
     }
 
+    /** @throws ValidationException */
     public function entryFromPage(Page $page, int $parentId): Entry
     {
-        $link = $page->properties()->getUrlById(self::SCHEMA['link'])->url;
+        $props = $page->properties();
+
+        $link = $props->getUrlById(self::SCHEMA['link'])->url;
+
         $rawPage = [
-            'id' => IdHash::hash($page->id),
+            'id' => IdMap::hash($page->id),
             'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
+            'raw_link' => $link,
             'label' => $page->title()?->toString(),
-            'description' => $page->properties()->getRichTextById(self::SCHEMA['description']),
-            'organizationType' => $page->properties()->getSelectById(self::SCHEMA['organizationType'])->option?->name,
-            'activities' => array_map(function (SelectOption $opt) {
-                return Activity::fromNotionOption($opt);
-            }, $page->properties()->getMultiSelectById(self::SCHEMA['activityTypes'])->options),
-            'interventionFocuses' => array_map(function (SelectOption $opt) {
-                return InterventionFocus::fromNotionOption($opt);
-            }, $page->properties()->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options),
-            'location' => $page->properties()->getMultiSelectById(self::SCHEMA['locationHints'])->options,
-            'gcbrFocus' => $page->properties()->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
+            'description' => $props->getRichTextById(self::SCHEMA['description']),
+            'organizationType' => $props->getSelectById(self::SCHEMA['organizationType'])->option?->name,
+            'activities' => array_map(
+                fn (SelectOption $opt) => Activity::fromNotionOption($opt),
+                $props->getMultiSelectById(self::SCHEMA['activityTypes'])->options
+            ),
+            'interventionFocuses' => array_map(
+                fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt),
+                $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options
+            ),
+            'location' => $props->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+            'gcbrFocus' => $props->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
 
         $rules = [
@@ -168,12 +180,15 @@ class Hydrator
         ];
 
         if (self::$strict) {
-            $rules = collect($rules)->mapWithKeys(function ($previousRules, $key) {
-                return [$key => match ($key) {
-                    'link' => [...$previousRules, new OkStatusRule],
-                    default => $previousRules
-                }];
-            })->toArray();
+            $rules = collect($rules)
+                ->mapWithKeys(function ($previousRules, $key) {
+                    return [$key => match ($key) {
+                        'link' => [...$previousRules, new OkStatusRule],
+                        default => $previousRules
+                    }];
+                })
+                ->put('raw_link', ['required', 'string', 'url'])
+                ->toArray();
         }
 
         $data = Validator::make($rawPage, $rules)->validate();

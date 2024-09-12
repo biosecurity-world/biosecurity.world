@@ -12,7 +12,7 @@
     <link rel="preload" href="{{ Vite::asset('resources/fonts/Nunito-Regular.woff2') }}" as="font" crossorigin/>
     <link rel="preload" href="{{ Vite::asset('resources/fonts/Nunito-Bold.woff2') }}" as="font" crossorigin/>
 
-    @vite('resources/css/app.css')
+    @vite('resources/css/main.css')
 
     {{ $head ?? '' }}
 </head>

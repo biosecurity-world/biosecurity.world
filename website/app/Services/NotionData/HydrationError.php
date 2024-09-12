@@ -10,8 +10,11 @@ use Notion\Pages\Page;
 
 class HydrationError
 {
-    /** @param array<string> $messages */
-    public function __construct(public Page|Entry|Category $page, public array $messages) {}
+    public function __construct(
+        public Page|Entry|Category $page,
+        /** @var array<string> $messages */
+        public array $messages
+    ) {}
 
     public static function fromValidationException(ValidationException $e, Page|Entry|Category $page): self
     {

@@ -1,3 +1,1 @@
-<p>
-    {{ $text->toString() }}
-</p>
+<p>{{ $text->toString() }}</p>

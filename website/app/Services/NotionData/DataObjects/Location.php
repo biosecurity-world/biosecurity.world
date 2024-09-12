@@ -14,13 +14,17 @@ class Location implements \Stringable
     /** @param array<SelectOption> $locationHints */
     public static function fromNotionOptions(array $locationHints): self
     {
-        return new self(
-            /** @phpstan-ignore-next-line  */
-            collect($locationHints)
-                ->map->name
-                ->filter()
-                ->toArray()
-        );
+        $hints = [];
+
+        foreach ($locationHints as $locationHint) {
+            if (is_null($locationHint->name)) {
+                continue;
+            }
+
+            $hints[] = $locationHint->name;
+        }
+
+        return new self($hints);
     }
 
     public function toString(): string
@@ -29,20 +33,7 @@ class Location implements \Stringable
             return 'Global';
         }
 
-        return collect($this->hints)
-            ->reverse()
-            ->map(function ($name) {
-                if ($name === 'Europe (excl. UK)') {
-                    return 'Europe';
-                }
-
-                if ($name === 'Cambridge MA') {
-                    return 'Cambridge, MA';
-                }
-
-                return $name;
-            })
-            ->implode(', ');
+        return implode(', ', array_reverse($this->hints));
     }
 
     public function __toString()

@@ -27,12 +27,4 @@ class AppServiceProvider extends ServiceProvider
             return new Notion($database, $token);
         });
     }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
-    }
 }

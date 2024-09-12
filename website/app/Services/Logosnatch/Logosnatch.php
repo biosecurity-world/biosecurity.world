@@ -9,12 +9,9 @@ class Logosnatch
 {
     public static function retrieve(string $url, int $targetSize = 128): Logo
     {
-        $cacheKey = 'logosnatch-download-'.str_replace(str_split('{}()/\@:'), '_', $url).'-'.$targetSize;
+        $cacheKey = sprintf('logosnatch-download-%s-%d', base64_encode($url), $targetSize);
         if (Cache::has($cacheKey)) {
-            /** @var array{format: string, path: string, size: int, filled: bool} $decoded */
-            $decoded = Cache::get($cacheKey);
-
-            return self::createFromLogosnatchResponse($decoded);
+            return self::createFromLogosnatchResponse(Cache::get($cacheKey));
         }
 
         $logosnatchBinary = base_path('/../tools/logosnatch/logosnatch');
@@ -22,6 +19,7 @@ class Logosnatch
             throw new RuntimeException('Could not find logosnatch binary at '.$logosnatchBinary);
         }
 
+        // We can not use symfony/process because it does not let us hook into STDIN.
         $process = proc_open(
             [
                 $logosnatchBinary,
@@ -39,43 +37,39 @@ class Logosnatch
             '/tmp',
             [],
         );
-
-        if (is_resource($process)) {
-            fwrite($pipes[0], $url);
-            fclose($pipes[0]);
-
-            $body = stream_get_contents($pipes[1]);
-            fclose($pipes[1]);
-
-            $error = stream_get_contents($pipes[2]);
-            fclose($pipes[2]);
-
-            $return_value = proc_close($process);
-
-            if ($return_value !== 0) {
-                throw new RuntimeException('Failed to download logo: '.$error);
-            }
-        } else {
+        if (! $process) {
             throw new RuntimeException('Failed to start logosnatch process');
         }
 
-        if (! $body) {
-            throw new RuntimeException("Failed to download logo: $error");
+        fwrite($pipes[0], $url);
+        fclose($pipes[0]);
+
+        $body = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        $error = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        $ret = proc_close($process);
+
+        if ($ret !== 0 || ! $body) {
+            throw new RuntimeException('Failed to download logo: '.$error);
         }
 
         $decoded = json_decode($body, true);
-        if (! is_array($decoded) || ! array_key_exists('format', $decoded) || ! array_key_exists('path', $decoded) || ! array_key_exists('filled', $decoded) || ! array_key_exists('size', $decoded)) {
-            throw new RuntimeException(sprintf('Unexpected response from logosnatch, got %s, expected key format, path, filled', $body));
-        }
+        $logo = self::createFromLogosnatchResponse($decoded);
 
         Cache::forever($cacheKey, $decoded);
 
-        return self::createFromLogosnatchResponse($decoded);
+        return $logo;
     }
 
-    /** @param array{format: string, path: string, size: int, filled: bool} $decoded */
-    private static function createFromLogosnatchResponse(array $decoded): Logo
+    private static function createFromLogosnatchResponse(mixed $decoded): Logo
     {
+        if (! is_array($decoded) || ! isset($decoded['format'], $decoded['path'], $decoded['filled'], $decoded['size'])) {
+            throw new RuntimeException('Unexpected response from logosnatch, expected key format, path, filled, got '.$decoded);
+        }
+
         return new Logo(
             $decoded['format'],
             'storage/logos/'.$decoded['path'],

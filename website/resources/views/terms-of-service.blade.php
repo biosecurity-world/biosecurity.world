@@ -1,64 +1,7 @@
 <x-layouts.default title="Terms of Service" class="antialiased bg-gray-100">
     <x-slot:head>
         <style>
-            .prose p {
-                max-width: 65ch;
-                margin-top: 1.25em;
-                margin-bottom: 1.25em;
-            }
-
-            .prose h2 {
-                margin-top: 2em;
-                margin-bottom: 1em;
-                font-family: Gilroy, sans-serif;
-                font-size: 1.5em;
-                font-weight: 700;
-                line-height: 1.33333;
-            }
-
-            .prose > ul > li > :last-child {
-                margin-bottom: 1.25em;
-            }
-
-            .prose > ul > li > :first-child {
-                margin-top: 1.25em;
-            }
-
-            .prose h3 {
-                margin-top: 1.6em;
-                margin-bottom: .6em;
-                font-size: 1.25em;
-                font-family: Gilroy, sans-serif;
-                font-weight: 600;
-                line-height: 1.6;
-            }
-
-            .prose ul {
-                margin-bottom: 1.25em;
-                padding-left: 1.625em;
-                list-style-type: disc;
-            }
-
-            .prose ol {
-                margin-top: 1.25em;
-                margin-bottom: 1.25em;
-                padding-left: 1.625em;
-                list-style-type: decimal;
-            }
-
-            .prose a {
-                font-weight: 500;
-                text-decoration: underline;
-            }
-
-            .prose ul > li {
-                padding-left: .375em;
-            }
-
-            .prose li {
-                margin-top: .5em;
-                margin-bottom: .5em;
-            }
+            {!! Vite::content('resources/css/prose.css') !!}
         </style>
     </x-slot:head>
 

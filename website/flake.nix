@@ -31,7 +31,6 @@
           nodejs
           pnpm
           wrangler
-          chromium
         ]);
     };
   };

@@ -1,3 +1,4 @@
+@tailwind base;
 @font-face {
     font-family: "Gilroy";
     font-display: swap;
@@ -5,7 +6,6 @@
     font-weight: 700;
     unicode-range: U+0020-007F;
 }
-
 @font-face {
     font-family: 'Nunito';
     font-display: swap;
@@ -13,7 +13,6 @@
     src: local("Nunito"), url(../fonts/Nunito-Regular.woff2) format('woff2');
     unicode-range: U+0020-007F;
 }
-
 @font-face {
     font-family: 'Nunito';
     font-display: optional;
@@ -22,60 +21,48 @@
     unicode-range: U+0020-007F;
 }
 
+.off-screen {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
 
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/** Map */
 .app-state {
     @apply absolute inset-0 h-full w-full transition-opacity duration-300 flex items-center justify-center;
 }
 
 .state-active {
-    pointer-events: initial;
-    opacity: 1;
+    @apply pointer-events-auto opacity-100;
 }
 
 .state-inactive {
-    pointer-events: none;
-    opacity: 0;
-}
-
-.state-active *.focusable {
-    tab-index: 0;
-}
-
-.state-inactive *.focusable {
-    tab-index: -1;
-}
-
-#map-wrapper {
-    max-width: 144rem;
-    margin: 0 auto;
-}
-
-#map-wrapper:not(.fullscreen) {
-    @apply 2xl:px-36 -mt-40;
-    max-height: 144rem;
+    @apply pointer-events-none opacity-0;
 }
 
 #map-wrapper.fullscreen {
     @apply absolute inset-0 px-0 bg-white;
-    max-height: unset;
+
+    &.rounded-l-3xl {
+        border-bottom-left-radius: 0 !important;
+        border-top-left-radius: 0 !important;
+    }
+
+    &.rounded-r-3xl {
+        border-bottom-right-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+    }
+
+    &.rounded-tr-3xl {
+        border-top-right-radius: 0 !important;
+    }
 }
 
-#map-wrapper.fullscreen .rounded-l-3xl {
-    border-bottom-left-radius: 0 !important;
-    border-top-left-radius: 0 !important;
-}
-
-#map-wrapper.fullscreen .rounded-r-3xl {
-    border-bottom-right-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-}
-
-#map-wrapper.fullscreen .rounded-tr-3xl {
-    border-top-right-radius: 0 !important;
+#map-wrapper:not(.fullscreen) {
+        @apply 2xl:px-36 -mt-40;
 }
 
 #entry-wrapper:not(:has(> .entry)) {
@@ -86,6 +73,7 @@
     display: block;
 }
 
+/** Filters: Domain */
 input[name^="lens_"]:checked + label > .check {
     opacity: 1;
 }
@@ -107,29 +95,26 @@ input[name^="lens_"]:checked + label[for^="lens_"] > .at-governance {
     color: white;
 }
 
+/** Filters: Activity */
 label[for^="activity_"].inactive {
     background: #ffffff !important;
     color: theme("colors.gray.500") !important;
 }
 
-#entry-loader {
-    opacity: 0;
-    transition: opacity 500ms ease-in;
+/** Navbar */
+.navlink {
+    @apply  underline lg:no-underline mr-4 lg:mr-0 lg:px-2  lg:hover:underline rounded-xl focus:outline-none;
 }
 
-#entry-loader.loading-entry {
-    opacity: 1;
+.navlink:not(.inverted) {
+    @apply lg:hover:bg-emerald-50 lg:focus:bg-emerald-50
 }
 
-[data-entry]:not(.matches-filters) {
-    display: none;
+.navlink.inverted {
+    @apply text-white lg:hover:bg-white/20 lg:focus:bg-white/20
 }
 
-#entrygroups .intervention-type:not(:has(+ div > [data-entry].matches-filters)) {
-    margin-top: 0;
-    display: none;
-}
-
+/** Handle the hover logic on entries */
 #entrygroups.hovered [data-entry]:not(.active) {
     opacity: 0.25;
 }
@@ -142,10 +127,7 @@ label[for^="activity_"].inactive {
     opacity: 0.25;
 }
 
-#entrygroups.hovered .intervention-type:has(+ div > [data-sum].active) {
-    @apply text-primary-600;
-}
-
+/** Generic toggle component */
 [data-toggle="off"] {
     @apply bg-gray-200;
 }
@@ -162,29 +144,24 @@ label[for^="activity_"].inactive {
     @apply translate-x-5;
 }
 
-
-.entrygroup div:last-child{
-    @apply mb-2;
+/** ... */
+[data-entry]:not(.matches-filters) {
+    display: none;
 }
 
 .intervention-type {
     @apply text-xs tracking-tight text-gray-500 font-semibold px-3 mt-2;
 }
 
-.invisible {
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
+.entrygroup div:last-child{
+    @apply mb-2;
 }
 
-.navlink {
-    @apply  underline lg:no-underline mr-4 lg:mr-0 lg:px-2  lg:hover:underline rounded-xl focus:outline-none;
+#entry-loader {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
 }
 
-.navlink:not(.inverted) {
-    @apply lg:hover:bg-emerald-50 lg:focus:bg-emerald-50
-}
-
-.navlink.inverted {
-    @apply text-white lg:hover:bg-white/20 lg:focus:bg-white/20
+#entry-loader.loading-entry {
+    opacity: 1;
 }

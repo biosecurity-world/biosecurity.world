@@ -10,7 +10,7 @@ use App\Services\NotionData\DataObjects\InterventionFocus;
 use App\Services\NotionData\DataObjects\Root;
 use App\Services\NotionData\HydratedPages;
 use App\Services\NotionData\HydrationError;
-use App\Support\IdHash;
+use App\Support\IdMap;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -69,7 +69,7 @@ class Tree
 
     public static function buildFromPages(HydratedPages $pages): Tree
     {
-        $tree = new Tree([], [], $pages->errors, IdHash::hash('root'));
+        $tree = new Tree([], [], $pages->errors, IdMap::hash('root'));
 
         foreach ($pages->data as $page) {
             $tree->lookup[$page->id] = $page;
@@ -110,10 +110,10 @@ class Tree
                     usort($entryIds, fn (int $a, int $b) => $tree->lookup[$a]->createdAt <=> $tree->lookup[$b]->createdAt);
 
                     $id = sha1($parentId.'-'.implode('-', $entryIds));
-                    $reducedId = IdHash::hash($id);
+                    $reducedId = IdMap::hash($id);
 
                     $rest->push(new Node($reducedId, $parentId));
-                    $tree->lookup[$reducedId] = new Entrygroup(IdHash::hash($id), $entryIds);
+                    $tree->lookup[$reducedId] = new Entrygroup(IdMap::hash($id), $entryIds);
 
                     return $rest;
                 })

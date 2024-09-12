@@ -10,10 +10,8 @@ class ShowMapPartialController
 {
     public function __invoke(Notion $notion): View
     {
-        $tree = Tree::buildFromPages($notion->pages());
-
         return view('partials.map', [
-            'tree' => $tree,
+            'tree' => Tree::buildFromPages($notion->pages()),
         ]);
     }
 }
