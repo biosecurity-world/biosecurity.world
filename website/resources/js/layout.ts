@@ -1,7 +1,20 @@
 import {ProcessedNode, Sector} from "./types";
-import {debug, eq, getQuadrant, gt, gte, lt, PI, PI_2, PIPI, shortestDistanceBetweenRectangles} from "@/utils"
+import {
+    debug,
+    eq,
+    getQuadrant,
+    gt,
+    gte,
+    inIE,
+    lt,
+    PI,
+    PI_2,
+    PI_4,
+    PIPI,
+    shortestDistanceBetweenRectangles
+} from "@/utils"
 
-export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'position' | 'size'>[]): [number, number] {
+export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'position' | 'size'>[], spacing: number | null = null): [number, number] {
     if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -11,8 +24,12 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
     }
 
     let pos = fitRectToSector(node.sector, node.size)
-    let size = [node.size[0], node.size[1]]
 
+    if (spacing === null) {
+        return pos
+    }
+
+    let size = [node.size[0], node.size[1]]
     // Take the closest node in the trail, ensure that there's 100 pixels between this one and the one in the trail.
     let neighbour = null
     let distanceToNeighbour = Infinity
@@ -28,14 +45,16 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
         }
     }
 
-    let k = 0
+    let neighbourRect = [neighbour.position[0], neighbour.position[1], neighbour.size[0], neighbour.size[1]]
 
-    while (k < 5 && shortestDistanceBetweenRectangles(
-        [...pos, ...node.size],
-        [...neighbour.position, ...neighbour.size]
-    ) < 100) {
-        size[0] += 20
-        size[1] += 20
+    let m = (node.sector[0] + node.sector[1]) /2
+
+    while (shortestDistanceBetweenRectangles([...pos, ...node.size], neighbourRect) < spacing) {
+        if (inIE(m, PI_4, 3*PI_4) || inIE(m, 5*PI_4, 7*PI_4)) {
+            size[0] += 20
+        } else {
+            size[1] += 20
+        }
 
         let nextPos = fitRectToSector(node.sector, size)
 
@@ -44,17 +63,14 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
         }
 
         pos = nextPos
-
-        k++
     }
 
-    // debug().rect({
-    //     p: pos,
-    //     width: size[1],
-    //     length: size[0],
-    // })
+    let [x, y] = pos
 
-    return pos
+    x += (size[0] - node.size[0]) / 2
+    y += (size[1] - node.size[1]) / 2
+
+    return [x, y]
 }
 
 export function fitRectToSector(sector: Sector, size: [number, number]): [number, number] {
@@ -155,23 +171,31 @@ export function getEffectiveSector(sector: Sector): Sector {
     let q_od = getQuadrant(od)
     let q_ot = getQuadrant(ot)
 
-    if (q_od + 1 == q_ot || q_od === q_ot) {
-        let d = od % PI
-        let t = d + (ot - od)
-
-        if (gte(d, PI_2)) {
-            if (lt(PI - t, 0)) {
-                return [d, t]
-            }
-
-            d = PI - d
-            t = PI - t
-
-            return [t, d]
-        }
-
-        return [d, t]
+    if (q_ot - q_od >= 2) {
+        return [od, ot]
     }
 
-    return [od, ot]
+    let d: number, t: number
+
+    if (eq(ot, PIPI)) {
+        d = 0
+        t = ot - od
+    } else {
+        d = od % PI
+        t = d + (ot - od)
+    }
+
+    if (gte(d, PI_2)) {
+        if (lt(PI - t, 0)) {
+            return [d, t]
+        }
+
+        d = PI - d
+        t = PI - t
+
+        return [t, d]
+    }
+
+
+    return [d, t]
 }

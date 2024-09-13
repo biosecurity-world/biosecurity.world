@@ -181,4 +181,10 @@ class TreeRenderingVisualTest extends TestCase
             $this->node(5 * pi() / 6, 10 * pi() / 6),
         ]);
     }
+
+    public function test_regression_1() {
+        $this->assertTreeRenderingMatchesSnapshot([
+            $this->node(6.11815539705054, 6.283185307179587, 60, 210)
+        ]);
+    }
 }

@@ -24,35 +24,23 @@ const cssColors = [
 (async () => {
     try {
         const $map = select<SVGElement, {}>('#map')
-        const $centerWrapper = select<SVGGElement, {}>('#center-wrapper')
         const $zoomWrapper = select<SVGGElement, {}>('#zoom-wrapper')
-        const $root = select<SVGGElement, {}>('#cartesian-flip')
+        const $centerWrapper = select<SVGGElement, {}>('#center-wrapper')
 
         let mapWidth = $map.node()!.clientWidth
         let mapHeight = $map.node()!.clientHeight
-        let computeMapCenter = () => [mapWidth / 2, mapHeight / 2]
 
-        $centerWrapper.attr('transform', `translate(${computeMapCenter()})`)
+
+        $centerWrapper.attr('transform', `translate(${mapWidth / 2},${mapHeight / 2})`)
 
         const zoomHandler = zoom().on('zoom', (e: D3ZoomEvent<SVGGElement, unknown>) => {
             $zoomWrapper.attr('transform', e.transform.toString());
         })
-            .scaleExtent([0.1, 10])
-
-        window.addEventListener('resize', () => {
-            mapWidth = $map.node()!.clientWidth
-            mapHeight = $map.node()!.clientHeight
-            let mapCenter = computeMapCenter()
-
-            $centerWrapper.attr('transform', `translate(${mapCenter})`)
-        })
-
         $map.call(zoomHandler)
 
         console.table(window.testCase)
 
         console.log("=== CONSOLE OUTPUT BELOW ===")
-
         for (let i = 0; i < window.testCase.length; i++) {
             let box = window.testCase[i]
             let color = cssColors[i % cssColors.length]
@@ -63,7 +51,7 @@ const cssColors = [
             })
         }
 
-        debug().flush($root)
+        debug().flush($centerWrapper)
 
     } catch (e: unknown) {
         console.error(e)

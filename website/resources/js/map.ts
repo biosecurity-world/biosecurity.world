@@ -1,11 +1,17 @@
 import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
-import {debug, eq, gt, lt, PI, PIPI, throttle} from "./utils"
+import {debug, eq, getLabel, gt, lt, PI, PIPI, throttle} from "./utils"
 import {Node, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "./layout"
 import FiltersStateStore, {MapStateStore} from "@/store"
 import {shouldFilterEntry} from "@/filters";
 
 type AppState = "error" | "success" | "loading" | "empty"
+
+let cssColors = [
+    "rebeccapurple",
+
+    "peru", "olive", "teal", "navy", "mediumturquoise", "orangered", "crimson", "saddlebrown", "darkgoldenrod", "goldenrod", "dodgerblue", "deeppink", "cyan", "green", "lightcoral", "maroon", "darkgreen", "darkorange", "blue", "red", "darkseagreen", "palegreen", "mediumvioletred", "sienna", "hotpink", "tan", "purple", "gold", "darkslategray", "chocolate"
+];
 
 function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
@@ -117,7 +123,6 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
 
     let idToNode: Record<number, ProcessedNode> = {}
 
-    // Prepare the nodes
     for (let i = 0; i < window.nodes.length; i++) {
         let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
 
@@ -222,33 +227,27 @@ function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
         let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
         let theta = delta + alpha
         node.sector = [delta, theta]
-        node.position = fitToSector(node, node.trail.map((id) => idToNode[id]))
+        node.position = fitToSector(node, node.trail.map((id) => idToNode[id]), 100)
 
         showNode(node)
 
         deltaFromSiblings[node.parent] = theta
 
-
         let r = 2 * window.innerWidth
 
+        // if (node.depth === 1) {
+        //     console.log(node.id, [delta, theta])
+        //         $fg.append('line')
+        //             .classed('ray', true)
+        //             .attr('x1', 0)
+        //             .attr('y1', 0)
+        //             .attr('x2', Math.cos(theta) * r * 2)
+        //             .attr('y2', Math.sin(theta) * r * 2)
+        //             .attr('stroke', '#d1d5db')
+        // } else
         if (node.depth === 1) {
-            $fg.append('line')
-                .classed('ray', true)
-                .attr('x1', 0)
-                .attr('y1', 0)
-                .attr('x2', Math.cos(alpha) * r * 2)
-                .attr('y2', Math.sin(alpha) * r * 2)
-                .attr('stroke', '#d1d5db')
-
-            $fg.append('line')
-                .classed('ray', true)
-                .attr('x1', 0)
-                .attr('y1', 0)
-                .attr('x2', Math.cos(theta) * r * 2)
-                .attr('y2', Math.sin(theta) * r * 2)
-                .attr('stroke', '#d1d5db')
-        } else if (node.depth === 2) {
             let color = level2NodeCount % 2 === 0 ? "#f3f4f6" : "#f9fafb"
+
             $bg.append("path")
                 .classed('background-sector', true)
                 .attr('d', [
@@ -268,6 +267,14 @@ function showNode(node: ProcessedNode) {
     node.el.classList.remove("off-screen")
     node.el.ariaHidden = "false"
     node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+
+    // if (node.id === node.parent) {
+    //     return
+    // }
+    // debug().point({
+    //     p: node.position,
+    //     label: node.id,
+    // })
 }
 
 ;(async function () {
@@ -491,3 +498,4 @@ function showNode(node: ProcessedNode) {
         )
     }
 })()
+

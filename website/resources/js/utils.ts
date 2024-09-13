@@ -25,7 +25,7 @@ export function debug(): Debug {
 class Debug {
     buffer: (($selection: Selection<SVGElement, {}, HTMLElement, unknown>) => void)[] = []
 
-    point(options: { p: [number, number], color?: string }) {
+    point(options: { p: [number, number], color?: string, label?: string }) {
         this.buffer.push(($svg) => {
             $svg.append('circle')
                 .classed('debug', true)
@@ -33,6 +33,15 @@ class Debug {
                 .attr('cy', options.p[1])
                 .attr('r', 2)
                 .attr('fill', options.color || 'red')
+
+            if (options.label) {
+                $svg.append('text')
+                    .classed('debug', true)
+                    .attr('x', options.p[0] + 5)
+                    .attr('y', options.p[1] + 5)
+                    .attr('fill', 'black')
+                    .text(options.label)
+            }
         })
     }
 
@@ -106,8 +115,9 @@ class Debug {
 
         debug().point({p: options.node.position, color: options.color ?? 'red'})
     }
-}
 
+
+}
 
 export function eq(a: number, b: number) {
     if (a === b) {
@@ -193,4 +203,12 @@ export function throttle(callback: (...args: any[]) => void, wait: number, immed
             timeout = setTimeout(next, wait)
         }
     }
+}
+
+export function getLabel(node: ProcessedNode): string {
+    if (node.el.querySelector('.entrygroup') !== null) {
+        return 'Entrygroup'
+    }
+
+    return node.el.querySelector('div > span').innerText
 }
