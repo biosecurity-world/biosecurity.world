@@ -1,1 +1,2 @@
+regressions/*
 !regressions/*_cmp_*
