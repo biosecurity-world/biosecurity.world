@@ -166,9 +166,9 @@
                                                      class="size-[1.125rem] group-hover:opacity-75"/>
                                 @endif
 
-                                <span class="ml-1.5 leading-none group-hover:opacity-75">
-                                            {{ $activity->label }}
-                                        </span>
+                                <span class="ml-1.5 leading-none group-hover:opacity-75 select-none">
+                                    {{ $activity->label }}
+                                </span>
                             </label>
                         </li>
                     @endforeach

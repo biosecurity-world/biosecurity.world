@@ -190,3 +190,21 @@ export function getDebugLabel(node: ProcessedNode): string {
 
     return (node.el.querySelector('div > span') as HTMLSpanElement).innerText
 }
+
+export function wrapClickAndDoubleClickEvent(
+    singleClickHandler: (event: MouseEvent) => void,
+    doubleClickHandler: (event: MouseEvent) => void
+) {
+    let timeout: number | null = null
+
+    return function(e: MouseEvent) {
+        e.preventDefault()
+
+        if (e.detail === 1) {
+            timeout = setTimeout(() => singleClickHandler(e), 175)
+        } else {
+            clearTimeout(timeout as number)
+            doubleClickHandler(e)
+        }
+    }
+}

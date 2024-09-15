@@ -1,5 +1,5 @@
 import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
-import {debug, changeAppState, throttle} from "./utils"
+import {debug, changeAppState, throttle, wrapClickAndDoubleClickEvent} from "./utils"
 import type {Node, ProcessedNode, AppStateChangeEvent} from "@/types/index.d.ts"
 import {updateMap} from "./layout"
 import FiltersStore, {Filters} from "@/filters"
@@ -73,6 +73,7 @@ window.addEventListener('appstatechange', (e: AppStateChangeEvent) => {
 
 /* Prepare filters */
 let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
+let activityInputLabels = document.querySelectorAll(`label[for^="activity_"]`) as NodeListOf<HTMLLabelElement>
 
 let technicalDomain = document.querySelector(`input[name="domain_technical"]`) as HTMLInputElement
 let governanceDomain = document.querySelector(`input[name="domain_governance"]`) as HTMLInputElement
@@ -90,11 +91,10 @@ const filtersStore = new FiltersStore<Filters>({
             return mask
         },
         (mask: number) => {
-            let offset = 0
-
-            for (const activityInput of activityInputs) {
-                activityInput.checked = (mask & (1 << offset++)) !== 0
-                document.querySelector(`label[for="${activityInput.id}"]`)!.classList.toggle("inactive", !activityInput.checked)
+            for (let i = 0; i < activityInputs.length; i++) {
+                let checked = (mask & (1 << i)) !== 0
+                activityInputs[i].checked = checked
+                activityInputLabels[i].classList.toggle("inactive", !checked)
             }
         }
     ],
@@ -129,7 +129,19 @@ document.querySelectorAll('button.resets-filters').forEach(btn => {
     })
 })
 
-activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncFilter('activities')))
+activityInputs.forEach((el: HTMLInputElement) => {
+    el.addEventListener("change", e => filtersStore.syncFilter("activities"))
+    el.addEventListener('click', wrapClickAndDoubleClickEvent(
+        (preventedEvent) => {
+            el.checked = !el.checked
+            filtersStore.syncFilter("activities")
+        },
+        (preventedEvent) => {
+            filtersStore.setState('activities', 1 << Array.from(activityInputs).indexOf(el))
+        }
+    ))
+})
+
 technicalDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 governanceDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus'))
