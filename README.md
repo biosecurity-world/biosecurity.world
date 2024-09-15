@@ -1,7 +1,6 @@
 # biosecurity.world
 
 ### me
-- Margins
 - [ ] [minutes] Highlight the path to the highlighted entry
 - [ ] [minutes] Make the edges nicer
  

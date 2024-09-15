@@ -1,20 +1,14 @@
 import {Selection} from "d3"
-import {AppState, AppStateChange, AppStateParameters, ProcessedNode, Sector} from "@/types"
-import {fitToSector} from "@/layout"
+import type {AppState, AppStateChange, AppStateParameters, ProcessedNode, Sector} from "@/types/index.d.ts"
 
 export function changeAppState<T extends AppState>(state: T, params: AppStateParameters[T]) {
     window.dispatchEvent(new CustomEvent<AppStateChange>('appstatechange', {
+        /* @ts-ignore */
         detail: { state, params }
     }));
 }
 
-// export const IN_PRODUCTION = import.meta.env.PROD === true
-
 export const PI = Math.PI
-export const PI_4 = PI / 4
-export const PI_6 = PI / 6
-export const PI_2 = PI / 2
-export const PI_3 = PI / 3
 export const PIPI = PI * 2
 
 let _debugInstance: Debug|null = null
@@ -50,9 +44,9 @@ class Debug {
         })
     }
 
-    rect(options: { p: [number, number], width: number, length: number, color?: string, cb?: (rect: Selection<SVGRectElement, {}, HTMLElement, unknown>) => void }) {
+    rect(options: { p: [number, number], width: number, length: number, color?: string }) {
         this.buffer.push(($svg) => {
-            let $rect = $svg.append('rect')
+            $svg.append('rect')
                 .classed('debug', true)
                 .attr('x', options.p[0])
                 .attr('y', options.p[1])
@@ -60,18 +54,7 @@ class Debug {
                 .attr('height', options.width)
                 .attr('fill', 'none')
                 .attr('stroke', options.color || 'red');
-
-            if (options.cb) {
-                options.cb($rect)
-            }
         })
-    }
-
-    cartesianPlane() {
-        debug().ray({angle: 0, color: 'gray'})
-        debug().ray({angle: PI, color: 'gray'})
-        debug().ray({angle: PI_2, color: 'gray'})
-        debug().ray({angle: -PI_2, color: 'gray'})
     }
 
     sector(sector: Sector, color ?: string, p?: [number, number], length?: number) {
@@ -107,26 +90,6 @@ class Debug {
 
         this.buffer = []
     }
-
-    node(options: {node: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
-        if (!options.node.position) {
-            options.node.position = fitToSector(options.node)
-        }
-
-        debug().ray({angle: options.node.sector[0], color: 'black'})
-        debug().ray({angle: options.node.sector[1], color: 'black'})
-        debug().rect({
-            p: options.node.position,
-            length: options.node.size[0],
-            width: options.node.size[1],
-            color: options.color ?? 'red',
-            cb: ($rect) => $rect.attr('data-debug-id', options.node.id),
-        })
-
-        debug().point({p: options.node.position, color: options.color ?? 'red'})
-    }
-
-
 }
 
 export function eq(a: number, b: number) {
@@ -165,15 +128,15 @@ export function getQuadrant(angle: number): number {
         throw new Error(`Angle ${angle} is not in the range [0, 2*PI]`)
     }
 
-    if (inIE(angle, 0, PI_2)) {
+    if (inIE(angle, 0, PI/2)) {
         return 1
     }
 
-    if (inIE(angle, PI_2, PI)) {
+    if (inIE(angle, PI/2, PI)) {
         return 2
     }
 
-    if (inIE(angle, PI, PI + PI_2)) {
+    if (inIE(angle, PI, PI + PI/2)) {
         return 3
     }
 
@@ -193,32 +156,37 @@ export function shortestDistanceBetweenRectangles(
     return Math.sqrt(dx * dx + dy * dy)
 }
 
-export function throttle(callback: (...args: any[]) => void, wait: number, immediate: boolean = false) {
-    let timeout: number|null = null
-    let initialCall = true
+export function throttle<T extends (...args: any[]) => void>(
+    callback: T,
+    wait: number,
+    immediate: boolean = false
+): (...args: Parameters<T>) => void {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    let initialCall = true;
 
-    return function() {
-        const callNow = immediate && initialCall
+    return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+        const callNow = immediate && initialCall;
         const next = () => {
-            callback.apply(this, arguments)
-            timeout = null
-        }
+            callback.apply(this, args);
+            timeout = null;
+        };
 
         if (callNow) {
-            initialCall = false
-            next()
+            initialCall = false;
+            next();
         }
 
         if (!timeout) {
-            timeout = setTimeout(next, wait)
+            timeout = setTimeout(next, wait);
         }
-    }
+    };
 }
 
-export function getLabel(node: ProcessedNode): string {
+
+export function getDebugLabel(node: ProcessedNode): string {
     if (node.el.querySelector('.entrygroup') !== null) {
         return 'Entrygroup'
     }
 
-    return node.el.querySelector('div > span').innerText
+    return (node.el.querySelector('div > span') as HTMLSpanElement).innerText
 }

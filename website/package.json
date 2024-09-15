@@ -4,29 +4,22 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test": "mocha resources/js/tests --colors true",
         "lint": "prettier --write resources/js/**/*.ts resources/css/**/*.css *.json *.js",
         "test:lint": "prettier --check resources/js/**/*.ts resources/css/**/*.css *.json *.js"
     },
     "devDependencies": {
-        "@babel/core": "^7.25.2",
-        "@babel/preset-env": "^7.25.4",
-        "@babel/preset-typescript": "^7.24.7",
-        "@tailwindcss/forms": "^0.5.8",
+        "@tailwindcss/forms": "^0.5.9",
         "@types/d3": "^7.4.3",
-        "@types/jest": "^29.5.12",
-        "autoprefixer": "^10.4.19",
-        "babel-jest": "^29.7.0",
-        "jest": "^29.7.0",
-        "laravel-vite-plugin": "^1.0",
+        "autoprefixer": "^10.4.20",
+        "laravel-vite-plugin": "^1.0.5",
         "pixelmatch": "^6.0.0",
         "pngjs": "^7.0.0",
-        "postcss": "^8.4.39",
+        "postcss": "^8.4.47",
         "prettier": "^3.3.3",
-        "puppeteer": "^23.1.1",
-        "tailwindcss": "^3.4.6",
-        "typescript": "^5.5.4",
-        "vite": "^5.0"
+        "puppeteer": "^23.3.0",
+        "tailwindcss": "^3.4.11",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.5"
     },
     "dependencies": {
         "d3": "^7.9.0"

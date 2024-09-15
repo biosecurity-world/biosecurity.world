@@ -1,4 +1,4 @@
-import {Filters, Node, ProcessedNode, Sector} from "@/types";
+import type {Node, ProcessedNode, Sector} from "@/types/index.d.ts";
 import {
     changeAppState,
     debug,
@@ -9,26 +9,25 @@ import {
     inIE,
     lt,
     PI,
-    PI_2,
-    PI_4,
     PIPI,
     shortestDistanceBetweenRectangles
 } from "@/utils"
-import {FilterMetadata, shouldFilterEntry} from "@/filters";
+import {FilterMetadata, Filters, shouldFilterEntry} from "@/filters";
+
+type PreparedNode = (typeof window.nodes[number]) & { el: SVGElement } & Partial<ProcessedNode>
 
 export function updateMap(state: Filters, metadata: FilterMetadata) {
-    let nodes: ProcessedNode[] = []
-    let stack: ProcessedNode[] = []
-    console.log("here");
+    let nodes: PreparedNode[] = []
+    let stack: PreparedNode[] = []
 
     changeAppState('loading', {})
     resetGlobalMapState()
 
     let maxDepth = 0
-    let idToNode: Record<number, ProcessedNode> = {}
+    let idToNode: Record<number, PreparedNode> = {}
 
     for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
+        let node = window.nodes[i] as PreparedNode
 
         idToNode[node.id] = node
 
@@ -37,7 +36,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         }
 
         if (node.od === 0) {
-            let entryIds = node.entries
+            let entryIds = node.entries!
             let filteredIds = []
 
             for (const entryId of entryIds) {
@@ -73,8 +72,8 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         node.size = [
             // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
             // We need to use offsetWidth and offsetHeight instead.
-            node.el.firstElementChild!.offsetWidth,
-            node.el.firstElementChild!.offsetHeight,
+            (node.el.firstElementChild! as HTMLElement).offsetWidth,
+            (node.el.firstElementChild! as HTMLElement).offsetHeight,
         ]
         node.weight = node.size[0] * node.size[1]
 
@@ -82,16 +81,16 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
             let children = []
 
             for (let j = 0; j < node.od; j++) {
-                let child = stack.pop()
+                let child = stack.pop()!
                 if (child.filtered) {
                     continue
                 }
 
                 children.push(child)
-                node.weight += child.weight
+                node.weight += child.weight!
             }
 
-            children.sort((a, b) => a.weight - b.weight)
+            children.sort((a, b) => a.weight! - b.weight!)
             for (const child of children) {
                 nodes.push(child)
             }
@@ -105,7 +104,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 
     let root = stack.pop()!
     root.sector = [0, PIPI]
-    root.position = fitToSector(root, [{position: [0, 0], size: root!.size}])
+    root.position = fitToSector(root as Required<PreparedNode>, [{position: [0, 0], size: root.size!}])
 
     if (nodes.length === 0) {
         changeAppState('empty', {})
@@ -117,48 +116,28 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
     let deltaFromSiblings: Record<number, number> = {}
 
     for (let i = nodes.length - 1; i >= 0; i--) {
-        let node = nodes[i]
-
-        let parent = idToNode[node.parent]
+        let node = nodes[i] as Required<PreparedNode>
+        let parent = idToNode[node.parent] as Required<PreparedNode>
 
         if (!deltaFromSiblings[node.parent]) {
             deltaFromSiblings[node.parent] = parent.sector[0]
         }
 
         let delta = deltaFromSiblings[node.parent]
-        let alpha = (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
-        let theta = delta + alpha
-        deltaFromSiblings[node.parent] = theta
+        let theta = delta + (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
+
         node.sector = [delta, theta]
+        node.position = fitToSector(node as Required<PreparedNode>, node.trail.map((id: number) => idToNode[id] as Required<PreparedNode>), 150)
 
-
-        node.position = fitToSector(node, node.trail.map((id) => idToNode[id]), 150)
+        deltaFromSiblings[node.parent] = theta
 
         showNode(node)
-
-
-        // let r = 2 * window.innerWidth
-        // if (node.depth === 1) {
-        //     let color = level2NodeCount % 2 === 0 ? "#f3f4f6" : "#f9fafb"
-        //
-        //     $bg.append("path")
-        //         .classed('background-sector', true)
-        //         .attr('d', [
-        //             `M 0,0`,
-        //             `L ${r * Math.cos(delta)} ${r * Math.sin(delta)}`,
-        //             `A ${r} ${r} 0 0 1 ${r * Math.cos(theta)} ${r * Math.sin(theta)}`,
-        //             `Z`,
-        //         ].join(" "))
-        //         .attr("fill", color)
-        //
-        //     level2NodeCount++
-        // }
     }
 
     changeAppState('success', {})
 }
 
-export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'position' | 'size'>[], spacing: number | null = null): [number, number] {
+export function fitToSector(node: Pick<ProcessedNode, 'position' | 'size' | 'sector'>, trail: Pick<ProcessedNode, 'position' | 'size'>[], spacing: number | null = null): [number, number] {
     if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -167,7 +146,7 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
         return [-node.size[0] / 2, -node.size[1] / 2]
     }
 
-    let pos = fitRectToSector(node.sector, node.size, node.id)
+    let pos = fitRectToSector(node.sector, node.size)
 
     if (spacing === null) {
         return pos
@@ -180,7 +159,7 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
     for (const candidate of trail) {
         let candidateDistance = shortestDistanceBetweenRectangles(
             [pos[0], pos[1], node.size[0], node.size[1]],
-            [candidate.position[0], candidate.position[1], candidate.size[0], candidate.size[1]]
+            [candidate.position![0], candidate.position![1], candidate.size[0], candidate.size[1]]
         )
 
         if (candidateDistance < distanceToNeighbour) {
@@ -193,18 +172,18 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
         throw new Error("Should not happen: no neighbour found in the trail")
     }
 
-    let neighbourRect: [number, number, number, number] = [neighbour.position[0], neighbour.position[1], neighbour.size[0], neighbour.size[1]]
+    let neighbourRect: [number, number, number, number] = [neighbour.position![0], neighbour.position![1], neighbour.size[0], neighbour.size[1]]
 
     let m = (node.sector[0] + node.sector[1]) / 2
 
     while (shortestDistanceBetweenRectangles([pos[0], pos[1], node.size[0], node.size[1]], neighbourRect) < spacing) {
-        if (inIE(m, PI_4, 3 * PI_4) || inIE(m, 5 * PI_4, 7 * PI_4)) {
+        if (inIE(m, PI / 4, 3 * PI / 4) || inIE(m, 5 * PI / 4, 7 * PI / 4)) {
             size[0] += 20
         } else {
             size[1] += 20
         }
 
-        pos = fitRectToSector(node.sector, size, node.id)
+        pos = fitRectToSector(node.sector, size)
     }
 
     let [x, y] = pos
@@ -215,7 +194,7 @@ export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'pos
     return [x, y]
 }
 
-function fitRectToSector(sector: Sector, size: [number, number], id: number = null): [number, number] {
+function fitRectToSector(sector: Sector, size: [number, number]): [number, number] {
     let [od, ot] = sector
     // These checks will save you at some point, don't remove them.
     if (eq(od, ot)) {
@@ -272,7 +251,7 @@ function fitRectToSector(sector: Sector, size: [number, number], id: number = nu
         return [x, y]
     }
 
-    if (q_d + 1 === q_t && !(eq(d, 0) && gt(t, PI_2))) {
+    if (q_d + 1 === q_t && !(eq(d, 0) && gt(t, PI / 2))) {
 
         let x = (tan_d * l) / (tan_t - tan_d)
         let y = tan_t * x
@@ -289,7 +268,7 @@ function fitRectToSector(sector: Sector, size: [number, number], id: number = nu
     }
 
 
-    if (eq(d, 0) && gt(t, PI_2)) {
+    if (eq(d, 0) && gt(t, PI / 2)) {
         let x = gte(t, PI) ? -l / 2 : 0
         let y = l / 2
 
@@ -329,7 +308,7 @@ function getEffectiveSector(sector: Sector): Sector {
         t = d + (ot - od)
     }
 
-    if (gte(d, PI_2)) {
+    if (gte(d, PI / 2)) {
         if (lt(PI - t, 0)) {
             return [d, t]
         }
@@ -344,17 +323,17 @@ function getEffectiveSector(sector: Sector): Sector {
     return [d, t]
 }
 
-function showNode(node: ProcessedNode) {
+function showNode(node: Pick<ProcessedNode, 'el' | 'id' | 'parent' | 'position'>) {
     node.el.classList.remove("off-screen")
     node.el.ariaHidden = "false"
-    node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
+    node.el.style.transform = `translate(${node.position![0]}px, ${node.position![1]}px)`
 
     if (node.id === node.parent) {
         return
     }
     debug().point({
-        p: node.position,
-        label: node.id,
+        p: node.position!,
+        label: node.id.toString(10),
     })
 }
 

@@ -15,21 +15,21 @@ export type Sector = [number, number]
 
 export type Node = {
     id: number
+    parent: number
     od: number
     depth: number
-    parent: number
-    filtered: boolean
-
+    trail: number[]
     entries?: number[]
+
+    filtered: boolean
 }
 
 export type ProcessedNode = {
     weight: number
-    childrenWeight: number
     edge: [number, number]
-    size: [number, number] // length, width
-    position?: [number, number]
+    size: [number, number]
     sector: Sector
+    position?: [number, number]
 
     el: SVGElement
 } & Node

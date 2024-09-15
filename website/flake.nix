@@ -8,12 +8,11 @@
     pkgs = nixpkgs.legacyPackages.${system};
   in {
     devShells.${system}.default = pkgs.mkShell {
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true";
+
       nativeBuildInputs = let
         php = pkgs.php83.buildEnv {
-          extraConfig = ''
-            memory_limit = 5G
-            xdebug.mode=coverage
-          '';
+          extraConfig = "xdebug.mode=coverage";
 
           extensions = {
             enabled,
@@ -27,10 +26,10 @@
       in
         [php php.packages.composer]
         ++ (with pkgs; [
-          # Add dependencies here
           nodejs
           pnpm
           wrangler
+          chromium
         ]);
     };
   };
