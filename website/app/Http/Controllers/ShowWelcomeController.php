@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\NotionData\DataObjects\Activity;
 use App\Services\NotionData\DataObjects\Entry;
 use App\Services\NotionData\DataObjects\Entrygroup;
 use App\Services\NotionData\Notion;
@@ -35,12 +36,17 @@ class ShowWelcomeController
 
         return view('welcome', [
             'tree' => $tree,
+            'filterData' => $tree->entries()->mapWithKeys(function (Entry $entry) {
+                return [$entry->id => [
+                    $entry->getActivitiesBitmask(),
+                    $entry->getDomainBitmask(),
+                    $entry->focusesOnGCBRs
+                ]];
+            }),
+            'filterMetadata' => [Activity::totalSeen()],
             'databaseUrl' => $notion->databaseUrl(),
             'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
             'nodes' => $nodes,
-            'bitmaskLength' => Entry::bitmaskLength(),
-            'andOrMask' => Entry::andOrBitmask(),
-            'entries' => $tree->entries()->mapWithKeys(fn (Entry $entry) => [$entry->id => $entry->getFilterBitmask()]),
         ]);
     }
 }

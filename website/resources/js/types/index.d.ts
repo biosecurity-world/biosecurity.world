@@ -14,6 +14,7 @@ export type Node = {
 
 export type ProcessedNode = {
     weight: number
+    childrenWeight: number
     edge: [number, number]
     size: [number, number] // length, width
     position?: [number, number]

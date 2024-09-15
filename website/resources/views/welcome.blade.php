@@ -2,9 +2,8 @@
 <x-slot:head>
     <script>
         window.nodes = @json($nodes);
-        window.masks = @json($entries);
-        window.bitmaskLength = {{ $bitmaskLength }};
-        window.andOrMask = {{ $andOrMask }};
+        window.filterData = @json($filterData);
+        window.filterMetadata = @json($filterMetadata);
     </script>
 
     @vite('resources/js/map.ts')
@@ -214,6 +213,18 @@
                 <span class="sr-only">Loading...</span>
             </div>
         </section>
+        <section data-state="empty" class="app-state state-inactive" aria-hidden="true">
+            <div class="text-center flex flex-col items-center justify-center">
+                <h3 class="text-xl font-display">
+                    There are no entries matching your filters.
+                </h3>
+
+                <button id="filters-reset"
+                        class="focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2">
+                Reset the filters
+                </button>
+            </div>
+        </section>
         <section data-state="success" class="app-state state-inactive" aria-hidden="true">
             <div class="absolute inset-0 z-20 w-full h-full max-w-md border-y" id="entry-wrapper"></div>
             <div
@@ -248,18 +259,6 @@
                 </div>
             </div>
         </section>
-        <section data-state="empty" class="app-state state-inactive" aria-hidden="true">
-            <div class="text-center flex flex-col items-center justify-center">
-                <h3 class="text-xl font-display">
-                    There are no entries matching your filters.
-                </h3>
-
-                <button id="filters-reset"
-                        class=focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2">
-                    Reset the filters
-                </button>
-            </div>
-        </section>
     </main>
 </div>
 
@@ -267,5 +266,6 @@
 
 {{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
-<a href="/m"class="hidden" aria-hidden="true">map</a>
+<a href="/_/m" class="hidden" aria-hidden="true">map</a
+>
 </x-layouts.default>

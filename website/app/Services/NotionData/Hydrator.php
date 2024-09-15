@@ -157,14 +157,14 @@ class Hydrator
                 $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options
             ),
             'location' => $props->getMultiSelectById(self::SCHEMA['locationHints'])->options,
-            'gcbrFocus' => $props->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
+            'focusesOnGCBRs' => $props->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
 
         $rules = [
             'id' => ['required', 'int'],
             'label' => ['required', 'string'],
             'description' => ['required'],
-            'gcbrFocus' => ['required', 'boolean'],
+            'focusesOnGCBRs' => ['required', 'boolean'],
             'link' => ['required', 'string', 'url'],
             'organizationType' => ['required', 'string'],
             'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {

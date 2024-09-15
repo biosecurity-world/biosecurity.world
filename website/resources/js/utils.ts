@@ -1,5 +1,5 @@
 import {Selection} from "d3"
-import {ProcessedNode} from "@/types"
+import {ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "@/layout"
 
 
@@ -67,6 +67,11 @@ class Debug {
         debug().ray({angle: PI, color: 'gray'})
         debug().ray({angle: PI_2, color: 'gray'})
         debug().ray({angle: -PI_2, color: 'gray'})
+    }
+
+    sector(sector: Sector, color ?: string, p?: [number, number], length?: number) {
+        this.ray({ angle: sector[0], color, p, length})
+        this.ray({ angle: sector[1], color, p ,length})
     }
 
     ray(options: { angle: number, p?: [number, number], length?: number, color?: string }) {

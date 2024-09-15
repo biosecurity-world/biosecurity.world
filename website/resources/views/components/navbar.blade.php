@@ -3,7 +3,7 @@
     <nav class="md:py-3 @if($border) md:border @endif md:rounded-full md:px-8 xl:-mx-8 {{ $attributes->get('class') }}">
         <ul class="md:flex md:space-x-4 items-center">
             <li class="font-display inline-block mb-1.5 md:mb-0 navlink @if ($invert) inverted @endif">
-                <a href="{{ route('welcome') }}">biosecurity.world</a>
+                <a href="{{ route('welcome', absolute: false) }}">biosecurity.world</a>
             </li>
 
             <li class="block flex-1" aria-hidden="true"></li>

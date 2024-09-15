@@ -9,7 +9,7 @@
         "noEmit": true,
         "forceConsistentCasingInFileNames": true,
         "paths": {
-            "@/*": ["resources/js/*"],
+            "@/*": ["resources/js/*"]
         }
     },
     "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts"]

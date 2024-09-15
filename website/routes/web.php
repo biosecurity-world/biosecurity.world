@@ -16,8 +16,10 @@ Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::view('/how-to-contribute', 'how-to-contribute')->name('how-to-contribute');
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
+
 Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
-Route::get('/m', ShowMapPartialController::class);
+
+Route::get('/_/m', ShowMapPartialController::class);
 Route::get('/_/entries', function (Notion $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 

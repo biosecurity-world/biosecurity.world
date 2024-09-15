@@ -19,18 +19,18 @@ class Entry
     public function __construct(
         public int $id,
         public int $parentId,
-        public string $label,
+        public string             $label,
         public \DateTimeInterface $createdAt,
-        public string $link,
-        public RichTextProperty $description,
-        public string $organizationType,
+        public string             $link,
+        public RichTextProperty   $description,
+        public string             $organizationType,
         /** @var array<InterventionFocus> */
-        public array $interventionFocuses,
+        public array              $interventionFocuses,
         /** @var array<Activity> */
-        public array $activities,
-        public Location $location,
-        public bool $gcbrFocus,
-        public Logo $logo,
+        public array              $activities,
+        public Location           $location,
+        public bool               $focusesOnGCBRs,
+        public Logo               $logo,
     ) {}
 
     public function nounForOrganizationType(): string
@@ -75,17 +75,7 @@ class Entry
         return false;
     }
 
-    public static function bitmaskLength(): int
-    {
-        return count(Activity::$seen) + 3;
-    }
-
-    public static function andOrBitmask(): int
-    {
-        return 0b111 << count(Activity::$seen);
-    }
-
-    public function isTechnical(): bool
+    public function belongsToTechnicalDomain(): bool
     {
         foreach ($this->interventionFocuses as $focus) {
             if ($focus->isMetaTechnicalFocus()) {
@@ -96,7 +86,7 @@ class Entry
         return false;
     }
 
-    public function isGovernance(): bool
+    public function belongsToGovernanceDomain(): bool
     {
         foreach ($this->interventionFocuses as $focus) {
             if ($focus->isMetaGovernanceFocus()) {
@@ -107,7 +97,7 @@ class Entry
         return false;
     }
 
-    public function getFilterBitmask(): int
+    public function getActivitiesBitmask(): int
     {
         $mask = 0;
         $offset = 0;
@@ -116,10 +106,10 @@ class Entry
             $mask |= $this->hasActivity($id) << $offset++;
         }
 
-        $mask |= ($this->isTechnical() ? 1 : 0) << $offset++;
-        $mask |= ($this->isGovernance() ? 1 : 0) << $offset++;
-        $mask |= ($this->gcbrFocus ? 1 : 0) << $offset++;
-
         return $mask;
+    }
+
+    public function getDomainBitmask(): int {
+        return ($this->belongsToTechnicalDomain() ? 1 : 0) | ($this->belongsToGovernanceDomain() ? 1 : 0) << 1;
     }
 }

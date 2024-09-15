@@ -1,24 +1,20 @@
-import {D3ZoomEvent, select, Selection, zoom, zoomIdentity} from "d3"
-import {debug, eq, getLabel, gt, lt, PI, PIPI, throttle} from "./utils"
-import {Node, ProcessedNode, Sector} from "@/types"
-import {fitToSector} from "./layout"
-import FiltersStateStore, {MapStateStore} from "@/store"
-import {shouldFilterEntry} from "@/filters";
+import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
+import {debug, throttle} from "./utils"
+import type {Node, ProcessedNode} from "@/types/index.d.ts"
+import {updateMap} from "./layout"
+import FiltersStore, {Filters} from "@/filters"
 
 type AppState = "error" | "success" | "loading" | "empty"
 
-let cssColors = [
-    "rebeccapurple",
-
-    "peru", "olive", "teal", "navy", "mediumturquoise", "orangered", "crimson", "saddlebrown", "darkgoldenrod", "goldenrod", "dodgerblue", "deeppink", "cyan", "green", "lightcoral", "maroon", "darkgreen", "darkorange", "blue", "red", "darkseagreen", "palegreen", "mediumvioletred", "sienna", "hotpink", "tan", "purple", "gold", "darkslategray", "chocolate"
-];
-
-function showAppState(newState: AppState): void {
+export function showAppState(newState: AppState): void {
     (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
         let isActive = newState === state.dataset.state
 
+        if (newState === 'empty') {
+            // wasEmpty = true
+        }
+
         state.ariaHidden = isActive ? "false" : "true"
-        state.tabIndex = isActive ? 0 : -1
         state.classList.toggle("state-active", isActive)
         state.classList.toggle("state-inactive", !isActive)
     })
@@ -38,251 +34,79 @@ function showError(message: string, err: unknown) {
     showAppState("error")
 }
 
-window.persistedMapState = new MapStateStore()
-window.persistedMapState.sync()
+let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
+let technicalDomain = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
+let governanceDomain = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
+let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
+let gcbrFocusLabel = document.querySelector('label[for="gcbr_focus"]') as HTMLLabelElement
 
-const filtersStore = new FiltersStateStore()
+
+const filtersStore = new FiltersStore<Filters>({
+    activities: [
+        () => {
+            let mask = 0, offset = 0;
+
+            activityInputs.forEach((el) => mask |= (el.checked ? 1 : 0) << offset++)
+
+            return mask
+        },
+        (mask: number) => {
+            let offset = 0
+
+            for (const activityInput of activityInputs) {
+                activityInput.checked = (mask & (1 << offset++)) !== 0
+                document.querySelector(`label[for="${activityInput.id}"]`)!.classList.toggle("inactive", !activityInput.checked)
+            }
+        }
+    ],
+    domains: [
+        () => {
+            let mask = 0, offset = 0;
+
+            mask |= (technicalDomain.checked ? 1 : 0) << offset++
+            mask |= (governanceDomain.checked ? 1 : 0) << offset++
+
+            return mask
+        },
+        (mask: number) => {
+            let offset = 0
+
+            technicalDomain.checked = (mask & (1 << offset++)) !== 0
+            governanceDomain.checked = (mask & (1 << offset)) !== 0
+        }
+    ],
+    gcbrFocus: [
+        () => gcbrFocus.checked,
+        (checked: boolean) => {
+            gcbrFocus.checked = checked
+            gcbrFocusLabel.dataset.toggle = checked ? "on" : "off"
+        }
+    ]
+})
 
 document.getElementById("filters-reset")!.addEventListener("click", () => filtersStore.reset())
 
-let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
-let technicalLens = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
-let governanceLens = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
-let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
-filtersStore.persist(
-    "mask",
-    () => {
-        let mask = 0
-        let offset = 0
-
-        activityInputs.forEach((el) => mask |= (el.checked ? 1 : 0) << offset++)
-        mask |= (technicalLens.checked ? 1 : 0) << offset++
-        mask |= (governanceLens.checked ? 1 : 0) << offset++
-        mask |= (gcbrFocus.checked ? 1 : 0) << offset
-
-        return mask.toString(2)
-    },
-    (maskStr: string) => {
-        let mask = parseInt(maskStr, 2)
-        let offset = 0
-
-        activityInputs.forEach((el: HTMLInputElement) => {
-            el.checked = (mask & (1 << offset++)) !== 0
-
-            document
-                .querySelector(`label[for="${el.id}"]`)!
-                .classList.toggle("inactive", !el.checked)
-        })
-
-        technicalLens.checked = (mask & (1 << offset++)) !== 0
-        governanceLens.checked = (mask & (1 << offset++)) !== 0
-        gcbrFocus.checked = (mask & (1 << offset)) !== 0
-
-        document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
-    },
-    "0".repeat(window.bitmaskLength),
-)
-
-activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncOnly(["mask"])))
-technicalLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
-governanceLens.addEventListener("change", () => filtersStore.syncOnly(["mask"]))
-gcbrFocus.addEventListener("change", (e) => {
-    document.querySelector('label[for="gcbr_focus"]')!.dataset.toggle = gcbrFocus.checked ? "on" : "off"
-    return filtersStore.syncOnly(["mask"]);
-})
+activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncFilter('activities')))
+technicalDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
+governanceDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
+gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus'))
 
 document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
     activityInputs.forEach((el: HTMLInputElement) => {
         el.checked = !el.checked
         document.querySelector(`label[for="${el.id}"]`)!.classList.toggle("inactive", !el.checked)
     })
-
-    filtersStore.syncOnly(["mask"])
+    //
+    // filtersStore.syncFilter('activities')
 })
 
-function renderMap($svg: Selection<SVGGElement, any, HTMLElement, any>) {
-    let nodes: ProcessedNode[] = []
-    let stack: ProcessedNode[] = []
-
-    // Reset the map
-    for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node &
-            Partial<ProcessedNode> & { el: SVGElement }
-
-        node.el.classList.add("off-screen")
-        node.el.ariaHidden = "true"
-        node.el.style.transform = ""
-    }
-
-    $svg.selectAll('.layer-bg, .layer-fg').remove()
-
-    let $bg = $svg.append('g').classed('layer-bg', true)
-    let $fg = $svg.append('g').classed('layer-fg', true)
-
-    let maxDepth = 0
-
-    let idToNode: Record<number, ProcessedNode> = {}
-
-    for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
-
-        idToNode[node.id] = node
-
-        if (node.depth >= maxDepth) {
-            maxDepth = node.depth
-        }
-
-        if (node.od === 0) {
-            let entryIds = node.entries
-            let filteredIds = []
-
-            for (const entryId of entryIds) {
-                let entryMask = window.masks[entryId]
-                let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
-
-                let shouldFilter = shouldFilterEntry(filtersStore.getState('mask'), entryMask.toString(2))
-
-                elEntry.classList.toggle("matches-filters", !shouldFilter)
-
-                if (!shouldFilter) {
-                    filteredIds.push(entryId)
-                }
-            }
-
-            node.filtered = filteredIds.length === 0
-        }
-
-        if (!(node.el instanceof SVGForeignObjectElement)) {
-            throw new Error(`Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`)
-        }
-
-        // We set the <foreignObject> with a height of 100% and a w of 100%
-        // because we don't want to compute the size of the elements server-side
-        // but this means that we get the wrong bounds.
-        if (node.el.firstElementChild === null) {
-            throw new Error(
-                "It is expected that the foreignObject representing the node " +
-                "has a single child to compute its real bounding box, not " +
-                "the advertised (100%, 100%)",
-            )
-        }
-
-        node.size = [
-            // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
-            // We need to use offsetWidth and offsetHeight instead.
-            node.el.firstElementChild!.offsetWidth,
-            node.el.firstElementChild!.offsetHeight,
-        ]
-        node.weight = node.size[0] * node.size[1]
-
-        let children = []
-
-        if (node.od > 0) {
-            for (let i = 0; i < node.od; i++) {
-                let child = stack.pop()
-                if (child.filtered) {
-                    continue
-                }
-
-                children.push(child)
-                node.weight += child.weight
-            }
-
-            children.sort((a, b) => a.weight - b.weight)
-            for (const child of children) {
-                nodes.push(child)
-            }
-
-            node.filtered = children.length === 0
-        }
-
-        stack.push(node)
-    }
-
-    let root = stack.pop()!
-    root.sector = [0, PIPI]
-    root.position = fitToSector(root, [{ position: [0, 0], size: root!.size}])
-
-    if (nodes.length === 0) {
-        return showAppState("empty")
-    }
-
-    showNode(root)
-
-    let deltaFromSiblings: Record<number, number> = {}
-
-    let level2NodeCount = 0
-
-    for (let i = nodes.length - 1; i >= 0; i--) {
-        let node = nodes[i]
-
-        let parent = idToNode[node.parent]
-
-        if (!deltaFromSiblings[node.parent]) {
-            deltaFromSiblings[node.parent] = parent.sector[0]
-        }
-
-        let delta = deltaFromSiblings[node.parent]
-        let siblingsWeight = parent.weight - (parent.size[0] * parent.size[1])
-        let alpha = (node.weight / siblingsWeight) * (parent.sector[1] - parent.sector[0])
-        let theta = delta + alpha
-        node.sector = [delta, theta]
-        node.position = fitToSector(node, node.trail.map((id) => idToNode[id]), 100)
-
-        showNode(node)
-
-        deltaFromSiblings[node.parent] = theta
-
-        let r = 2 * window.innerWidth
-
-        // if (node.depth === 1) {
-        //     console.log(node.id, [delta, theta])
-        //         $fg.append('line')
-        //             .classed('ray', true)
-        //             .attr('x1', 0)
-        //             .attr('y1', 0)
-        //             .attr('x2', Math.cos(theta) * r * 2)
-        //             .attr('y2', Math.sin(theta) * r * 2)
-        //             .attr('stroke', '#d1d5db')
-        // } else
-        if (node.depth === 1) {
-            let color = level2NodeCount % 2 === 0 ? "#f3f4f6" : "#f9fafb"
-
-            $bg.append("path")
-                .classed('background-sector', true)
-                .attr('d', [
-                    `M 0,0`,
-                    `L ${r * Math.cos(delta)} ${r * Math.sin(delta)}`,
-                    `A ${r} ${r} 0 0 1 ${r * Math.cos(theta)} ${r * Math.sin(theta)}`,
-                    `Z`,
-                ].join(" "))
-                .attr("fill", color)
-
-            level2NodeCount++
-        }
-    }
-}
-
-function showNode(node: ProcessedNode) {
-    node.el.classList.remove("off-screen")
-    node.el.ariaHidden = "false"
-    node.el.style.transform = `translate(${node.position[0]}px, ${node.position[1]}px)`
-
-    // if (node.id === node.parent) {
-    //     return
-    // }
-    // debug().point({
-    //     p: node.position,
-    //     label: node.id,
-    // })
-}
 
 ;(async function () {
     try {
         let elMapWrapper = document.getElementById('map-wrapper')!
 
         let $map = select<SVGElement, any>("#map")
-        let mapContentRes = await fetch('/m')
+        let mapContentRes = await fetch('/_/m')
         let mapContent = await mapContentRes.text()
 
         $map.html(mapContent)
@@ -309,9 +133,7 @@ function showNode(node: ProcessedNode) {
         elsEntryButtons.forEach((el: HTMLButtonElement) => {
             let entryId = parseInt(el.dataset.entry!, 10)
 
-            el.addEventListener("click", () => {
-                openEntry(el);
-            })
+            el.addEventListener("click", () => openEntry(el))
             el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
             el.addEventListener("mouseleave", () => removeHighlight())
             el.addEventListener("focus", () => highlightEntriesWithId(entryId))
@@ -328,16 +150,12 @@ function showNode(node: ProcessedNode) {
             let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
             let entryId = parseInt(entry.dataset.entry!, 10)
 
-            fetch(`/e/${entrygroup}/${entryId}`, {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-            })
+            fetch(`/e/${entrygroup}/${entryId}`, {headers: {"X-Requested-With": "XMLHttpRequest"}})
                 .then((response: Response) => response.text())
                 .then((html: string) => {
                     elEntryWrapper.innerHTML = html
 
-                    window.persistedMapState.setFocusedEntry(entrygroup, entryId)
+                    setLastFocusedEntry([entrygroup, entryId])
 
                     elEntryWrapper
                         .querySelector("button.close-entry")!
@@ -351,11 +169,12 @@ function showNode(node: ProcessedNode) {
 
         function closeEntry() {
             elEntryWrapper.innerHTML = ""
-            window.persistedMapState.resetFocusedEntry()
+            setLastFocusedEntry(null)
         }
 
-        if (window.persistedMapState.focusedEntry) {
-            let [entrygroup, entry] = window.persistedMapState.focusedEntry
+        let lastFocusedEntry = getLastFocusedEntry()
+        if (lastFocusedEntry !== null) {
+            let [entrygroup, entry] = lastFocusedEntry
             let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
             openEntry(el)
         }
@@ -478,17 +297,13 @@ function showNode(node: ProcessedNode) {
             node.el = el
         }
 
-        let cb = () => {
+        filtersStore.onChange((state) => {
             debug().clear()
-            showAppState('loading')
 
-            renderMap(select('#background'))
+            updateMap(state)
 
-            showAppState('success')
             debug().flush($centerWrapper)
-        }
-        filtersStore.sync().onChange(cb)
-        cb()
+        }, true)
     } catch (err: unknown) {
         console.error(err)
 
@@ -499,3 +314,15 @@ function showNode(node: ProcessedNode) {
     }
 })()
 
+
+function setLastFocusedEntry(focusedEntry: [number, number] | null) {
+    let loc = new URL(window.location.toString())
+    loc.hash = focusedEntry ? `/${focusedEntry[0]}:${focusedEntry[1]}/` : '';
+
+    window.history.replaceState({}, '', loc.toString())
+}
+
+function getLastFocusedEntry(): [number, number] | null {
+    let focusedEntry = new URL(window.location.toString()).hash.split("/").shift()
+    return focusedEntry && /(\d+):(\d+)/.test(focusedEntry) ? focusedEntry.split(":").map(id => parseInt(id, 10)) as [number, number] : null
+}
