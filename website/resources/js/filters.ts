@@ -14,13 +14,14 @@ export function shouldFilterEntry(state: Filters, filterData: [Filters['activiti
         return true
     }
 
-    if ((domains & TECHNICAL_DOMAIN) !== 0 && (domains & TECHNICAL_DOMAIN) === 0) {
+    if ((state.domains & TECHNICAL_DOMAIN) !== 0 && (domains & TECHNICAL_DOMAIN) === 0) {
         return true
     }
 
-    if ((domains & GOVERNANCE_DOMAIN) !== 0 && (domains & GOVERNANCE_DOMAIN) === 0) {
+    if ((state.domains & GOVERNANCE_DOMAIN) !== 0 && (domains & GOVERNANCE_DOMAIN) === 0) {
         return true
     }
+
 
     let shouldFilter = true
 
@@ -51,23 +52,23 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         this.setters = {} as any
         this.defaults = {} as any
 
-        for (const key in gettersSetters) {
-            const [getter, setter] = gettersSetters[key]
+        for (const id in gettersSetters) {
+            const [getter, setter] = gettersSetters[id]
 
-            this.getters[key] = getter
-            this.setters[key] = setter
-            this.defaults[key] = getter()
+            this.getters[id] = getter
+            this.setters[id] = setter
+            this.defaults[id] = getter()
+
+            let queryValue = this.getQueryParam(id)
+
+            if (queryValue) {
+                this.setState(id, queryValue)
+            }
         }
     }
 
     syncFilter(id: keyof S): FiltersState<S> {
-        let value = this.getters[id]()
-
-        if (this.getQueryParam(id) === value) {
-            return this
-        }
-
-        this.setState(id, value)
+        this.setState(id, this.getters[id]())
 
         return this
     }

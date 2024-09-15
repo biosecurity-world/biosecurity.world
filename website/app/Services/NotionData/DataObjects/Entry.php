@@ -19,18 +19,18 @@ class Entry
     public function __construct(
         public int $id,
         public int $parentId,
-        public string             $label,
+        public string $label,
         public \DateTimeInterface $createdAt,
-        public string             $link,
-        public RichTextProperty   $description,
-        public string             $organizationType,
+        public string $link,
+        public RichTextProperty $description,
+        public string $organizationType,
         /** @var array<InterventionFocus> */
-        public array              $interventionFocuses,
+        public array $interventionFocuses,
         /** @var array<Activity> */
-        public array              $activities,
-        public Location           $location,
-        public bool               $focusesOnGCBRs,
-        public Logo               $logo,
+        public array $activities,
+        public Location $location,
+        public bool $focusesOnGCBRs,
+        public Logo $logo,
     ) {}
 
     public function nounForOrganizationType(): string
@@ -109,7 +109,8 @@ class Entry
         return $mask;
     }
 
-    public function getDomainBitmask(): int {
+    public function getDomainBitmask(): int
+    {
         return ($this->belongsToTechnicalDomain() ? 1 : 0) | ($this->belongsToGovernanceDomain() ? 1 : 0) << 1;
     }
 }

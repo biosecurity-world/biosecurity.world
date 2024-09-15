@@ -182,9 +182,10 @@ class TreeRenderingVisualTest extends TestCase
         ]);
     }
 
-    public function test_regression_1() {
+    public function test_regression_1()
+    {
         $this->assertTreeRenderingMatchesSnapshot([
-            $this->node(6.11815539705054, 6.283185307179587, 60, 210)
+            $this->node(6.11815539705054, 6.283185307179587, 60, 210),
         ]);
     }
 }

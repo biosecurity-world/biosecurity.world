@@ -13,6 +13,7 @@ class NewLayoutTestUrlCommand extends Command
     {
         if (! app()->isLocal()) {
             $this->error('This command can only be run in local environment');
+
             return 1;
         }
 
@@ -28,17 +29,26 @@ class NewLayoutTestUrlCommand extends Command
             'length' => (int) $length,
         ]]);
 
-        echo route('tree-rendering', ['caseId' => $id]) . PHP_EOL;
+        echo route('tree-rendering', ['caseId' => $id]).PHP_EOL;
 
         return 0;
     }
 
-    private function evalExpr(string $argument)
+    private function evalExpr(string $argument): int|float
     {
         $argument = trim(strtolower($argument));
 
         $argument = str_replace('pi', 'pi()', $argument);
 
-        return eval("return $argument;");
+        try {
+            $ret = eval("return $argument;");
+        } catch (\Throwable $e) {
+        }
+
+        if (!isset($ret) || (!is_int($ret) && !is_float($ret))) {
+            throw new \InvalidArgumentException(sprintf('Invalid expression: %s, expected a valid PHP expression that evaluates to a number.', $argument));
+        }
+
+        return $ret;
     }
 }

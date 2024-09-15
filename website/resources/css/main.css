@@ -125,6 +125,12 @@ label[for^="activity_"].inactive {
 
 #entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
     opacity: 0.25;
+
+}
+
+.intervention-type:not(:has(+ div > .matches-filters)) {
+    display: none;
+    margin: 0 !important;
 }
 
 /** Generic toggle component */
@@ -149,13 +155,18 @@ label[for^="activity_"].inactive {
     display: none;
 }
 
-.intervention-type {
-    @apply text-xs tracking-tight text-gray-500 font-semibold px-3 mt-2;
+.entrygroup:not(:has(*.matches-filters)) {
+    display: none;
 }
 
-.entrygroup div:last-child{
-    @apply mb-2;
+.intervention-type:has(+ div > .matches-filters) {
+    @apply mt-2
 }
+
+.intervention-type {
+    @apply text-xs tracking-tight text-gray-500 font-semibold px-3
+}
+
 
 #entry-loader {
     opacity: 0;

@@ -40,7 +40,7 @@ class ShowWelcomeController
                 return [$entry->id => [
                     $entry->getActivitiesBitmask(),
                     $entry->getDomainBitmask(),
-                    $entry->focusesOnGCBRs
+                    $entry->focusesOnGCBRs,
                 ]];
             }),
             'filterMetadata' => [Activity::totalSeen()],

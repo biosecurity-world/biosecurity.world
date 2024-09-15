@@ -84,20 +84,25 @@ const filtersStore = new FiltersStore<Filters>({
     ]
 })
 
-document.getElementById("filters-reset")!.addEventListener("click", () => filtersStore.reset())
+document.querySelectorAll('button.resets-filters').forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopImmediatePropagation()
+      return filtersStore.reset();
+  })
+})
 
 activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncFilter('activities')))
 technicalDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 governanceDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus'))
 
-document.getElementById("toggle-all-activities")!.addEventListener('click', () => {
+document.getElementById("toggle-all-activities")!.addEventListener('click', e => {
+    e.stopImmediatePropagation()
+    let mask = 0, offset = 0
     activityInputs.forEach((el: HTMLInputElement) => {
-        el.checked = !el.checked
-        document.querySelector(`label[for="${el.id}"]`)!.classList.toggle("inactive", !el.checked)
+        mask |= +!el.checked << offset++
     })
-    //
-    // filtersStore.syncFilter('activities')
+    filtersStore.setState('activities', mask)
 })
 
 

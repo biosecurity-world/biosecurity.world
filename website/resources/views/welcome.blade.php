@@ -87,7 +87,10 @@
             </ul>
         </section>
         <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
-            <h4 class="text-lg font-display text-primary-950">Filters</h4>
+            <div class="flex items-center">
+                <h4 class="flex-1 text-lg font-display">Filters</h4>
+                <button class="resets-filters px-3 -mx-3 text-sm py-1 -mt~-1.5 underline rounded-xl hover:bg-white hover:border-gray-200 border border-transparent transition">Reset</button>
+            </div>
 
             <fieldset class="mt-4">
                 <legend class="font-medium leading-6 text-gray-900">
@@ -138,21 +141,21 @@
                 <div class="flex">
                     <span class="font-medium leading-6 text-gray-900 mr-4 flex-1">Activities</span>
                     <button
-                        class="text-sm text-gray-700  underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-gray-100 transition"
+                        class="text-sm text-gray-700 underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-white transition border border-transparent hover:border-gray-200"
                         id="toggle-all-activities">
-                        Toggle all
+                        <span>Toggle all</span>
                     </button>
                 </div>
 
                 <ul class="mt-2.5 flex flex-wrap gap-x-2 gap-y-2">
                     @foreach($tree->activities() as $activity)
                         <li>
-                            <input type="checkbox" checked name="activity_{{ $activity->id }}"
+                            <input type="checkbox"  checked name="activity_{{ $activity->id }}"
                                    id="activity_{{ $activity->id }}"
                                    value="{{ $activity->id }}" class="sr-only peer">
                             <label
                                 for="activity_{{ $activity->id }}"
-                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium text-gray-600 border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
+                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
                                 style="background-color: {{ $activity->color->foreground() }}"
                                 type="button"
                             >
@@ -219,8 +222,8 @@
                     There are no entries matching your filters.
                 </h3>
 
-                <button id="filters-reset"
-                        class="focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2">
+                <button
+                        class="resets-filters focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2 hover:bg-gray-50">
                 Reset the filters
                 </button>
             </div>
