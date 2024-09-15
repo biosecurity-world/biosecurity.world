@@ -76,6 +76,10 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         return this
     }
 
+    getState<K extends keyof S>(id: K): S[K] {
+        return this.getters[id]()
+    }
+
     setState<K extends keyof S>(id: K, value: S[K]): FiltersState<S> {
         this.setters[id](value)
         this.setQueryParam(id, value)

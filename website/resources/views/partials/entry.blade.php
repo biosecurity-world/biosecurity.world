@@ -21,7 +21,7 @@
             <ol role="list" class="flex items-center space-x-1 overflow-x-scroll">
                 @foreach($breadcrumbs as $breadcrumb)
                     <li class="flex items-center">
-                        <span class="mr-1 text-sm font-medium text-gray-700 whitespace-nowrap">{{ $breadcrumb }}</span>
+                        <span class="mr-1 text-sm font-bold text-gray-700 whitespace-nowrap">{{ $breadcrumb }}</span>
 
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                              class="size-5 flex-shrink-0 text-gray-500">

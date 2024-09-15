@@ -47,56 +47,79 @@
         </li>
     </ul>
 </header>
-
 <h2 class="sr-only">Map</h2>
-
-<div class="w-full h-full flex duration-500 transition-[padding,border-radius] mx-auto" id="map-wrapper">
+<div class="w-full h-full flex duration-300 motion-safe:transition-[padding,border-radius] mx-auto" id="map-wrapper">
     <aside
-        class="w-full h-full border-r divide-y border-y border-l max-w-md bg-white rounded-l-3xl flex-col hidden lg:flex">
-        <section class="p-6">
-            <h3 class="text-xl font-display flex-grow text-primary-950">
-                About the map
-            </h3>
-            <p class="text-gray-700 text-sm">
-                Last updated on
-                <time datetime="{{ $lastEditedAt->toIso8601String() }}" class="font-medium">
-                    {{ $lastEditedAt->format('F j, Y') }}.
-                </time>
-            </p>
+        class="w-full h-full overflow-y-scroll border-r border-y border-l max-w-md rounded-l-3xl hidden lg:flex lg:flex-col bg-white">
+        <header class="border-b">
+            <div class="px-6 pt-4">
+                <div class="flex items-center">
+                    <h3 class="flex-1 font-display text-2xl">
+                        Map of Biosecurity
+                    </h3>
 
-            <h5 class="font-display mt-4 text-lg text-primary-950">
-                Criteria for inclusion
-            </h5>
+                    <button title="Toggle fullscreen (shortcut: F)" id="toggle-fullscreen" class="-m-2 p-2 transition hover:bg-gray-100 border-transparent hover:border-gray-200 border rounded-full hover:shadow-inner">
+                        <span class="sr-only">Toggle fullscreen</span>
+                        <x-heroicon-o-arrows-pointing-out id="not-fullscreen" aria-hidden="true" class="size-5 text-gray-700"/>
+                        <x-heroicon-o-arrows-pointing-in id="is-fullscreen" aria-hidden="true" class="hidden size-5 text-gray-700"/>
+                    </button>
+                </div>
+                <p class="text-gray-700 mt-&">
+                    Last updated on <time datetime="{{ $lastEditedAt->toIso8601String() }}"
+                                          title="{{ $lastEditedAt->diffForHumans() }}">{{ $lastEditedAt->format('F j, Y') }}</time>.
+                </p>
 
-            <ul class="space-y-4 mt-1">
-                <li>
-                    <span class="font-bold font-display text-gray-700">Productive</span>
-                    <p class="text-gray-700 mt-0.5">Has relevant research or policy output, or a relevant product, device, published funding decision.</p>
-                </li>
-                <li>
-                    <span class="font-bold font-display text-gray-700">Active</span>
-                    <p class="text-gray-700 mt-0.5">Is likely to produce more relevant outputs.</p>
-                </li>
-                <li>
-                    <span class="font-bold font-display text-gray-700">Focused</span>
-                    <p class="text-gray-700 mt-0.5">
-                        Aims to prevent large scale pandemics, or is a key player in one of the <a href="" class="underline">intervention focuses</a>.
-                    </p>
-                </li>
-            </ul>
-        </section>
-        <section class="p-6 bg-gray-50 flex-grow rounded-bl-3xl">
-            <div class="flex items-center">
-                <h4 class="flex-1 text-lg font-display">Filters</h4>
-                <button class="resets-filters px-3 -mx-3 text-sm py-1 -mt~-1.5 underline rounded-xl hover:bg-white hover:border-gray-200 border border-transparent transition">Reset</button>
+                <ul class="list-disc list-inside mt-4">
+                    <li>
+                        <a href="#"
+                           class="inline-flex underline whitespace-nowrap">
+                            Suggest an entry
+                        </a>
+                    </li>
+                </ul>
             </div>
 
-            <fieldset class="mt-4">
-                <legend class="font-medium leading-6 text-gray-900">
+            <ul class="flex space-x-4 px-6 mt-4 py-2">
+                <li>
+                    <a href="#"
+                       class="inline-flex text-sm whitespace-nowrap">
+                        <span class="text-gray-400">&bull;&nbsp;</span>
+                        <span class="underline -mt-px text-gray-700">Inclusion criteria</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"
+                       class="inline-flex text-sm whitespace-nowrap">
+                        <span class="text-gray-400">&bull;&nbsp;</span>
+                        <span class="underline -mt-px text-gray-700">Rejected entries</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://notion.so/{{ config('services.notion.database') }}"
+                       class="inline-flex text-sm whitespace-nowrap">
+                        <span class="text-gray-400">&bull;&nbsp;</span>
+                        <span class="mr-0.5 -mt-px underline text-gray-700">Notion</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+                             class="size-4 text-gray-400 group-hover:text-primary-700 -mt-px"
+                             aria-label="External link icon">
+                            <path
+                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
+                            <path
+                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </header>
+        <div class="bg-gray-50 px-6 py-4 lg:flex-1">
+            <h4 class="flex-1 text-lg font-display">Filters</h4>
+
+            <fieldset class="mt-2">
+                <legend class="font-bold leading-6 text-gray-900">
                     Domain
                 </legend>
 
-                <div class="shadow-sm rounded-xl mt-2 bg-white">
+                <div class="shadow-sm rounded-xl mt-0.5 bg-white">
                     <div>
                         <input type="checkbox" name="domain_technical" id="domain_technical" value="technical"
                                class="sr-only peer">
@@ -117,13 +140,12 @@
                     </div>
                 </div>
             </fieldset>
-
-            <div class="mt-8 flex items-center justify-between">
+            <div class="mt-6 flex items-center justify-between">
                       <span class="flex flex-grow flex-col">
-                        <span class="font-medium leading-6 text-gray-900">
+                        <span class="font-bold leading-6 text-gray-900">
                             Focus on GCBRs prevention
                         </span>
-                        <span class="text-sm text-gray-500 mt-1">
+                        <span class="text-sm text-gray-500">
                             Include only organizations focused on large-scale pandemics prevention.
                         </span>
                       </span>
@@ -135,18 +157,10 @@
 
                 </label>
             </div>
+            <fieldset class="mt-6">
+                <legend class="font-bold leading-6 text-gray-900 inline">Activities</legend>
 
-            <div class="mt-8">
-                <div class="flex">
-                    <span class="font-medium leading-6 text-gray-900 mr-4 flex-1">Activities</span>
-                    <button
-                        class="text-sm text-gray-700 underline px-3 py-0.5 -my-0.5 -mx-3 rounded-xl hover:bg-white transition border border-transparent hover:border-gray-200"
-                        id="toggle-all-activities">
-                        <span>Toggle all</span>
-                    </button>
-                </div>
-
-                <ul class="mt-2.5 flex flex-wrap gap-x-2 gap-y-2">
+                <ul class="mt-2.5 clear-both flex flex-wrap gap-x-2 gap-y-2">
                     @foreach($tree->activities() as $activity)
                         <li>
                             <input type="checkbox"  checked name="activity_{{ $activity->id }}"
@@ -154,7 +168,7 @@
                                    value="{{ $activity->id }}" class="sr-only peer">
                             <label
                                 for="activity_{{ $activity->id }}"
-                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-medium border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
+                                class="flex items-center py-1 rounded-full bg-gray-50 text-sm text-white font-bold border border-gray-500/10 px-2 group whitespace-nowrap shadow-sm peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-primary-600 peer-focus:ring-opacity-50 transition"
                                 style="background-color: {{ $activity->color->foreground() }}"
                                 type="button"
                             >
@@ -173,11 +187,32 @@
                         </li>
                     @endforeach
                 </ul>
-            </div>
-        </section>
-    </aside>
+            </fieldset>
+            <fieldset class="mt-6">
+                <legend class="font-bold leading-6 text-gray-900 mr-4 flex-1">Focuses</legend>
 
-    <main class="w-full h-full relative border-b border-r bg-gray-50 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
+                <ul class="mt-2.5">
+                    @foreach($tree->interventionFocuses() as $focus)
+                        <li>
+                            <input type="checkbox"  checked name="focus_{{ $focus->id }}"
+                                   id="focus_{{ $focus->id }}"
+                                   value="{{ $focus->id }}" class="sr-only peer">
+                            <label
+                                for="focus_{{ $focus->id }}"
+                                type="button"
+                            >
+                                <span class="sr-only">Toggle filter</span>
+                                <span class="leading-none group-hover:opacity-75 select-none">
+                                    {{ $focus->label }}
+                                </span>
+                            </label>
+                        </li>
+                    @endforeach
+                </ul>
+            </fieldset>
+        </div>
+    </aside>
+    <main class="w-full h-full relative border-b border-r bg-gray-100 rounded-r-3xl rounded-l-3xl lg:rounded-l-none">
         <section data-state="error" aria-hidden="true" class="app-state state-inactive">
             <div class="text-center">
                 <h3 class="text-xl">An error has occurred.</h3>
@@ -195,7 +230,6 @@
                               d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z"
                               clip-rule="evenodd"/>
                     </svg>
-
                     <span class="-mt-px">Reload</span>
                 </a>
             </div>
@@ -220,7 +254,6 @@
                 <h3 class="text-xl font-display">
                     There are no entries matching your filters.
                 </h3>
-
                 <button
                         class="resets-filters focusable border px-4 py-1 rounded-md mt-4 bg-white flex items-center space-x-2 hover:bg-gray-50">
                 Reset the filters
@@ -254,7 +287,6 @@
                     <button class="p-2 hover:bg-gray-50 rounded-t-lg focusable" id="zoom-in">
                         <x-heroicon-s-plus class="size-5 text-gray-700"/>
                     </button>
-
                     <button class="p-2 hover:bg-gray-50 rounded-b-lg focusable" id="zoom-out">
                         <x-heroicon-s-minus class="size-5 text-gray-700"/>
                     </button>
@@ -263,11 +295,8 @@
         </section>
     </main>
 </div>
-
 <x-footer />
-
-{{-- Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it. --}}
+ Necessary for spatie/laravel-export to find the entries, adding /_/entries to config('export.paths') doesn't crawl the URL on it.
 <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
-<a href="/_/m" class="hidden" aria-hidden="true">map</a
->
+<a href="/_/m" class="hidden" aria-hidden="true">map</a>
 </x-layouts.default>

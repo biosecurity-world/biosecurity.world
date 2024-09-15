@@ -9,7 +9,7 @@ export default {
             colors: {
                 technical: colors.amber[700],
                 governance: colors.blue[600],
-                primary: colors.emerald,
+                primary: colors.cyan,
             },
             fontFamily: {
                 sans: ["Nunito", ...defaultConfig.theme.fontFamily.sans],

@@ -4,8 +4,38 @@ import type {Node, ProcessedNode, AppStateChangeEvent} from "@/types/index.d.ts"
 import {updateMap} from "./layout"
 import FiltersStore, {Filters} from "@/filters"
 
-let elMapWrapper = document.getElementById('map-wrapper')!
 let $map = select<SVGElement, any>("#map")
+let elMapWrapper = document.getElementById('map-wrapper')!
+
+let lastScrollTop = 0
+
+// element.requestFullscreen() is not available in Safari
+// so we implement our own almost "fullscreen" mode.
+function toggleFullscreen() {
+    let isFullscreen = elMapWrapper.classList.contains('fullscreen')
+
+    document.getElementById('not-fullscreen')!.classList.toggle('hidden', !isFullscreen)
+    document.getElementById('is-fullscreen')!.classList.toggle('hidden', isFullscreen)
+
+    if (!isFullscreen) {
+        lastScrollTop = window.scrollY
+        elMapWrapper.classList.add('fullscreen')
+    } else {
+        elMapWrapper.classList.remove('fullscreen')
+        elMapWrapper.scrollIntoView()
+        window.scrollTo(0, lastScrollTop)
+    }
+}
+document.getElementById('toggle-fullscreen')!.addEventListener('click', toggleFullscreen)
+window.addEventListener('keydown', (e) => {
+    if (
+        e.key === "f" ||
+        (e.key === "Escape" && elMapWrapper.classList.contains('fullscreen'))
+    ) {
+        e.preventDefault()
+        toggleFullscreen()
+    }
+})
 
 /* Open/Close an entry, restore last focused entry */
 let elEntryLoader = document.getElementById("entry-loader")!
@@ -137,7 +167,14 @@ activityInputs.forEach((el: HTMLInputElement) => {
             filtersStore.syncFilter("activities")
         },
         (preventedEvent) => {
-            filtersStore.setState('activities', 1 << Array.from(activityInputs).indexOf(el))
+            let mask = 1 << Array.from(activityInputs).indexOf(el)
+
+            // The double-clicked activity is already the only one active, so we flip all of them
+            if (filtersStore.getState('activities') === mask) {
+                mask = ~mask
+            }
+
+            filtersStore.setState('activities', mask)
         }
     ))
 })
@@ -145,17 +182,6 @@ activityInputs.forEach((el: HTMLInputElement) => {
 technicalDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 governanceDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
 gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus'))
-
-document.getElementById("toggle-all-activities")!.addEventListener('click', e => {
-    e.stopImmediatePropagation()
-    let mask = 0, offset = 0
-    activityInputs.forEach((el: HTMLInputElement) => {
-        mask |= +!el.checked << offset++
-    })
-    filtersStore.setState('activities', mask)
-})
-
-
 
 ;(async function () {
     try {
@@ -216,89 +242,6 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', e =>
         document.getElementById('zoom-in')!.addEventListener('click', () => zoomHandler.scaleBy($map, 1.2))
         document.getElementById('zoom-out')!.addEventListener('click', () => zoomHandler.scaleBy($map, 0.8))
 
-        let directionalIncrements = 0
-        let nextScrollShouldBeIgnored = false
-        let comingFromTop = elMapWrapper.getBoundingClientRect().top > 0
-        let mapDistanceToTop = window.scrollY + elMapWrapper.getBoundingClientRect().top
-
-        if (elMapWrapper.getBoundingClientRect().top < 0) {
-            elMapWrapper.classList.add('fullscreen')
-        }
-
-        let handleMovement = (direction: number) => {
-            if (!elMapWrapper.classList.contains('fullscreen')) {
-                return;
-            }
-
-            directionalIncrements += direction
-
-            if (Math.abs(directionalIncrements) !== 2) {
-                return;
-            }
-
-            elMapWrapper.classList.remove('fullscreen')
-            comingFromTop = directionalIncrements < 0
-            directionalIncrements = 0
-
-            if (directionalIncrements > 0) {
-                nextScrollShouldBeIgnored = true
-            }
-
-            window.scrollTo(0, mapDistanceToTop + 10 * Math.sign(directionalIncrements))
-        }
-
-        document.addEventListener('scroll', throttle(() => {
-            if (nextScrollShouldBeIgnored) {
-                nextScrollShouldBeIgnored = false
-                return;
-            }
-
-            if (elMapWrapper.classList.contains('fullscreen')) {
-                return
-            }
-
-            if (
-                comingFromTop && elMapWrapper.getBoundingClientRect().top < 0 ||
-                !comingFromTop && elMapWrapper.getBoundingClientRect().top > 0
-            ) {
-                elMapWrapper.classList.add('fullscreen')
-            }
-        }, 100))
-        document.addEventListener('wheel', (e: WheelEvent) => handleMovement(e.deltaY > 0 ? 1 : -1))
-        document.addEventListener("keydown", (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                closeEntry()
-            }
-
-            if (e.key === 'ArrowDown') {
-                handleMovement(1)
-            }
-
-            if (e.key === 'ArrowUp') {
-                handleMovement(-1)
-            }
-        })
-        window.addEventListener('resize', () => {
-            mapWidth = $map.node()!.clientWidth
-            mapHeight = $map.node()!.clientHeight
-
-            $centerWrapper.attr(
-                "transform",
-                `translate(${mapWidth / 2}, ${mapHeight / 2})`,
-            )
-
-            zoomHandler.translateExtent([
-                [-mapWidth * 1.5, -mapHeight * 1.5],
-                [mapWidth * 1.5, mapHeight * 1.5],
-            ])
-
-            $map.call(zoomHandler.transform, zoomIdentity)
-
-            if (elMapWrapper.getBoundingClientRect().top < 0) {
-                elMapWrapper.classList.add('fullscreen')
-            }
-        })
-
         for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
             let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
             if (!el) {
@@ -331,4 +274,15 @@ function setLastFocusedEntry(focusedEntry: [number, number] | null) {
 function getLastFocusedEntry(): [number, number] | null {
     let focusedEntry = new URL(window.location.toString()).hash.slice(1).split("/").filter(Boolean)[0]
     return focusedEntry && /(\d+):(\d+)/.test(focusedEntry) ? focusedEntry.split(":").map(id => parseInt(id, 10)) as [number, number] : null
+}
+
+function getLastVisitTime() {
+    let lastVisit = localStorage.getItem('startChangelogAt') || '0'
+    let timestamp = parseInt(lastVisit, 10)
+
+    return new Date(timestamp)
+}
+
+function updateLastVisitTime() {
+    localStorage.setItem('startChangelogAt', Date.now().toString())
 }

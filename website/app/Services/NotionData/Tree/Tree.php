@@ -53,7 +53,11 @@ class Tree
     /** @return Collection<int, InterventionFocus> */
     public function interventionFocuses(): Collection
     {
-        return $this->entries()->flatMap(fn (Entry $e) => $e->interventionFocuses)->unique('id')->values();
+        return $this->entries()
+            ->flatMap(fn (Entry $e) => $e->interventionFocuses)
+            ->unique('id')
+            ->filter(fn (InterventionFocus $f) => ! $f->isMetaTechnicalFocus() && ! $f->isMetaGovernanceFocus())
+            ->values();
     }
 
     public static function buildFromPages(HydratedPages $pages): Tree
