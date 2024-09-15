@@ -72,7 +72,7 @@ class Logosnatch
 
         return new Logo(
             $decoded['format'],
-            'storage/logos/'.$decoded['path'],
+            '/storage/logos/'.$decoded['path'],
             $decoded['size'],
             $decoded['filled']
         );

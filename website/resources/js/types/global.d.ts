@@ -1,6 +1,4 @@
-import {Node} from "@/types/index"
-
-export {}
+import {Node, AppStateChangeEvent} from "@/types/index"
 
 declare global {
     interface Window {
@@ -9,5 +7,9 @@ declare global {
         filterData: Record<number, [number, number, boolean]>
         filterMetadata: [number]
         andOrMask: number
+    }
+
+    interface WindowEventMap {
+        'appstatechange': AppStateChangeEvent
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\NotionData\DataObjects;
+namespace App\Services\NotionData\Tree;
 
 class Root
 {

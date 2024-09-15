@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowMapPartialController;
 use App\Http\Controllers\ShowWelcomeController;
-use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\Models\Entrygroup;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +20,7 @@ Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-servi
 Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
 
 Route::get('/_/m', ShowMapPartialController::class);
-Route::get('/_/entries', function (Notion $notion) {
+Route::get('/_/entries', function (NotionClient $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
     $links = $tree

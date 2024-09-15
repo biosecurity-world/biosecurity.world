@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\NotionData\DataObjects;
+namespace App\Services\NotionData\Models;
 
 use App\Services\Logosnatch\Logo;
 use App\Support\IdMap;
+use Illuminate\Support\Collection;
 use Notion\Pages\Properties\RichTextProperty;
 
 class Entry
@@ -24,11 +25,12 @@ class Entry
         public string $link,
         public RichTextProperty $description,
         public string $organizationType,
-        /** @var array<InterventionFocus> */
-        public array $interventionFocuses,
-        /** @var array<Activity> */
-        public array $activities,
-        public Location $location,
+        /** @var Collection<int,InterventionFocus> */
+        public Collection $interventionFocuses,
+        /** @var Collection<int,Activity> */
+        public Collection $activities,
+        /** @var Collection<int,LocationHint> */
+        public Collection $locationHints,
         public bool $focusesOnGCBRs,
         public Logo $logo,
     ) {}
@@ -44,7 +46,7 @@ class Entry
             'International non-profit organization' => 'international NGO',
             'Media' => 'media organization',
             'Research institute / lab / network' => 'research institute',
-            default => 'organization',
+            default => throw new \RuntimeException('Unknown organization type: '.$this->organizationType),
         };
     }
 
@@ -58,55 +60,34 @@ class Entry
         $host = parse_url($this->link, PHP_URL_HOST);
 
         if (! is_string($host)) {
-            throw new \RuntimeException('Should not happen: could not parse host in entry link but entries are supposed to be always validated');
+            throw new \RuntimeException('Should not happen: could not parse host in entry link but the entry should have been validated');
         }
 
         return $host;
     }
 
-    public function hasActivity(int $id): bool
-    {
-        foreach ($this->activities as $activity) {
-            if ($activity->id === $id) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function belongsToTechnicalDomain(): bool
     {
-        foreach ($this->interventionFocuses as $focus) {
-            if ($focus->isMetaTechnicalFocus()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->interventionFocuses->contains(fn (InterventionFocus $focus) => $focus->isMetaTechnicalFocus());
     }
 
     public function belongsToGovernanceDomain(): bool
     {
-        foreach ($this->interventionFocuses as $focus) {
-            if ($focus->isMetaGovernanceFocus()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->interventionFocuses->contains(fn (InterventionFocus $focus) => $focus->isMetaGovernanceFocus());
     }
 
     public function getActivitiesBitmask(): int
     {
-        $mask = 0;
-        $offset = 0;
+        return Activity::all()->reduce(function ($mask, $id, $offset) {
+            return $mask | ($this->activities->contains('id', $id) << $offset);
+        }, 0);
+    }
 
-        foreach (Activity::$seen as $id) {
-            $mask |= $this->hasActivity($id) << $offset++;
-        }
-
-        return $mask;
+    public function getFocusesBitmask(): int
+    {
+        return InterventionFocus::all()->reduce(function ($mask, $id, $offset) {
+            return $mask | ($this->interventionFocuses->contains('id', $id) << $offset);
+        }, 0);
     }
 
     public function getDomainBitmask(): int

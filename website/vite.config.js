@@ -7,7 +7,8 @@ export default defineConfig({
             input: [
                 "resources/css/main.css",
                 "resources/css/prose.css",
-                "resources/js/map.ts"
+                "resources/js/map.ts",
+                "resources/js/render-testcase.ts",
             ],
             refresh: true,
         }),

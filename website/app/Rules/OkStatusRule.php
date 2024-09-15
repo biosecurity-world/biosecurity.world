@@ -12,10 +12,16 @@ class OkStatusRule implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
-            $fail("The $attribute is not a valid URL");
+        if (! is_string($value)) {
+            throw new \UnexpectedValueException('The value to validate must be a string.');
+        }
 
-            return;
+        if (! str_starts_with($value, 'http')) {
+            $value = 'https://'.$value;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+            throw new \InvalidArgumentException('The value to validate must be a valid URL.');
         }
 
         $baseURL = parse_url($value, PHP_URL_SCHEME).'://'.parse_url($value, PHP_URL_HOST);

@@ -1,5 +1,6 @@
 import {Filters, Node, ProcessedNode, Sector} from "@/types";
 import {
+    changeAppState,
     debug,
     eq,
     getQuadrant,
@@ -13,15 +14,14 @@ import {
     PIPI,
     shortestDistanceBetweenRectangles
 } from "@/utils"
-import {shouldFilterEntry} from "@/filters";
-import {showAppState} from "@/map";
+import {FilterMetadata, shouldFilterEntry} from "@/filters";
 
-
-export function updateMap(state: Filters) {
+export function updateMap(state: Filters, metadata: FilterMetadata) {
     let nodes: ProcessedNode[] = []
     let stack: ProcessedNode[] = []
+    console.log("here");
 
-    showAppState('loading')
+    changeAppState('loading', {})
     resetGlobalMapState()
 
     let maxDepth = 0
@@ -43,7 +43,7 @@ export function updateMap(state: Filters) {
             for (const entryId of entryIds) {
                 let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
 
-                let shouldFilter = shouldFilterEntry(state, window.filterData[entryId])
+                let shouldFilter = shouldFilterEntry(state, metadata, window.filterData[entryId])
 
                 elEntry.classList.toggle("matches-filters", !shouldFilter)
 
@@ -108,7 +108,7 @@ export function updateMap(state: Filters) {
     root.position = fitToSector(root, [{position: [0, 0], size: root!.size}])
 
     if (nodes.length === 0) {
-        showAppState('empty')
+        changeAppState('empty', {})
         return
     }
 
@@ -155,7 +155,7 @@ export function updateMap(state: Filters) {
         // }
     }
 
-    showAppState('success')
+    changeAppState('success', {})
 }
 
 export function fitToSector(node: ProcessedNode, trail: Pick<ProcessedNode, 'position' | 'size'>[], spacing: number | null = null): [number, number] {

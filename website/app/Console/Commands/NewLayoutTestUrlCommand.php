@@ -45,7 +45,7 @@ class NewLayoutTestUrlCommand extends Command
         } catch (\Throwable $e) {
         }
 
-        if (!isset($ret) || (!is_int($ret) && !is_float($ret))) {
+        if (! isset($ret) || (! is_int($ret) && ! is_float($ret))) {
             throw new \InvalidArgumentException(sprintf('Invalid expression: %s, expected a valid PHP expression that evaluates to a number.', $argument));
         }
 

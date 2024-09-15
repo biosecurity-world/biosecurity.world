@@ -16,8 +16,6 @@ class Differ
     public function __construct(
         protected string $name,
         protected string $url,
-        protected string $nodeBinary,
-        protected string $chromePath,
         public float $threshold = 0.1,
         public float $errorPercentage = 0,
         protected int $windowWidth = 1920,
@@ -40,8 +38,8 @@ class Differ
 
         $browsershot = Browsershot::url($this->url)
             ->noSandbox()
-            ->setNodeBinary('node')
-            ->setChromePath($this->chromePath)
+            ->setNodeBinary(config('services.differ.node_binary'))
+            ->setChromePath(config('services.differ.chrome_binary'))
             ->windowSize($this->windowWidth, $this->windowHeight);
 
         if ($this->browsershotConfigurationCallback) {

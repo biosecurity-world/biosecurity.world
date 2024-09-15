@@ -1,3 +1,16 @@
+export type AppState = "error" | "success" | "loading" | "empty";
+export type AppStateParameters = {
+    error: { message: string; error: unknown };
+    success: { };
+    loading: { };
+    empty: { };
+};
+export type AppStateChange = {
+    [K in AppState]: { state: K; params: AppStateParameters[K] };
+}[AppState];
+export type AppStateChangeEvent = CustomEvent<AppStateChange>;
+
+
 export type Sector = [number, number]
 
 export type Node = {
@@ -8,8 +21,6 @@ export type Node = {
     filtered: boolean
 
     entries?: number[]
-    activities?: number
-    lenses?: number
 }
 
 export type ProcessedNode = {

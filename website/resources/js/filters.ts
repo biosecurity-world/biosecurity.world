@@ -4,10 +4,14 @@ export type Filters = {
     gcbrFocus: boolean,
 }
 
+export type FilterMetadata = {
+    activityCount: number,
+}
+
 const TECHNICAL_DOMAIN = 1 << 0
 const GOVERNANCE_DOMAIN = 1 << 1
 
-export function shouldFilterEntry(state: Filters, filterData: [Filters['activities'], Filters['domains'], Filters['gcbrFocus']]): boolean {
+export function shouldFilterEntry(state: Filters, meta: FilterMetadata, filterData: [Filters['activities'], Filters['domains'], Filters['gcbrFocus']]): boolean {
     let [activities, domains, gcbrFocus] = filterData
 
     if (state.gcbrFocus && !gcbrFocus) {
@@ -25,8 +29,7 @@ export function shouldFilterEntry(state: Filters, filterData: [Filters['activiti
 
     let shouldFilter = true
 
-    let activitiesCount = window.filterMetadata[0]
-    for (let i = 0; i < activitiesCount; i++) {
+    for (let i = 0; i < meta.activityCount; i++) {
         if ((activities & (1 << i)) === 0) {
             continue
         }
@@ -75,7 +78,7 @@ export default class FiltersState<S extends Record<string, number|boolean|string
 
     setState<K extends keyof S>(id: K, value: S[K]): FiltersState<S> {
         this.setters[id](value)
-        this.setQueryParam(id as string, value)
+        this.setQueryParam(id, value)
 
         this.triggerChange(this.changeCallbacks)
 
@@ -128,10 +131,10 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         } else if (type === 'number') {
             return parseInt(value, 10) as any
         } else if (type === 'boolean') {
-            return value === 'true' as any
+            return (value === 'true') as any
+        } else {
+            throw new Error(`Unsupported type conversion for ${key.toString()}`)
         }
-
-        throw new Error(`Unsupported type conversion for ${key.toString()}`)
     }
 
     setQueryParam<K extends keyof S>(key: K, value: S[K]) {

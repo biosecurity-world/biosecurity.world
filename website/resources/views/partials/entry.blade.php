@@ -11,8 +11,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
 
-    @vite('resources/js/app.ts')
-    @vite('resources/css/app.css')
+    @vite('resources/css/main.css')
 </head>
 <body class="h-full max-w-lg border-l bg-gray-50">
 @endif
@@ -76,7 +75,6 @@
                 </a>
             </h2>
 
-            @if(!empty($entry->location))
                 <ul class="mt-1.5 flex space-x-4 overflow-x-scroll">
                     <li class="flex justify-center space-x-1.5">
                         @foreach($entry->activities as $activity)
@@ -93,7 +91,6 @@
 {{--                        <span class="text-sm text-gray-700 ml-1 truncate">{{ $entry->location }}</span>--}}
 {{--                    </li>--}}
                 </ul>
-            @endif
 
             <div class="mt-4 text-justify">
                 <x-notion-rich-text :text="$entry->description" />

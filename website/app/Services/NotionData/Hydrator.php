@@ -6,12 +6,13 @@ namespace App\Services\NotionData;
 
 use App\Rules\OkStatusRule;
 use App\Services\Logosnatch\Logosnatch;
-use App\Services\NotionData\DataObjects\Activity;
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Entry;
-use App\Services\NotionData\DataObjects\InterventionFocus;
-use App\Services\NotionData\DataObjects\Location;
+use App\Services\NotionData\Models\Activity;
+use App\Services\NotionData\Models\Category;
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\InterventionFocus;
+use App\Services\NotionData\Models\LocationHint;
 use App\Support\IdMap;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Notion\Databases\Database;
@@ -20,8 +21,13 @@ use Notion\Pages\Page;
 
 class Hydrator
 {
-    public static bool $strict = false;
+    protected static bool $strict = false;
 
+    /**
+     * The strict mode is used for checks that would be impractical to run
+     * in development (like checking if a URL is reachable), but that we
+     * want to run in production.
+     */
     public static function setStrictMode(bool $strict): void
     {
         self::$strict = $strict;
@@ -64,7 +70,7 @@ class Hydrator
 
             if (count($parents) === 0) {
                 if (! $isCategory) {
-                    $errors[] = HydrationError::fromString('Entries must belong to a category.', $page);
+                    $errors[] = new HydrationError($page, 'Entries must belong to a category.');
 
                     continue;
                 }
@@ -72,14 +78,16 @@ class Hydrator
                 try {
                     $hydrated[] = $this->categoryFromPage($page, null);
                 } catch (ValidationException $e) {
-                    $errors[] = HydrationError::fromValidationException($e, $page);
+                    foreach (Arr::flatten($e->errors(), 1) as $error) {
+                        $errors[] = new HydrationError($page, $error);
+                    }
                 }
 
                 continue;
             }
 
             if (count($parents) > 1 && $isCategory) {
-                $errors[] = HydrationError::fromString('Categories cannot have multiple parents.', $page);
+                $errors[] = new HydrationError($page, 'Categories cannot have multiple parents.');
 
                 continue;
             }
@@ -89,7 +97,9 @@ class Hydrator
                     $this->categoryFromPage($page, -1) :
                     $this->entryFromPage($page, -1);
             } catch (ValidationException $e) {
-                $errors[] = HydrationError::fromValidationException($e, $page);
+                foreach (Arr::flatten($e->errors(), 1) as $error) {
+                    $errors[] = new HydrationError($page, $error);
+                }
 
                 continue;
             }
@@ -143,8 +153,9 @@ class Hydrator
 
         $rawPage = [
             'id' => IdMap::hash($page->id),
-            'link' => ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link,
-            'raw_link' => $link,
+            'link' => self::$strict ? $link : (
+                ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link
+            ),
             'label' => $page->title()?->toString(),
             'description' => $props->getRichTextById(self::SCHEMA['description']),
             'organizationType' => $props->getSelectById(self::SCHEMA['organizationType'])->option?->name,
@@ -156,7 +167,10 @@ class Hydrator
                 fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt),
                 $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options
             ),
-            'location' => $props->getMultiSelectById(self::SCHEMA['locationHints'])->options,
+            'locationHints' => array_map(
+                fn (SelectOption $opt) => LocationHint::fromNotionOption($opt),
+                $props->getMultiSelectById(self::SCHEMA['locationHints'])->options
+            ),
             'focusesOnGCBRs' => $props->getCheckboxById(self::SCHEMA['gcbrFocus'])->checked,
         ];
 
@@ -176,7 +190,7 @@ class Hydrator
                 }
             }],
             'activities' => ['required', 'array'],
-            'location' => ['required', 'array'],
+            'locationHints' => ['required', 'array'],
         ];
 
         if (self::$strict) {
@@ -187,7 +201,6 @@ class Hydrator
                         default => $previousRules
                     }];
                 })
-                ->put('raw_link', ['required', 'string', 'url'])
                 ->toArray();
         }
 
@@ -195,7 +208,12 @@ class Hydrator
 
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
-        $data['location'] = Location::fromNotionOptions($data['location']);
+        /** @phpstan-ignore-next-line  */
+        $data['interventionFocuses'] = collect($data['interventionFocuses']);
+        /** @phpstan-ignore-next-line  */
+        $data['activities'] = collect($data['activities']);
+        /** @phpstan-ignore-next-line  */
+        $data['locationHints'] = collect($data['locationHints']);
         $data['logo'] = Logosnatch::retrieve($data['link'], targetSize: 64);
 
         return new Entry(...$data);

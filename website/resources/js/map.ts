@@ -1,45 +1,84 @@
 import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
-import {debug, throttle} from "./utils"
-import type {Node, ProcessedNode} from "@/types/index.d.ts"
+import {debug, changeAppState, throttle} from "./utils"
+import type {Node, ProcessedNode, AppStateChangeEvent} from "@/types/index.d.ts"
 import {updateMap} from "./layout"
 import FiltersStore, {Filters} from "@/filters"
 
-type AppState = "error" | "success" | "loading" | "empty"
+let elMapWrapper = document.getElementById('map-wrapper')!
+let $map = select<SVGElement, any>("#map")
 
-export function showAppState(newState: AppState): void {
-    (document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>).forEach((state: HTMLElement) => {
-        let isActive = newState === state.dataset.state
+/* Open/Close an entry, restore last focused entry */
+let elEntryLoader = document.getElementById("entry-loader")!
+let elEntryWrapper = document.getElementById("entry-wrapper")!
 
-        if (newState === 'empty') {
-            // wasEmpty = true
-        }
+async function openEntry(entry: HTMLElement) {
+    elEntryLoader.classList.add("loading-entry")
+
+    let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
+    let entryId = parseInt(entry.dataset.entry!, 10)
+
+    try {
+        let entryResponse = await fetch(`/e/${entrygroup}/${entryId}`, {headers: {"X-Requested-With": "XMLHttpRequest"}})
+
+        elEntryWrapper.innerHTML = await entryResponse.text()
+
+        setLastFocusedEntry([entrygroup, entryId])
+
+        elEntryWrapper
+            .querySelector("button.close-entry")!
+            .addEventListener("click", () => closeEntry())
+    } catch (err: unknown) {
+        changeAppState("error", { error: err, message: "An error occurred while loading the entry. Please try again later." })
+    } finally {
+        elEntryLoader.classList.remove("loading-entry")
+    }
+}
+
+function closeEntry() {
+    elEntryWrapper.innerHTML = ""
+    setLastFocusedEntry(null)
+}
+
+let lastFocusedEntry = getLastFocusedEntry()
+if (lastFocusedEntry !== null) {
+    let [entrygroup, entry] = lastFocusedEntry
+    let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
+    openEntry(el)
+}
+
+// Handle app state changes
+let stateElements = document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>
+window.addEventListener('appstatechange', (e: AppStateChangeEvent) => {
+    const { state, params } = e.detail;
+
+    switch (state) {
+        case "error":
+            let elStateContainer = document.querySelector("[data-state='error']")!
+            let reason = elStateContainer.querySelector(".reason") as HTMLParagraphElement
+
+            reason.innerHTML = params.message
+
+            console.error(params.error)
+            break;
+    }
+
+    stateElements.forEach((state: HTMLElement) => {
+        let isActive = e.detail.state === state.dataset.state
 
         state.ariaHidden = isActive ? "false" : "true"
         state.classList.toggle("state-active", isActive)
         state.classList.toggle("state-inactive", !isActive)
     })
-}
+});
 
-function showError(message: string, err: unknown) {
-    console.error(err)
-    const elStateContainer = document.querySelector("[data-state='error']")
-    if (!elStateContainer) {
-        throw new Error("No error state container found")
-    }
-
-    let reason = elStateContainer.querySelector(".reason") as HTMLParagraphElement
-
-    reason.innerHTML = message
-
-    showAppState("error")
-}
-
+/* Prepare filters */
 let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
-let technicalDomain = document.querySelector(`input[name="lens_technical"]`) as HTMLInputElement
-let governanceDomain = document.querySelector(`input[name="lens_governance"]`) as HTMLInputElement
+
+let technicalDomain = document.querySelector(`input[name="domain_technical"]`) as HTMLInputElement
+let governanceDomain = document.querySelector(`input[name="domain_governance"]`) as HTMLInputElement
+
 let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
 let gcbrFocusLabel = document.querySelector('label[for="gcbr_focus"]') as HTMLLabelElement
-
 
 const filtersStore = new FiltersStore<Filters>({
     activities: [
@@ -83,12 +122,11 @@ const filtersStore = new FiltersStore<Filters>({
         }
     ]
 })
-
 document.querySelectorAll('button.resets-filters').forEach(btn => {
     btn.addEventListener("click", e => {
-      e.stopImmediatePropagation()
-      return filtersStore.reset();
-  })
+        e.stopImmediatePropagation()
+        return filtersStore.reset();
+    })
 })
 
 activityInputs.forEach((el: HTMLInputElement) => el.addEventListener("change", () => filtersStore.syncFilter('activities')))
@@ -106,11 +144,9 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', e =>
 })
 
 
+
 ;(async function () {
     try {
-        let elMapWrapper = document.getElementById('map-wrapper')!
-
-        let $map = select<SVGElement, any>("#map")
         let mapContentRes = await fetch('/_/m')
         let mapContent = await mapContentRes.text()
 
@@ -119,70 +155,28 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', e =>
         let elEntrygroupContainer = document.getElementById("entrygroups")!
         let elsEntryButtons = document.querySelectorAll("button[data-entry]") as NodeListOf<HTMLButtonElement>
 
-        function highlightEntriesWithId(id: number) {
+        let highlightEntries = (commonEntryId: number) => {
             let instances = 0
 
             elsEntryButtons.forEach((btn: HTMLButtonElement) => {
-                let isActive = btn.dataset.entry === id.toString()
+                let isActive = btn.dataset.entry === commonEntryId.toString()
                 btn.classList.toggle("active", isActive)
                 instances += isActive ? 1 : 0
             })
 
             elEntrygroupContainer.classList.toggle("hovered", instances > 1)
         }
-
-        function removeHighlight() {
-            elEntrygroupContainer.classList.remove("hovered")
-        }
+        let removeHighlight = () => elEntrygroupContainer.classList.remove("hovered")
 
         elsEntryButtons.forEach((el: HTMLButtonElement) => {
             let entryId = parseInt(el.dataset.entry!, 10)
 
             el.addEventListener("click", () => openEntry(el))
-            el.addEventListener("mouseenter", () => highlightEntriesWithId(entryId))
+            el.addEventListener("mouseenter", () => highlightEntries(entryId))
             el.addEventListener("mouseleave", () => removeHighlight())
-            el.addEventListener("focus", () => highlightEntriesWithId(entryId))
+            el.addEventListener("focus", () => highlightEntries(entryId))
             el.addEventListener("blur", () => removeHighlight())
         })
-
-        // Handle hiding entries that do not match current filters
-        let elEntryLoader = document.getElementById("entry-loader")!
-        let elEntryWrapper = document.getElementById("entry-wrapper")!
-
-        function openEntry(entry: HTMLElement) {
-            elEntryLoader.classList.add("loading-entry")
-
-            let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
-            let entryId = parseInt(entry.dataset.entry!, 10)
-
-            fetch(`/e/${entrygroup}/${entryId}`, {headers: {"X-Requested-With": "XMLHttpRequest"}})
-                .then((response: Response) => response.text())
-                .then((html: string) => {
-                    elEntryWrapper.innerHTML = html
-
-                    setLastFocusedEntry([entrygroup, entryId])
-
-                    elEntryWrapper
-                        .querySelector("button.close-entry")!
-                        .addEventListener("click", () => closeEntry())
-                })
-                .catch((err: unknown) => {
-                    showError("An error occurred while loading the entry. Please try again later.", err,)
-                })
-                .finally(() => elEntryLoader.classList.remove("loading-entry"))
-        }
-
-        function closeEntry() {
-            elEntryWrapper.innerHTML = ""
-            setLastFocusedEntry(null)
-        }
-
-        let lastFocusedEntry = getLastFocusedEntry()
-        if (lastFocusedEntry !== null) {
-            let [entrygroup, entry] = lastFocusedEntry
-            let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
-            openEntry(el)
-        }
 
         let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
         let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
@@ -219,7 +213,7 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', e =>
             elMapWrapper.classList.add('fullscreen')
         }
 
-        const handleMovement = (direction: number) => {
+        let handleMovement = (direction: number) => {
             if (!elMapWrapper.classList.contains('fullscreen')) {
                 return;
             }
@@ -305,17 +299,12 @@ document.getElementById("toggle-all-activities")!.addEventListener('click', e =>
         filtersStore.onChange((state) => {
             debug().clear()
 
-            updateMap(state)
+            updateMap(state, { activityCount: activityInputs.length })
 
             debug().flush($centerWrapper)
         }, true)
     } catch (err: unknown) {
-        console.error(err)
-
-        showError(
-            "An error occurred while loading the map. Please try again later.",
-            err,
-        )
+        changeAppState("error", { error: err, message: "An error occurred while loading the map. Please try again later." })
     }
 })()
 
@@ -328,6 +317,6 @@ function setLastFocusedEntry(focusedEntry: [number, number] | null) {
 }
 
 function getLastFocusedEntry(): [number, number] | null {
-    let focusedEntry = new URL(window.location.toString()).hash.split("/").shift()
+    let focusedEntry = new URL(window.location.toString()).hash.slice(1).split("/").filter(Boolean)[0]
     return focusedEntry && /(\d+):(\d+)/.test(focusedEntry) ? focusedEntry.split(":").map(id => parseInt(id, 10)) as [number, number] : null
 }

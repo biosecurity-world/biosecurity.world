@@ -1,7 +1,12 @@
 import {Selection} from "d3"
-import {ProcessedNode, Sector} from "@/types"
+import {AppState, AppStateChange, AppStateParameters, ProcessedNode, Sector} from "@/types"
 import {fitToSector} from "@/layout"
 
+export function changeAppState<T extends AppState>(state: T, params: AppStateParameters[T]) {
+    window.dispatchEvent(new CustomEvent<AppStateChange>('appstatechange', {
+        detail: { state, params }
+    }));
+}
 
 // export const IN_PRODUCTION = import.meta.env.PROD === true
 

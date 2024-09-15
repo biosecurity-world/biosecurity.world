@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\NotionData\DataObjects\Activity;
-use App\Services\NotionData\DataObjects\Entry;
-use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\Entrygroup;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\Tree;
 use Carbon\Carbon;
@@ -13,7 +12,7 @@ use Illuminate\Contracts\View\View;
 
 class ShowWelcomeController
 {
-    public function __invoke(Notion $notion): View
+    public function __invoke(NotionClient $notion): View
     {
         $tree = Tree::buildFromPages($notion->pages());
 
@@ -43,7 +42,6 @@ class ShowWelcomeController
                     $entry->focusesOnGCBRs,
                 ]];
             }),
-            'filterMetadata' => [Activity::totalSeen()],
             'databaseUrl' => $notion->databaseUrl(),
             'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
             'nodes' => $nodes,

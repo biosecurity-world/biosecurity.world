@@ -2,14 +2,13 @@
 
 namespace App\Services\NotionData\Tree;
 
-use App\Services\NotionData\DataObjects\Activity;
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Entry;
-use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\DataObjects\InterventionFocus;
-use App\Services\NotionData\DataObjects\Root;
 use App\Services\NotionData\HydratedPages;
 use App\Services\NotionData\HydrationError;
+use App\Services\NotionData\Models\Activity;
+use App\Services\NotionData\Models\Category;
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\Entrygroup;
+use App\Services\NotionData\Models\InterventionFocus;
 use App\Support\IdMap;
 use Exception;
 use Illuminate\Support\Arr;
@@ -48,17 +47,7 @@ class Tree
     /** @return Collection<int, Activity> */
     public function activities(): Collection
     {
-        $activities = $this->entries()->flatMap(fn (Entry $e) => $e->activities)->unique('id')->values();
-
-        return collect(Activity::$seen)->map(function (int $id) use ($activities) {
-            $activity = $activities->first(fn (Activity $a) => $a->id === $id);
-
-            if (is_null($activity)) {
-                throw new Exception("Should not happen: Activity with id `$id` not found.");
-            }
-
-            return $activity;
-        });
+        return $this->entries()->flatMap(fn (Entry $e) => $e->activities)->unique('id')->values();
     }
 
     /** @return Collection<int, InterventionFocus> */
@@ -126,7 +115,7 @@ class Tree
             $node = self::getNode($tree, $id, $parentId);
 
             if (! $parentToChildrenMap->has($id) && $tree->lookup[$id] instanceof Category) {
-                $tree->errors[] = HydrationError::fromString('Category is empty.', $tree->lookup[$id]);
+                $tree->errors[] = new HydrationError($tree->lookup[$id], 'Category is empty.');
 
                 return [];
             }

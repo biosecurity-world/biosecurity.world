@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Contracts\View\View;
 
 class ShowEntryPartialController
 {
-    public function __invoke(Notion $notion, int $id, int $entryId): View
+    public function __invoke(NotionClient $notion, int $id, int $entryId): View
     {
         $tree = Tree::buildFromPages($notion->pages());
 

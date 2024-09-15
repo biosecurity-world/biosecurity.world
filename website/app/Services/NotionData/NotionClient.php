@@ -8,7 +8,7 @@ use Notion\Databases\Database;
 use Notion\Notion as NotionWrapper;
 use Notion\Pages\Page;
 
-class Notion
+class NotionClient
 {
     protected NotionWrapper $client;
 

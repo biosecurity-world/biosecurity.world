@@ -6,7 +6,7 @@
             window.testCase = @js($case)
         </script>
 
-        @vite(["resources/js/tests/helpers/e2e.ts"])
+        @vite(['resources/js/render-testcase.ts'])
     </x-slot:head>
 
     <svg width="100%" height="100%" id="map">

@@ -46,19 +46,23 @@
 #map-wrapper.fullscreen {
     @apply absolute inset-0 px-0 bg-white;
 
-    &.rounded-l-3xl {
+    & .rounded-l-3xl {
         border-bottom-left-radius: 0 !important;
         border-top-left-radius: 0 !important;
     }
 
-    &.rounded-r-3xl {
+    & .rounded-r-3xl {
         border-bottom-right-radius: 0 !important;
         border-top-right-radius: 0 !important;
     }
 
-    &.rounded-tr-3xl {
+    & .rounded-tr-3xl {
         border-top-right-radius: 0 !important;
     }
+    & aside {
+        @apply border-y-0;
+    }
+
 }
 
 #map-wrapper:not(.fullscreen) {
@@ -74,24 +78,24 @@
 }
 
 /** Filters: Domain */
-input[name^="lens_"]:checked + label > .check {
+input[name^="domain_"]:checked + label > .check {
     opacity: 1;
 }
 
-input[name^="lens_"]:not(:checked) + label > .check {
+input[name^="domain_"]:not(:checked) + label > .check {
     opacity: 0;
 }
 
-input[name^="lens_"]:checked + label[for="lens_technical"] {
+input[name="domain_technical"]:checked + label[for="domain_technical"] {
     @apply border-technical;
 }
 
-input[name^="lens_"]:checked + label[for="lens_governance"] {
+input[name="domain_governance"]:checked + label[for="domain_governance"] {
     @apply border-governance;
 }
 
-input[name^="lens_"]:checked + label[for^="lens_"] > .at-technical,
-input[name^="lens_"]:checked + label[for^="lens_"] > .at-governance {
+input[name^="domain_"]:checked + label[for^="domain_"] > .at-technical,
+input[name^="domain_"]:checked + label[for^="domain_"] > .at-governance {
     color: white;
 }
 
@@ -164,7 +168,7 @@ label[for^="activity_"].inactive {
 }
 
 .intervention-type {
-    @apply text-xs tracking-tight text-gray-500 font-semibold px-3
+    @apply text-xs tracking-tight text-gray-500 font-semibold -mb-1.5
 }
 
 

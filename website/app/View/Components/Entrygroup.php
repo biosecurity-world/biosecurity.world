@@ -2,8 +2,8 @@
 
 namespace App\View\Components;
 
-use App\Services\NotionData\DataObjects\Entry;
-use App\Services\NotionData\DataObjects\Entrygroup as EntrygroupData;
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\Entrygroup as EntrygroupData;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;

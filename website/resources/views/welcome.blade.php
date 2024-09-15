@@ -3,7 +3,6 @@
     <script>
         window.nodes = @json($nodes);
         window.filterData = @json($filterData);
-        window.filterMetadata = @json($filterMetadata);
     </script>
 
     @vite('resources/js/map.ts')
@@ -99,18 +98,18 @@
 
                 <div class="shadow-sm rounded-xl mt-2 bg-white">
                     <div>
-                        <input type="checkbox" name="lens_technical" id="lens_technical" value="technical"
+                        <input type="checkbox" name="domain_technical" id="domain_technical" value="technical"
                                class="sr-only peer">
-                        <label for="lens_technical"
+                        <label for="domain_technical"
                                class="py-1.5 peer-checked:bg-technical hover:bg-gray-50 transition rounded-t-xl px-4 flex items-center border peer-focus:ring-2 peer-focus:ring-technical peer-focus:ring-offset-2">
                             <x-at-technical class="flex-grow"/>
                             <x-heroicon-m-check class="size-5 text-white check"/>
                         </label>
                     </div>
                     <div>
-                        <input type="checkbox" name="lens_governance" id="lens_governance" value="governance"
+                        <input type="checkbox" name="domain_governance" id="domain_governance" value="governance"
                                class="sr-only peer">
-                        <label for="lens_governance"
+                        <label for="domain_governance"
                                class="py-1.5 peer-checked:bg-governance hover:bg-gray-50 transition rounded-b-xl px-4 flex items-center border border-t-0 peer-focus:ring-2 peer-focus:ring-governance peer-focus:ring-offset-2">
                             <x-at-governance class="flex-grow"/>
                             <x-heroicon-m-check class="size-5 text-white check"/>

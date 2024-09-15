@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\NotionData\DataObjects;
+namespace App\Services\NotionData\Models;
 
 class Category
 {
