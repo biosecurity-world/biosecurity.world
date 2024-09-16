@@ -56,7 +56,6 @@ class Tree
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->interventionFocuses)
             ->unique('id')
-            ->filter(fn (InterventionFocus $f) => ! $f->isMetaTechnicalFocus() && ! $f->isMetaGovernanceFocus())
             ->values();
     }
 

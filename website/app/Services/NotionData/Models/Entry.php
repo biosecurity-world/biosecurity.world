@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\NotionData\Models;
 
 use App\Services\Logosnatch\Logo;
+use App\Services\NotionData\Enums\DomainEnum;
 use App\Support\IdMap;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rules\In;
 use Notion\Pages\Properties\RichTextProperty;
 
 class Entry
@@ -25,6 +27,8 @@ class Entry
         public string $link,
         public RichTextProperty $description,
         public string $organizationType,
+        /** @var Collection<int,DomainEnum> */
+        public Collection $domains,
         /** @var Collection<int,InterventionFocus> */
         public Collection $interventionFocuses,
         /** @var Collection<int,Activity> */
@@ -66,16 +70,6 @@ class Entry
         return $host;
     }
 
-    public function belongsToTechnicalDomain(): bool
-    {
-        return $this->interventionFocuses->contains(fn (InterventionFocus $focus) => $focus->isMetaTechnicalFocus());
-    }
-
-    public function belongsToGovernanceDomain(): bool
-    {
-        return $this->interventionFocuses->contains(fn (InterventionFocus $focus) => $focus->isMetaGovernanceFocus());
-    }
-
     public function getActivitiesBitmask(): int
     {
         return Activity::all()->reduce(function ($mask, $id, $offset) {
@@ -92,6 +86,8 @@ class Entry
 
     public function getDomainBitmask(): int
     {
-        return ($this->belongsToTechnicalDomain() ? 1 : 0) | ($this->belongsToGovernanceDomain() ? 1 : 0) << 1;
+        return $this->domains->reduce(function ($mask, DomainEnum $domain, $offset) {
+            return $mask | $domain->mask();
+        }, 0);
     }
 }

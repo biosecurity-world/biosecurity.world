@@ -6,6 +6,7 @@ namespace App\Services\NotionData;
 
 use App\Rules\OkStatusRule;
 use App\Services\Logosnatch\Logosnatch;
+use App\Services\NotionData\Enums\DomainEnum;
 use App\Services\NotionData\Models\Activity;
 use App\Services\NotionData\Models\Category;
 use App\Services\NotionData\Models\Entry;
@@ -151,6 +152,17 @@ class Hydrator
 
         $link = $props->getUrlById(self::SCHEMA['link'])->url;
 
+        $interventionFocuses = $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options;
+        $domains = [];
+        $interventionFocuses = array_filter($interventionFocuses, function (SelectOption $opt) use (&$domains) {
+            if ($domain = DomainEnum::tryFrom($opt->id)) {
+                $domains[] = $domain;
+                return false;
+            }
+
+            return true;
+        });
+
         $rawPage = [
             'id' => IdMap::hash($page->id),
             'link' => self::$strict ? $link : (
@@ -165,8 +177,9 @@ class Hydrator
             ),
             'interventionFocuses' => array_map(
                 fn (SelectOption $opt) => InterventionFocus::fromNotionOption($opt),
-                $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options
+                $interventionFocuses
             ),
+            'domains' => $domains,
             'locationHints' => array_map(
                 fn (SelectOption $opt) => LocationHint::fromNotionOption($opt),
                 $props->getMultiSelectById(self::SCHEMA['locationHints'])->options
@@ -181,14 +194,12 @@ class Hydrator
             'focusesOnGCBRs' => ['required', 'boolean'],
             'link' => ['required', 'string', 'url'],
             'organizationType' => ['required', 'string'],
-            'interventionFocuses' => ['required', 'array', function ($attribute, array $value, $fail) {
-                $isTechnical = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaTechnicalFocus());
-                $isGovernance = collect($value)->contains(fn (InterventionFocus $focus) => $focus->isMetaGovernanceFocus());
-
-                if ((! $isTechnical && ! $isGovernance)) {
+            'domains' => ['required', 'array', function ($attribute, $value, $fail) {
+                if (count($value) === 0 || count($value) > 2) {
                     $fail('The entry must have at least either a [TECHNICAL] or [GOVERNANCE] focus, or both');
                 }
             }],
+            'interventionFocuses' => ['array'],
             'activities' => ['required', 'array'],
             'locationHints' => ['required', 'array'],
         ];
@@ -208,6 +219,8 @@ class Hydrator
 
         $data['createdAt'] = $page->createdTime;
         $data['parentId'] = $parentId;
+        /** @phpstan-ignore-next-line  */
+        $data['domains'] = collect($data['domains']);
         /** @phpstan-ignore-next-line  */
         $data['interventionFocuses'] = collect($data['interventionFocuses']);
         /** @phpstan-ignore-next-line  */

@@ -4,7 +4,7 @@
         <foreignObject width="100%" height="100%" class="off-screen pointer-events-none"
                        aria-hidden="true"
                        data-node="{{ $tree->rootNodeId }}">
-            <div class="text-2xl text-emerald-900 font-display inline-block px-2">
+            <div class="text-2xl text-primary-900 font-display inline-block px-2">
                 Biosecurity
             </div>
         </foreignObject>

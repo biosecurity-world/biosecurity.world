@@ -4,7 +4,7 @@ declare global {
     interface Window {
         nodes: Node[]
         bitmaskLength: number
-        filterData: Record<number, [number, number, boolean]>
+        filterData: Record<number, [number, number, number, boolean]>
         filterMetadata: [number]
         andOrMask: number
     }

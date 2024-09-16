@@ -6,24 +6,21 @@
     font-weight: 700;
     unicode-range: U+0020-007F;
 }
-@font-face {
-    font-family: 'Nunito';
-    font-display: swap;
-    font-weight: 500;
-    src: local("Nunito"), url(../fonts/Nunito-Regular.woff2) format('woff2');
-    unicode-range: U+0020-007F;
-}
-@font-face {
-    font-family: 'Nunito';
-    font-display: optional;
-    font-weight: 700;
-    src: url(../fonts/Nunito-Bold.woff2) format('woff2');
-    unicode-range: U+0020-007F;
-}
 
-fieldset {
-    border: 0;
-}
+/*@font-face {*/
+/*    font-family: 'Nunito';*/
+/*    font-display: swap;*/
+/*    font-weight: 500;*/
+/*    src: local("Nunito"), url(../fonts/Nunito-Regular.woff2) format('woff2');*/
+/*    unicode-range: U+0020-007F;*/
+/*}*/
+/*@font-face {*/
+/*    font-family: 'Nunito';*/
+/*    font-display: optional;*/
+/*    font-weight: 700;*/
+/*    src: url(../fonts/Nunito-Bold.woff2) format('woff2');*/
+/*    unicode-range: U+0020-007F;*/
+/*}*/
 
 .off-screen {
     position: absolute !important;
@@ -47,8 +44,13 @@ fieldset {
     @apply pointer-events-none opacity-0;
 }
 
+#map-wrapper:not(.fullscreen) {
+    transform: translateY(-10em) scale(0.9);
+}
+
 #map-wrapper.fullscreen {
-    @apply absolute inset-0 px-0 ;
+    @apply absolute inset-0;
+    transform: translateY(0em) scale(1);
 
     & .rounded-l-3xl {
         border-bottom-left-radius: 0 !important;
@@ -63,14 +65,11 @@ fieldset {
     & .rounded-tr-3xl {
         border-top-right-radius: 0 !important;
     }
+
     & aside {
         @apply border-y-0;
     }
 
-}
-
-#map-wrapper:not(.fullscreen) {
-    @apply 2xl:px-36 -mt-40;
 }
 
 #entry-wrapper:not(:has(> .entry)) {
@@ -82,44 +81,27 @@ fieldset {
 }
 
 /** Filters: Domain */
-input[name^="domain_"]:checked + label > .check {
+.domain-checkbox:checked + label > .check {
     opacity: 1;
 }
 
-input[name^="domain_"]:not(:checked) + label > .check {
+.domain-checkbox:not(:checked) + label > .check {
     opacity: 0;
 }
 
-input[name="domain_technical"]:checked + label[for="domain_technical"] {
-    @apply border-technical;
+.domain-checkbox:checked + label > .at-technical,
+.domain-checkbox:checked + label > .at-governance {
+    color: white
 }
 
-input[name="domain_governance"]:checked + label[for="domain_governance"] {
-    @apply border-governance;
-}
-
-input[name^="domain_"]:checked + label[for^="domain_"] > .at-technical,
-input[name^="domain_"]:checked + label[for^="domain_"] > .at-governance {
-    color: white;
-}
-
-/** Filters: Activity */
-label[for^="activity_"].inactive {
+/** Filters: Activities and filters */
+.checkbox-as-pill:not(:checked) + label {
     background: #ffffff !important;
     color: theme("colors.gray.500") !important;
 }
 
-/** Navbar */
-.navlink {
-    @apply  underline lg:no-underline mr-4 lg:mr-0 lg:px-2  lg:hover:underline rounded-xl focus:outline-none;
-}
-
-.navlink:not(.inverted) {
-    @apply lg:hover:bg-emerald-50 lg:focus:bg-emerald-50
-}
-
-.navlink.inverted {
-    @apply text-white lg:hover:bg-white/20 lg:focus:bg-white/20
+.focuses-list:hover:not(:has(* :hover)) {
+    @apply border-primary-700;
 }
 
 /** Handle the hover logic on entries */
@@ -131,34 +113,33 @@ label[for^="activity_"].inactive {
     @apply border border-primary-600;
 }
 
-#entrygroups.hovered .intervention-type:not(:has(+ div > [data-sum].active)) {
+#entrygroups.hovered .org-type:not(:has(+ div > [data-sum].active)) {
     opacity: 0.25;
 
 }
 
-.intervention-type:not(:has(+ div > .matches-filters)) {
+.org-type:not(:has(+ div > .matches-filters)) {
     display: none;
     margin: 0 !important;
 }
 
-/** Generic toggle component */
-[data-toggle="off"] {
+.big-toggle:not(:checked) + label {
     @apply bg-gray-200;
+
+    & > span {
+        @apply translate-x-0;
+    }
 }
 
-[data-toggle="off"] > span {
-    @apply translate-x-0;
-}
-
-[data-toggle="on"] {
+.big-toggle:checked + label {
     @apply bg-primary-600;
+
+    & > span {
+        @apply translate-x-full;
+    }
 }
 
-[data-toggle="on"] > span {
-    @apply translate-x-5;
-}
-
-/** ... */
+/** ...? */
 [data-entry]:not(.matches-filters) {
     display: none;
 }
@@ -167,18 +148,8 @@ label[for^="activity_"].inactive {
     display: none;
 }
 
-.intervention-type:has(+ div > .matches-filters) {
-    @apply mt-2
-}
-
-.intervention-type {
-    @apply text-xs tracking-tight text-gray-500 font-semibold -mb-1.5
-}
-
-
-#entry-loader {
-    opacity: 0;
-    transition: opacity 500ms ease-in;
+.org-type:has(+ div > .matches-filters) {
+    @apply mt-2;
 }
 
 #entry-loader.loading-entry {

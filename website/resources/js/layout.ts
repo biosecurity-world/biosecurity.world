@@ -37,21 +37,25 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 
         if (node.od === 0) {
             let entryIds = node.entries!
-            let filteredIds = []
+            let matchingEntries = []
 
             for (const entryId of entryIds) {
-                let elEntry = document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`) as HTMLButtonElement
+                let filterData = window.filterData[entryId]
+                let shouldFilter = shouldFilterEntry(state, {
+                    activities: filterData[0],
+                    focuses: filterData[1],
+                    domains: filterData[2],
+                    gcbrFocus: filterData[3],
+                }, metadata)
 
-                let shouldFilter = shouldFilterEntry(state, metadata, window.filterData[entryId])
-
-                elEntry.classList.toggle("matches-filters", !shouldFilter)
+                document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!.classList.toggle("matches-filters", !shouldFilter)
 
                 if (!shouldFilter) {
-                    filteredIds.push(entryId)
+                    matchingEntries.push(entryId)
                 }
             }
 
-            node.filtered = filteredIds.length === 0
+            node.filtered = matchingEntries.length === 0
         }
 
         if (!(node.el instanceof SVGForeignObjectElement)) {

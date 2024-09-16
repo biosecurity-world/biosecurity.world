@@ -156,33 +156,6 @@ export function shortestDistanceBetweenRectangles(
     return Math.sqrt(dx * dx + dy * dy)
 }
 
-export function throttle<T extends (...args: any[]) => void>(
-    callback: T,
-    wait: number,
-    immediate: boolean = false
-): (...args: Parameters<T>) => void {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    let initialCall = true;
-
-    return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
-        const callNow = immediate && initialCall;
-        const next = () => {
-            callback.apply(this, args);
-            timeout = null;
-        };
-
-        if (callNow) {
-            initialCall = false;
-            next();
-        }
-
-        if (!timeout) {
-            timeout = setTimeout(next, wait);
-        }
-    };
-}
-
-
 export function getDebugLabel(node: ProcessedNode): string {
     if (node.el.querySelector('.entrygroup') !== null) {
         return 'Entrygroup'
@@ -191,20 +164,22 @@ export function getDebugLabel(node: ProcessedNode): string {
     return (node.el.querySelector('div > span') as HTMLSpanElement).innerText
 }
 
-export function wrapClickAndDoubleClickEvent(
+export function trapClickAndDoubleClick(
     singleClickHandler: (event: MouseEvent) => void,
-    doubleClickHandler: (event: MouseEvent) => void
+    doubleClickHandler: (event: MouseEvent) => void,
 ) {
-    let timeout: number | null = null
-
     return function(e: MouseEvent) {
         e.preventDefault()
-
         if (e.detail === 1) {
-            timeout = setTimeout(() => singleClickHandler(e), 175)
-        } else {
-            clearTimeout(timeout as number)
+            singleClickHandler(e)
+        } else if (e.detail === 2) {
+            singleClickHandler(e)
             doubleClickHandler(e)
         }
     }
+}
+
+export function flip(num: number, n: number): number {
+    // This is more semantically correct than ~num.
+    return num ^ (1 << n) - 1
 }

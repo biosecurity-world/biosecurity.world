@@ -1,47 +1,16 @@
-import {D3ZoomEvent, select, zoom, zoomIdentity} from "d3"
-import {debug, changeAppState, throttle, wrapClickAndDoubleClickEvent} from "./utils"
-import type {Node, ProcessedNode, AppStateChangeEvent} from "@/types/index.d.ts"
+import {D3ZoomEvent, select, zoom} from "d3"
+import {changeAppState, debug, flip, trapClickAndDoubleClick} from "./utils"
+import type {AppStateChangeEvent, Node, ProcessedNode} from "@/types/index.d.ts"
 import {updateMap} from "./layout"
 import FiltersStore, {Filters} from "@/filters"
 
 let $map = select<SVGElement, any>("#map")
 let elMapWrapper = document.getElementById('map-wrapper')!
 
-let lastScrollTop = 0
-
-// element.requestFullscreen() is not available in Safari
-// so we implement our own almost "fullscreen" mode.
-function toggleFullscreen() {
-    let isFullscreen = elMapWrapper.classList.contains('fullscreen')
-
-    document.getElementById('not-fullscreen')!.classList.toggle('hidden', !isFullscreen)
-    document.getElementById('is-fullscreen')!.classList.toggle('hidden', isFullscreen)
-
-    if (!isFullscreen) {
-        lastScrollTop = window.scrollY
-        elMapWrapper.classList.add('fullscreen')
-    } else {
-        elMapWrapper.classList.remove('fullscreen')
-        elMapWrapper.scrollIntoView()
-        window.scrollTo(0, lastScrollTop)
-    }
-}
-document.getElementById('toggle-fullscreen')!.addEventListener('click', toggleFullscreen)
-window.addEventListener('keydown', (e) => {
-    if (
-        e.key === "f" ||
-        (e.key === "Escape" && elMapWrapper.classList.contains('fullscreen'))
-    ) {
-        e.preventDefault()
-        toggleFullscreen()
-    }
-})
-
-/* Open/Close an entry, restore last focused entry */
+/* Open and close a specific entry  */
 let elEntryLoader = document.getElementById("entry-loader")!
 let elEntryWrapper = document.getElementById("entry-wrapper")!
-
-async function openEntry(entry: HTMLElement) {
+async function openEntry(entry: HTMLElement): Promise<void> {
     elEntryLoader.classList.add("loading-entry")
 
     let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
@@ -63,20 +32,56 @@ async function openEntry(entry: HTMLElement) {
         elEntryLoader.classList.remove("loading-entry")
     }
 }
-
-function closeEntry() {
+function closeEntry(): void {
     elEntryWrapper.innerHTML = ""
     setLastFocusedEntry(null)
 }
-
-let lastFocusedEntry = getLastFocusedEntry()
-if (lastFocusedEntry !== null) {
-    let [entrygroup, entry] = lastFocusedEntry
-    let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
-    openEntry(el)
+function hasEntryOpen(): boolean {
+    return elEntryWrapper.children.length > 0
 }
 
-// Handle app state changes
+
+/* Fullscreen mode */
+{
+    let lastScrollTop = 0
+
+    // element.requestFullscreen() is not available in Safari
+    // so we implement a fake fullscreen mode.
+    function toggleFullscreen() {
+        let isFullscreen = elMapWrapper.classList.contains("fullscreen")
+
+        document.getElementById("not-fullscreen")!.classList.toggle("hidden", !isFullscreen)
+        document.getElementById("is-fullscreen")!.classList.toggle("hidden", isFullscreen)
+
+        if (!isFullscreen) {
+            lastScrollTop = window.scrollY
+            elMapWrapper.classList.add("fullscreen")
+        } else {
+            elMapWrapper.classList.remove("fullscreen")
+            elMapWrapper.scrollIntoView()
+            window.scrollTo(0, lastScrollTop)
+        }
+    }
+
+    document.getElementById("toggle-fullscreen")!.addEventListener("click", toggleFullscreen)
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (hasEntryOpen()) {
+                closeEntry()
+            } else if (elMapWrapper.classList.contains("fullscreen")) {
+                e.preventDefault()
+                toggleFullscreen()
+            }
+        }
+
+        if (e.key === "f") {
+            e.preventDefault()
+            toggleFullscreen()
+        }
+    })
+}
+
+/* Handle app state changes */
 let stateElements = document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>
 window.addEventListener('appstatechange', (e: AppStateChangeEvent) => {
     const { state, params } = e.detail;
@@ -102,86 +107,161 @@ window.addEventListener('appstatechange', (e: AppStateChangeEvent) => {
 });
 
 /* Prepare filters */
-let activityInputs = document.querySelectorAll(`input[name^="activity_"]`) as NodeListOf<HTMLInputElement>
-let activityInputLabels = document.querySelectorAll(`label[for^="activity_"]`) as NodeListOf<HTMLLabelElement>
+let activityInputs = document.querySelectorAll(`.activity-checkbox`) as NodeListOf<HTMLInputElement>
+let domainInputs = document.querySelectorAll(".domain-checkbox") as NodeListOf<HTMLInputElement>
 
-let technicalDomain = document.querySelector(`input[name="domain_technical"]`) as HTMLInputElement
-let governanceDomain = document.querySelector(`input[name="domain_governance"]`) as HTMLInputElement
+let focusInputs = document.querySelectorAll(`.focus-checkbox`) as NodeListOf<HTMLInputElement>
+let focusesWrapper = document.querySelectorAll("[id^='focuses_wrapper_']") as NodeListOf<HTMLElement>
 
-let gcbrFocus = document.querySelector(`input[name="gcbr_focus"]`) as HTMLInputElement
-let gcbrFocusLabel = document.querySelector('label[for="gcbr_focus"]') as HTMLLabelElement
-
+let gcbrFocus = document.querySelector(".has-gcbr-focus") as HTMLInputElement
 const filtersStore = new FiltersStore<Filters>({
     activities: [
-        () => {
-            let mask = 0, offset = 0;
-
-            activityInputs.forEach((el) => mask |= (el.checked ? 1 : 0) << offset++)
-
-            return mask
-        },
-        (mask: number) => {
-            for (let i = 0; i < activityInputs.length; i++) {
-                let checked = (mask & (1 << i)) !== 0
-                activityInputs[i].checked = checked
-                activityInputLabels[i].classList.toggle("inactive", !checked)
-            }
-        }
+        () => Array.from(activityInputs).reduce((mask, el, k: number) => (mask | +el.checked << k), 0),
+        (mask: number) => activityInputs.forEach((activityInput, k) => {
+            activityInput.checked = (mask & (1 << k)) !== 0
+        })
     ],
     domains: [
-        () => {
-            let mask = 0, offset = 0;
-
-            mask |= (technicalDomain.checked ? 1 : 0) << offset++
-            mask |= (governanceDomain.checked ? 1 : 0) << offset++
-
-            return mask
-        },
-        (mask: number) => {
-            let offset = 0
-
-            technicalDomain.checked = (mask & (1 << offset++)) !== 0
-            governanceDomain.checked = (mask & (1 << offset)) !== 0
-        }
+        () => Array.from(domainInputs).reduce((mask, el, k) => (mask | +el.checked << k), 0),
+        (mask: number) => domainInputs.forEach((domainInput, k) => domainInput.checked = (mask & (1 << k)) !== 0)
+    ],
+    focuses: [
+        () => Array.from(focusInputs).reduce((mask, el,) => {
+            let k = parseInt(el.dataset.globalOffset!, 10)
+            return (mask | +el.checked << k)
+        }, 0),
+        (mask: number) => focusInputs.forEach((el) => {
+            let k = parseInt(el.dataset.globalOffset!, 10)
+            el.checked = (mask & (1 << k)) !== 0
+        })
     ],
     gcbrFocus: [
         () => gcbrFocus.checked,
-        (checked: boolean) => {
-            gcbrFocus.checked = checked
-            gcbrFocusLabel.dataset.toggle = checked ? "on" : "off"
-        }
-    ]
+        (checked: boolean) => gcbrFocus.checked = checked
+    ],
 })
-document.querySelectorAll('button.resets-filters').forEach(btn => {
-    btn.addEventListener("click", e => {
+
+for (const el of document.querySelectorAll('button.resets-filters')) {
+    el.addEventListener("click", e => {
         e.stopImmediatePropagation()
         return filtersStore.reset();
     })
-})
-
-activityInputs.forEach((el: HTMLInputElement) => {
-    el.addEventListener("change", e => filtersStore.syncFilter("activities"))
-    el.addEventListener('click', wrapClickAndDoubleClickEvent(
-        (preventedEvent) => {
+}
+for (const el of activityInputs) {
+    el.addEventListener("change", () => filtersStore.syncFilter("activities"))
+    el.addEventListener('click', trapClickAndDoubleClick(
+        () => {
             el.checked = !el.checked
             filtersStore.syncFilter("activities")
         },
-        (preventedEvent) => {
+        () => {
             let mask = 1 << Array.from(activityInputs).indexOf(el)
 
             // The double-clicked activity is already the only one active, so we flip all of them
             if (filtersStore.getState('activities') === mask) {
-                mask = ~mask
+                mask = flip(mask, activityInputs.length)
             }
 
             filtersStore.setState('activities', mask)
         }
     ))
+}
+for (const el of domainInputs) {
+    el.addEventListener("change", () => filtersStore.syncFilter("domains"))
+}
+gcbrFocus.addEventListener("change", () => filtersStore.syncFilter('gcbrFocus'))
+
+let masterCheckboxes: Record<string, HTMLInputElement> = {}
+let focusesLabels: Record<string, HTMLLabelElement> = {}
+let groupedFocuses: Map<HTMLElement, NodeListOf<HTMLInputElement>> = new Map()
+
+focusesWrapper.forEach(focusWrapper => {
+    let focuses = focusWrapper.querySelectorAll('.focus-checkbox') as NodeListOf<HTMLInputElement>
+
+    for (const focus of focuses) {
+        focusesLabels[focus.id] = focusWrapper.querySelector(`label[for="${focus.id}"]`) as HTMLLabelElement
+    }
+
+    groupedFocuses.set(focusWrapper, focuses)
+    masterCheckboxes[focusWrapper.id] = focusWrapper.querySelector('.focuses-master-checkbox') as HTMLInputElement
 })
 
-technicalDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
-governanceDomain.addEventListener("change", () => filtersStore.syncFilter('domains'))
-gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus'))
+function toggleGroupedFocus(focuses: NodeListOf<HTMLInputElement>, force: boolean | null  = null): void {
+    if (force === null) {
+        force = getGroupOffsets(focuses).length === 0
+    }
+
+    for (const focus of focuses) {
+        focus.checked = force
+    }
+}
+function getGroupOffsets(focuses: NodeListOf<HTMLInputElement>): number[] {
+    let offsets = []
+    for (const focus of focuses) {
+        if (!focus.checked) {
+            continue
+        }
+
+        offsets.push(parseInt(focus.dataset.globalOffset!, 10))
+    }
+
+    return offsets
+}
+
+for (let [focusesWrapper, focuses] of groupedFocuses) {
+    for (let focus of focuses) {
+        focusesLabels[focus.id].addEventListener('click', trapClickAndDoubleClick(
+            e => {
+                e.stopPropagation()
+                e.stopImmediatePropagation()
+                focus.checked = !focus.checked
+                filtersStore.syncFilter('focuses')
+            },
+            e => {
+                e.stopPropagation()
+                e.stopImmediatePropagation()
+
+                for (const comparisonFocus of focuses) {
+                    comparisonFocus.checked = comparisonFocus.id === focus.id
+                }
+
+                filtersStore.syncFilter('focuses')
+            }
+        ))
+    }
+
+    masterCheckboxes[focusesWrapper.id].addEventListener('click', () => {
+        toggleGroupedFocus(focuses)
+        filtersStore.syncFilter('focuses')
+    })
+
+    focusesWrapper.addEventListener('click', trapClickAndDoubleClick(
+        () => {
+            toggleGroupedFocus(focuses)
+            filtersStore.syncFilter('focuses')
+        },
+        () => {
+            for (const [comparisonGroup, comparisonFocuses] of groupedFocuses) {
+                toggleGroupedFocus(comparisonFocuses, comparisonGroup.id === focusesWrapper.id)
+            }
+            filtersStore.syncFilter('focuses')
+        }
+    ))
+}
+
+filtersStore.onChange(['focuses'], () => {
+    for (const [focusesWrapper, focuses] of groupedFocuses) {
+        let offsets = getGroupOffsets(focuses)
+
+        if (offsets.length === 0 || offsets.length === focuses.length) {
+            masterCheckboxes[focusesWrapper.id].checked = offsets.length === focuses.length
+            masterCheckboxes[focusesWrapper.id].indeterminate = false
+        } else {
+            masterCheckboxes[focusesWrapper.id].checked = true
+            masterCheckboxes[focusesWrapper.id].indeterminate = true
+        }
+    }
+})
 
 ;(async function () {
     try {
@@ -189,6 +269,16 @@ gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus')
         let mapContent = await mapContentRes.text()
 
         $map.html(mapContent)
+
+        // The map partial contains the entries, so we need to wait for it to load before we can show the entry
+        // that was opened on the last visit but never closed.
+        let lastFocusedEntry = getRememberedOpenEntry()
+        if (lastFocusedEntry !== null) {
+            let [entrygroup, entry] = lastFocusedEntry
+            let el = document.querySelector(`button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
+            console.log(el)
+            openEntry(el)
+        }
 
         let elEntrygroupContainer = document.getElementById("entrygroups")!
         let elsEntryButtons = document.querySelectorAll("button[data-entry]") as NodeListOf<HTMLButtonElement>
@@ -251,10 +341,10 @@ gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus')
             node.el = el
         }
 
-        filtersStore.onChange((state) => {
+        filtersStore.onChange ('*', (state) => {
             debug().clear()
 
-            updateMap(state, { activityCount: activityInputs.length })
+            updateMap(state, { activityCount: activityInputs.length, focusesCount: Object.keys(focusesLabels).length })
 
             debug().flush($centerWrapper)
         }, true)
@@ -263,17 +353,15 @@ gcbrFocus.addEventListener("change", (e) => filtersStore.syncFilter('gcbrFocus')
     }
 })()
 
-
 function setLastFocusedEntry(focusedEntry: [number, number] | null) {
     let loc = new URL(window.location.toString())
     loc.hash = focusedEntry ? `/${focusedEntry[0]}:${focusedEntry[1]}/` : '';
 
     window.history.replaceState({}, '', loc.toString())
 }
-
-function getLastFocusedEntry(): [number, number] | null {
-    let focusedEntry = new URL(window.location.toString()).hash.slice(1).split("/").filter(Boolean)[0]
-    return focusedEntry && /(\d+):(\d+)/.test(focusedEntry) ? focusedEntry.split(":").map(id => parseInt(id, 10)) as [number, number] : null
+function getRememberedOpenEntry(): [number, number] | null {
+    let entry = new URL(window.location.toString()).hash.slice(1).split("/").filter(Boolean)[0]
+    return entry && /(\d+):(\d+)/.test(entry) ? entry.split(":").map(id => parseInt(id, 10)) as [number, number] : null
 }
 
 function getLastVisitTime() {
@@ -282,7 +370,6 @@ function getLastVisitTime() {
 
     return new Date(timestamp)
 }
-
 function updateLastVisitTime() {
     localStorage.setItem('startChangelogAt', Date.now().toString())
 }

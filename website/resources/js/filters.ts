@@ -1,59 +1,58 @@
 export type Filters = {
     activities: number,
     domains: number,
+    focuses: number,
     gcbrFocus: boolean,
 }
 
 export type FilterMetadata = {
     activityCount: number,
+    focusesCount: number,
 }
 
-const TECHNICAL_DOMAIN = 1 << 0
-const GOVERNANCE_DOMAIN = 1 << 1
+const TECHNICAL_DOMAIN = 1 << 0 // 1
+const GOVERNANCE_DOMAIN = 1 << 1 // 2
 
-export function shouldFilterEntry(state: Filters, meta: FilterMetadata, filterData: [Filters['activities'], Filters['domains'], Filters['gcbrFocus']]): boolean {
-    let [activities, domains, gcbrFocus] = filterData
-
-    if (state.gcbrFocus && !gcbrFocus) {
+export function shouldFilterEntry(state: Filters, entry: Filters, meta: FilterMetadata): boolean {
+    if (state.gcbrFocus && !entry.gcbrFocus) {
         return true
     }
 
-    if ((state.domains & TECHNICAL_DOMAIN) !== 0 && (domains & TECHNICAL_DOMAIN) === 0) {
+    if ((state.domains & TECHNICAL_DOMAIN) !== 0 && (entry.domains & TECHNICAL_DOMAIN) === 0) {
         return true
     }
 
-    if ((state.domains & GOVERNANCE_DOMAIN) !== 0 && (domains & GOVERNANCE_DOMAIN) === 0) {
+    if ((state.domains & GOVERNANCE_DOMAIN) !== 0 && (entry.domains & GOVERNANCE_DOMAIN) === 0) {
         return true
     }
 
-
-    let shouldFilter = true
-
-    for (let i = 0; i < meta.activityCount; i++) {
-        if ((activities & (1 << i)) === 0) {
-            continue
-        }
-
-        if ((state.activities & (1 << i)) !== 0) {
-            shouldFilter = false
-            break
-        }
+    let hasSharedActivities = (state.activities & entry.activities) !== 0
+    if (!hasSharedActivities) {
+        return true
     }
 
-    return shouldFilter
+    let hasSharedFocuses = (state.focuses & entry.focuses) !== 0
+    return !hasSharedFocuses
 }
 
-export default class FiltersState<S extends Record<string, number|boolean|string>> {
-    private changeCallbacks: ((state: S) => void)[] = []
+type ChangeCallback<S> = (state: S) => void
 
+export default class FiltersState<
+    // If you add a new type for a filter's value, you need to update
+    // the getQueryParam and setQueryParam methods which handle
+    // the serialization and deserialization of the filters.
+    S extends Record<string, number|boolean|string>
+> {
     private getters: { [K in keyof S]: () => S[K] }
     private setters: { [K in keyof S]: (v: S[K]) => void }
     private defaults: { [K in keyof S]: S[K] }
+    private changeCallbacks: { [K in keyof S]: ChangeCallback<S>[] }
 
     constructor(gettersSetters: { [K in keyof S]: [() => S[K], (v: S[K]) => void] }) {
         this.getters = {} as any
         this.setters = {} as any
         this.defaults = {} as any
+        this.changeCallbacks = { } as any
 
         for (const id in gettersSetters) {
             const [getter, setter] = gettersSetters[id]
@@ -61,6 +60,7 @@ export default class FiltersState<S extends Record<string, number|boolean|string
             this.getters[id] = getter
             this.setters[id] = setter
             this.defaults[id] = getter()
+            this.changeCallbacks[id] = []
 
             let queryValue = this.getQueryParam(id)
 
@@ -84,7 +84,7 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         this.setters[id](value)
         this.setQueryParam(id, value)
 
-        this.triggerChange(this.changeCallbacks)
+        this.triggerChange([id])
 
         return this
     }
@@ -97,25 +97,38 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         return this
     }
 
-    onChange(callback: (state: S) => void, executeImmediately: boolean = false): FiltersState<S> {
-        this.changeCallbacks.push(callback)
+    onChange(keys: (keyof S)[] | '*', callback: (state: S) => void, executeImmediately: boolean = false): FiltersState<S> {
+        if (keys === '*') {
+            keys = Object.keys(this.defaults) as (keyof S)[]
+        }
+
+        for (const key of keys) {
+            this.changeCallbacks[key].push(callback)
+        }
 
         if (executeImmediately) {
-            this.triggerChange([callback])
+            callback(this.getFullState())
         }
 
         return this
     }
 
-    private triggerChange(callbacks: typeof this.changeCallbacks) {
+    private getFullState(): S {
         let data: Partial<S> = {}
 
         for (const id in this.getters) {
             data[id] = this.getters[id]()
         }
 
-        for (const cb of callbacks) {
-            cb(data as S)
+        return data as S
+    }
+
+    private triggerChange(keys: (keyof S)[]) {
+        let state = this.getFullState()
+        for (const key of keys) {
+            for (const callback of this.changeCallbacks[key]) {
+                callback(state)
+            }
         }
 
         return this
@@ -137,7 +150,7 @@ export default class FiltersState<S extends Record<string, number|boolean|string
         } else if (type === 'boolean') {
             return (value === 'true') as any
         } else {
-            throw new Error(`Unsupported type conversion for ${key.toString()}`)
+            throw new Error(`Could not deserialize key [${key.toString()}]`)
         }
     }
 
