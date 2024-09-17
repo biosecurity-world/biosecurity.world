@@ -10,6 +10,6 @@ declare global {
     }
 
     interface WindowEventMap {
-        'appstatechange': AppStateChangeEvent
+        appstatechange: AppStateChangeEvent
     }
 }

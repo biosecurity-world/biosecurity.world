@@ -33,7 +33,7 @@
 
 /** Map */
 .app-state {
-    @apply absolute inset-0 h-full w-full transition-opacity duration-300 flex items-center justify-center;
+    @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
 }
 
 .state-active {
@@ -69,7 +69,6 @@
     & aside {
         @apply border-y-0;
     }
-
 }
 
 #entry-wrapper:not(:has(> .entry)) {
@@ -91,7 +90,7 @@
 
 .domain-checkbox:checked + label > .at-technical,
 .domain-checkbox:checked + label > .at-governance {
-    color: white
+    color: white;
 }
 
 /** Filters: Activities and filters */
@@ -115,7 +114,6 @@
 
 #entrygroups.hovered .org-type:not(:has(+ div > [data-sum].active)) {
     opacity: 0.25;
-
 }
 
 .org-type:not(:has(+ div > .matches-filters)) {

@@ -1,4 +1,6 @@
-@props(['name'])
+@props([
+    "name",
+])
 <input
     type="checkbox"
     name="{{ $name }}"
