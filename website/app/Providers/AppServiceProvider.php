@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\NotionClient;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(Notion::class, function () {
+        $this->app->bind(NotionClient::class, function () {
             $database = config('services.notion.database');
             $token = config('services.notion.token');
 
@@ -20,19 +20,15 @@ class AppServiceProvider extends ServiceProvider
                 throw new \Exception('No notion database specified, please set the environment variable NOTION_DATABASE.');
             }
 
+            if (str_contains($database, '-')) {
+                throw new \Exception('The database ID should not contain dashes.');
+            }
+
             if (empty($token) || ! is_string($token)) {
                 throw new \Exception('No notion token specified, please set the environment variable NOTION_TOKEN.');
             }
 
-            return new Notion($database, $token);
+            return new NotionClient($database, $token);
         });
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
     }
 }

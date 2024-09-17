@@ -25,10 +25,8 @@ abstract class TestCase extends BaseTestCase
         (new Differ(
             name: $name,
             url: route('tree-rendering', ['caseId' => $id]),
-            nodeBinary: config('services.differ.node_path'),
-            chromePath: config('services.differ.chrome_path'),
         ))->configureBrowsershot(function (Browsershot $browsershot) {
-            $browsershot->waitForFunction('window.visualDiffReady === true');
+            $browsershot->waitForFunction('window.visualDiffReady === true', timeout: 5_000);
         })->runTest();
     }
 
@@ -38,8 +36,6 @@ abstract class TestCase extends BaseTestCase
         (new Differ(
             name: $name,
             url: url($url),
-            nodeBinary: config('services.differ.node_path'),
-            chromePath: config('services.differ.chrome_path'),
         ))->configureBrowsershot(function (Browsershot $browsershot) {
             $browsershot->waitUntilNetworkIdle()->fullPage();
         })->runTest();
@@ -67,12 +63,13 @@ abstract class TestCase extends BaseTestCase
         })->runTest();
     }
 
-    public function node(float $delta, float $theta, $width = 25, $length = 100): array
+    public function node(float $delta, float $theta, $width = 25, $length = 100, ?int $spacing = null): array
     {
         return [
             'sector' => [$delta, $theta],
             'width' => $width,
             'length' => $length,
+            'spacing' => $spacing,
         ];
     }
 }

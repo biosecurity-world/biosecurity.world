@@ -1,1 +1,2 @@
 * text=auto
+website/tests/Browser/regressions filter=lfs diff=lfs merge=lfs -text

@@ -1,15 +1,14 @@
 import {Selection} from "d3"
-import {ProcessedNode} from "@/types"
-import {fitToSector} from "@/layout"
+import type {AppState, AppStateChange, AppStateParameters, ProcessedNode, Sector} from "@/types/index.d.ts"
 
-
-// export const IN_PRODUCTION = import.meta.env.PROD === true
+export function changeAppState<T extends AppState>(state: T, params: AppStateParameters[T]) {
+    window.dispatchEvent(new CustomEvent<AppStateChange>('appstatechange', {
+        /* @ts-ignore */
+        detail: { state, params }
+    }));
+}
 
 export const PI = Math.PI
-export const PI_4 = PI / 4
-export const PI_6 = PI / 6
-export const PI_2 = PI / 2
-export const PI_3 = PI / 3
 export const PIPI = PI * 2
 
 let _debugInstance: Debug|null = null
@@ -25,7 +24,7 @@ export function debug(): Debug {
 class Debug {
     buffer: (($selection: Selection<SVGElement, {}, HTMLElement, unknown>) => void)[] = []
 
-    point(options: { p: [number, number], color?: string }) {
+    point(options: { p: [number, number], color?: string, label?: string }) {
         this.buffer.push(($svg) => {
             $svg.append('circle')
                 .classed('debug', true)
@@ -33,12 +32,21 @@ class Debug {
                 .attr('cy', options.p[1])
                 .attr('r', 2)
                 .attr('fill', options.color || 'red')
+
+            if (options.label) {
+                $svg.append('text')
+                    .classed('debug', true)
+                    .attr('x', options.p[0] + 5)
+                    .attr('y', options.p[1] + 5)
+                    .attr('fill', 'black')
+                    .text(options.label)
+            }
         })
     }
 
-    rect(options: { p: [number, number], width: number, length: number, color?: string, cb?: (rect: Selection<SVGRectElement, {}, HTMLElement, unknown>) => void }) {
+    rect(options: { p: [number, number], width: number, length: number, color?: string }) {
         this.buffer.push(($svg) => {
-            let $rect = $svg.append('rect')
+            $svg.append('rect')
                 .classed('debug', true)
                 .attr('x', options.p[0])
                 .attr('y', options.p[1])
@@ -46,18 +54,12 @@ class Debug {
                 .attr('height', options.width)
                 .attr('fill', 'none')
                 .attr('stroke', options.color || 'red');
-
-            if (options.cb) {
-                options.cb($rect)
-            }
         })
     }
 
-    cartesianPlane() {
-        debug().ray({angle: 0, color: 'gray'})
-        debug().ray({angle: PI, color: 'gray'})
-        debug().ray({angle: PI_2, color: 'gray'})
-        debug().ray({angle: -PI_2, color: 'gray'})
+    sector(sector: Sector, color ?: string, p?: [number, number], length?: number) {
+        this.ray({ angle: sector[0], color, p, length})
+        this.ray({ angle: sector[1], color, p ,length})
     }
 
     ray(options: { angle: number, p?: [number, number], length?: number, color?: string }) {
@@ -88,26 +90,7 @@ class Debug {
 
         this.buffer = []
     }
-
-    node(options: {node: ProcessedNode, parent?: ProcessedNode, minDistance?: number, color?: string}) {
-        if (!options.node.position) {
-            options.node.position = fitToSector(options.node)
-        }
-
-        debug().ray({angle: options.node.sector[0], color: 'black'})
-        debug().ray({angle: options.node.sector[1], color: 'black'})
-        debug().rect({
-            p: options.node.position,
-            length: options.node.size[0],
-            width: options.node.size[1],
-            color: options.color ?? 'red',
-            cb: ($rect) => $rect.attr('data-debug-id', options.node.id),
-        })
-
-        debug().point({p: options.node.position, color: options.color ?? 'red'})
-    }
 }
-
 
 export function eq(a: number, b: number) {
     if (a === b) {
@@ -145,15 +128,15 @@ export function getQuadrant(angle: number): number {
         throw new Error(`Angle ${angle} is not in the range [0, 2*PI]`)
     }
 
-    if (inIE(angle, 0, PI_2)) {
+    if (inIE(angle, 0, PI/2)) {
         return 1
     }
 
-    if (inIE(angle, PI_2, PI)) {
+    if (inIE(angle, PI/2, PI)) {
         return 2
     }
 
-    if (inIE(angle, PI, PI + PI_2)) {
+    if (inIE(angle, PI, PI + PI/2)) {
         return 3
     }
 
@@ -173,24 +156,30 @@ export function shortestDistanceBetweenRectangles(
     return Math.sqrt(dx * dx + dy * dy)
 }
 
-export function throttle(callback: (...args: any[]) => void, wait: number, immediate: boolean = false) {
-    let timeout: number|null = null
-    let initialCall = true
+export function getDebugLabel(node: ProcessedNode): string {
+    if (node.el.querySelector('.entrygroup') !== null) {
+        return 'Entrygroup'
+    }
 
-    return function() {
-        const callNow = immediate && initialCall
-        const next = () => {
-            callback.apply(this, arguments)
-            timeout = null
-        }
+    return (node.el.querySelector('div > span') as HTMLSpanElement).innerText
+}
 
-        if (callNow) {
-            initialCall = false
-            next()
-        }
-
-        if (!timeout) {
-            timeout = setTimeout(next, wait)
+export function trapClickAndDoubleClick(
+    singleClickHandler: (event: MouseEvent) => void,
+    doubleClickHandler: (event: MouseEvent) => void,
+) {
+    return function(e: MouseEvent) {
+        e.preventDefault()
+        if (e.detail === 1) {
+            singleClickHandler(e)
+        } else if (e.detail === 2) {
+            singleClickHandler(e)
+            doubleClickHandler(e)
         }
     }
+}
+
+export function flip(num: number, n: number): number {
+    // This is more semantically correct than ~num.
+    return num ^ (1 << n) - 1
 }

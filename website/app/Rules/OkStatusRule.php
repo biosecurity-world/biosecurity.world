@@ -10,57 +10,59 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class OkStatusRule implements ValidationRule
 {
-    /**
-     * Run the validation rule.
-     *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $headers = [
-            'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0',
-            'DNT' => '1',
-            'Accept' => 'image/avif,image/webp,*/*',
-            'Cache-Control' => 'no-cache',
-            'Referer' => 'baseURL',
-            'Origin' => 'baseURL',
-            'Sec-Fetch-Dest' => 'image',
-            'Sec-Fetch-Mode' => 'no-cors',
-            'Sec-Fetch-Site' => 'same-origin',
-        ];
+        if (! is_string($value)) {
+            throw new \UnexpectedValueException('The value to validate must be a string.');
+        }
+
+        if (! str_starts_with($value, 'http')) {
+            $value = 'https://'.$value;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+            throw new \InvalidArgumentException('The value to validate must be a valid URL.');
+        }
+
+        $baseURL = parse_url($value, PHP_URL_SCHEME).'://'.parse_url($value, PHP_URL_HOST);
+
+        $client = new Client([
+            'headers' => [
+                'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0',
+                'Accept' => '*/*',
+                'Accept-Encoding' => 'gzip, deflate, br',
+                'Accept-Language' => 'en-US,en;q=0.5',
+                'DNT' => '1',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'no-cache',
+                'Referer' => $baseURL,
+                'Origin' => $baseURL,
+                'Sec-Fetch-Dest' => 'document',
+                'Sec-Fetch-Mode' => 'cors',
+                'Sec-Fetch-Site' => 'cross-site',
+            ],
+            'timeout' => 5,
+            'http_errors' => false,
+        ]);
 
         try {
-            $client = new Client([
-                'headers' => $headers,
-                'timeout' => 5,
-                'http_errors' => false,
-            ]);
+            $head = $client->head($value);
 
-            if (! is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
-                $fail("The $attribute is not a valid URL");
-
+            if ($head->getStatusCode() >= 200 && $head->getStatusCode() < 300) {
                 return;
             }
+        } catch (RequestException|ConnectException) {
+        }
 
-            try {
-                $head = $client->head($value);
-
-                if ($head->getStatusCode() >= 200 && $head->getStatusCode() < 300) {
-                    return;
-                }
-            } catch (RequestException|ConnectException) {
-                // Continue to GET request
-            }
-
+        try {
             $get = $client->get($value);
 
             if (($get->getStatusCode() >= 200 && $get->getStatusCode() < 300) || $get->getStatusCode() === 403) {
                 return;
             }
-
-            $fail('The URL is not reachable.');
-        } catch (RequestException $e) {
-            $fail('The URL is not reachable.');
+        } catch (RequestException|ConnectException) {
         }
+
+        $fail('The URL is not reachable.');
     }
 }

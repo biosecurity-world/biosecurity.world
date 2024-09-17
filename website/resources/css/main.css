@@ -1,0 +1,157 @@
+@tailwind base;
+@font-face {
+    font-family: "Gilroy";
+    font-display: swap;
+    src: url(../fonts/Gilroy.woff2) format("woff2");
+    font-weight: 700;
+    unicode-range: U+0020-007F;
+}
+
+/*@font-face {*/
+/*    font-family: 'Nunito';*/
+/*    font-display: swap;*/
+/*    font-weight: 500;*/
+/*    src: local("Nunito"), url(../fonts/Nunito-Regular.woff2) format('woff2');*/
+/*    unicode-range: U+0020-007F;*/
+/*}*/
+/*@font-face {*/
+/*    font-family: 'Nunito';*/
+/*    font-display: optional;*/
+/*    font-weight: 700;*/
+/*    src: url(../fonts/Nunito-Bold.woff2) format('woff2');*/
+/*    unicode-range: U+0020-007F;*/
+/*}*/
+
+.off-screen {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+/** Map */
+.app-state {
+    @apply absolute inset-0 h-full w-full transition-opacity duration-300 flex items-center justify-center;
+}
+
+.state-active {
+    @apply pointer-events-auto opacity-100;
+}
+
+.state-inactive {
+    @apply pointer-events-none opacity-0;
+}
+
+#map-wrapper:not(.fullscreen) {
+    transform: translateY(-10em) scale(0.9);
+}
+
+#map-wrapper.fullscreen {
+    @apply absolute inset-0;
+    transform: translateY(0em) scale(1);
+
+    & .rounded-l-3xl {
+        border-bottom-left-radius: 0 !important;
+        border-top-left-radius: 0 !important;
+    }
+
+    & .rounded-r-3xl {
+        border-bottom-right-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+    }
+
+    & .rounded-tr-3xl {
+        border-top-right-radius: 0 !important;
+    }
+
+    & aside {
+        @apply border-y-0;
+    }
+
+}
+
+#entry-wrapper:not(:has(> .entry)) {
+    display: none;
+}
+
+#entry-wrapper:has(> .entry) {
+    display: block;
+}
+
+/** Filters: Domain */
+.domain-checkbox:checked + label > .check {
+    opacity: 1;
+}
+
+.domain-checkbox:not(:checked) + label > .check {
+    opacity: 0;
+}
+
+.domain-checkbox:checked + label > .at-technical,
+.domain-checkbox:checked + label > .at-governance {
+    color: white
+}
+
+/** Filters: Activities and filters */
+.checkbox-as-pill:not(:checked) + label {
+    background: #ffffff !important;
+    color: theme("colors.gray.500") !important;
+}
+
+.focuses-list:hover:not(:has(* :hover)) {
+    @apply border-primary-700;
+}
+
+/** Handle the hover logic on entries */
+#entrygroups.hovered [data-entry]:not(.active) {
+    opacity: 0.25;
+}
+
+#entrygroups.hovered [data-sum].active > .entry-logo {
+    @apply border border-primary-600;
+}
+
+#entrygroups.hovered .org-type:not(:has(+ div > [data-sum].active)) {
+    opacity: 0.25;
+
+}
+
+.org-type:not(:has(+ div > .matches-filters)) {
+    display: none;
+    margin: 0 !important;
+}
+
+.big-toggle:not(:checked) + label {
+    @apply bg-gray-200;
+
+    & > span {
+        @apply translate-x-0;
+    }
+}
+
+.big-toggle:checked + label {
+    @apply bg-primary-600;
+
+    & > span {
+        @apply translate-x-full;
+    }
+}
+
+/** ...? */
+[data-entry]:not(.matches-filters) {
+    display: none;
+}
+
+.entrygroup:not(:has(*.matches-filters)) {
+    display: none;
+}
+
+.org-type:has(+ div > .matches-filters) {
+    @apply mt-2;
+}
+
+#entry-loader.loading-entry {
+    opacity: 1;
+}

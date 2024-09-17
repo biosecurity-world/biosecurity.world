@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Services\NotionData\DataObjects;
+namespace App\Services\NotionData\Tree;
 
-#[\AllowDynamicProperties]
 class Root
 {
     public function __construct(

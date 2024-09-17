@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\NotionData\HydrationError;
 use App\Services\NotionData\Hydrator;
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -17,7 +16,7 @@ class ReportHydrationErrors extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Notion $notion): void
+    public function handle(NotionClient $notion): void
     {
         if ($this->option('strict')) {
             Hydrator::setStrictMode(true);
@@ -30,13 +29,7 @@ class ReportHydrationErrors extends Command
         $reported = 0;
 
         collect($tree->errors)
-            ->flatMap(
-                /** @return Collection<HydrationError> */
-                fn ($error) => collect($error->messages)->map(
-                    fn ($message): HydrationError => new HydrationError($error->page, [$message])
-                )
-            )
-            ->groupBy(fn (HydrationError $error) => $error->messages[0])
+            ->groupBy('message')
             ->map(fn (Collection $errors) => $errors->map->page)
             ->each(function (Collection $pages, string $errorMessage) use (&$report, &$reported) {
                 $report .= "### $errorMessage\n";
@@ -52,17 +45,18 @@ class ReportHydrationErrors extends Command
                     $report .= "- [$label]($url)\n";
                     $reported++;
                 }
+
+                $report .= "\n";
             });
 
         $path = $this->argument('path') ?? 'report.md';
-        file_put_contents($path, <<<MARKDOWN
+        file_put_contents($path, <<<MD
 # Report: possible problems in Notion
-These problems don't stop the site from working, but entries with errors are ignored and will not be displayed.
 
-It can be re-run although the process is a bit tedious, you have to manually "dispatch" a run in the "Actions" tab and provide
-a PR/Issue number which you can find in the URL after "/pull/" or "/issues/".
+These problems need to be fixed before the PR can be merged.
+
 $report
-MARKDOWN
+MD
         );
 
         $this->outputComponents()->info("Reported $reported errors in $path.");

@@ -1,10 +1,7 @@
 <?php
 
-namespace App\Services\NotionData\DataObjects;
+namespace App\Services\NotionData\Models;
 
-use AllowDynamicProperties;
-
-#[AllowDynamicProperties]
 class Entrygroup
 {
     public function __construct(

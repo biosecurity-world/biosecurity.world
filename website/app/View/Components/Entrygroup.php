@@ -2,8 +2,8 @@
 
 namespace App\View\Components;
 
-use App\Services\NotionData\DataObjects\Entry;
-use App\Services\NotionData\DataObjects\Entrygroup as EntrygroupData;
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\Entrygroup as EntrygroupData;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -36,9 +36,6 @@ class Entrygroup extends Component
             ->toArray();
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
     public function render(): View|Closure|string
     {
         return view('components.entrygroup');

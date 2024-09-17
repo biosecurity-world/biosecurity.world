@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use Tests\TestCase;
 
@@ -38,7 +38,7 @@ class PageResponseTest extends TestCase
 
     public function test_the_entry_page_is_ok()
     {
-        $notion = $this->app->make(\App\Services\NotionData\Notion::class);
+        $notion = $this->app->make(\App\Services\NotionData\NotionClient::class);
         $tree = \App\Services\NotionData\Tree\Tree::buildFromPages($notion->pages());
 
         $entrygroup = $tree->entrygroups()->first();

@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\Tree;
 
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Root;
+use App\Services\NotionData\Models\Category;
 
 class Node
 {

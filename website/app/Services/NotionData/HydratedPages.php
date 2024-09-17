@@ -2,8 +2,8 @@
 
 namespace App\Services\NotionData;
 
-use App\Services\NotionData\DataObjects\Category;
-use App\Services\NotionData\DataObjects\Entry;
+use App\Services\NotionData\Models\Category;
+use App\Services\NotionData\Models\Entry;
 
 class HydratedPages
 {

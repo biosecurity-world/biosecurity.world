@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowMapPartialController;
 use App\Http\Controllers\ShowWelcomeController;
-use App\Services\NotionData\DataObjects\Entrygroup;
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\Models\Entrygroup;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +16,11 @@ Route::get('/give-feedback', fn () => '')->name('give-feedback');
 Route::view('/how-to-contribute', 'how-to-contribute')->name('how-to-contribute');
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
+
 Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
-Route::get('/m', ShowMapPartialController::class);
-Route::get('/_/entries', function (Notion $notion) {
+
+Route::get('/_/m', ShowMapPartialController::class);
+Route::get('/_/entries', function (NotionClient $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
     $links = $tree
@@ -30,7 +32,7 @@ Route::get('/_/entries', function (Notion $notion) {
     return view('entries.index', ['links' => $links]);
 });
 
-if (app()->runningUnitTests() || app()->isLocal()) {
+if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library
     // but this isn't a priority for now, so some code is mixed with
     // the code for the website which includes the code for tests the tree

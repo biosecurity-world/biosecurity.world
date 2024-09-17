@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\NotionData\Notion;
+use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Contracts\View\View;
 
 class ShowMapPartialController
 {
-    public function __invoke(Notion $notion): View
+    public function __invoke(NotionClient $notion): View
     {
-        $tree = Tree::buildFromPages($notion->pages());
-
         return view('partials.map', [
-            'tree' => $tree,
+            'tree' => Tree::buildFromPages($notion->pages()),
         ]);
     }
 }

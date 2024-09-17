@@ -1,15 +1,15 @@
-import {Node} from "@/types/index"
-import {MapStateStore} from "@/store"
-
-export {}
+import {Node, AppStateChangeEvent} from "@/types/index"
 
 declare global {
     interface Window {
         nodes: Node[]
         bitmaskLength: number
-        masks: Record<number, number>
+        filterData: Record<number, [number, number, number, boolean]>
+        filterMetadata: [number]
         andOrMask: number
+    }
 
-        persistedMapState: MapStateStore
+    interface WindowEventMap {
+        'appstatechange': AppStateChangeEvent
     }
 }
