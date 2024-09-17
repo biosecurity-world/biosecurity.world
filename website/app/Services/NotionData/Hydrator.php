@@ -157,6 +157,7 @@ class Hydrator
         $interventionFocuses = array_filter($interventionFocuses, function (SelectOption $opt) use (&$domains) {
             if ($domain = DomainEnum::tryFrom($opt->id)) {
                 $domains[] = $domain;
+
                 return false;
             }
 

@@ -63,13 +63,13 @@ abstract class TestCase extends BaseTestCase
         })->runTest();
     }
 
-    public function node(float $delta, float $theta, $width = 25, $length = 100, int $spacing = null): array
+    public function node(float $delta, float $theta, $width = 25, $length = 100, ?int $spacing = null): array
     {
         return [
             'sector' => [$delta, $theta],
             'width' => $width,
             'length' => $length,
-            'spacing' => $spacing
+            'spacing' => $spacing,
         ];
     }
 }

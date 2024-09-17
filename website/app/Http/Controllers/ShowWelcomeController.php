@@ -10,7 +10,6 @@ use App\Services\NotionData\Tree\Node;
 use App\Services\NotionData\Tree\Tree;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
 
 class ShowWelcomeController
 {

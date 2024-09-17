@@ -4,8 +4,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "lint": "prettier --write resources/js/**/*.ts resources/css/**/*.css *.json *.js",
-        "test:lint": "prettier --check resources/js/**/*.ts resources/css/**/*.css *.json *.js"
+        "lint": "prettier --write .",
+        "test:lint": "prettier --check ."
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.9",
@@ -16,19 +16,14 @@
         "pngjs": "^7.0.0",
         "postcss": "^8.4.47",
         "prettier": "^3.3.3",
-        "puppeteer": "^23.3.0",
-        "tailwindcss": "^3.4.11",
+        "puppeteer": "^23.3.1",
+        "tailwindcss": "^3.4.10",
         "typescript": "^5.6.2",
-        "vite": "^5.4.5"
+        "vite": "^5.4.6"
     },
     "dependencies": {
-        "d3": "^7.9.0"
-    },
-    "prettier": {
-        "arrowParens": "always",
-        "semi": false,
-        "experimentalTernaries": true,
-        "trailingComma": "all",
-        "bracketSpacing": false
+        "d3": "^7.9.0",
+        "prettier-plugin-blade": "^2",
+        "prettier-plugin-tailwindcss": "0.6.5"
     }
 }

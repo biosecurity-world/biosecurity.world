@@ -1,0 +1,6 @@
+storage/
+!resources/js/**/*.ts
+!resources/views/**/*.blade.php
+!resources/css/**/*.css
+!*.json
+!*.js
