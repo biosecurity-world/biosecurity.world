@@ -1,7 +1,7 @@
 .prose h2 {
     margin-top: 2em;
     margin-bottom: 1em;
-    font-family: theme('fontFamily.display');
+    font-family: theme("fontFamily.display");
     font-size: 1.5em;
     font-weight: 700;
     line-height: 1.33333;
@@ -9,9 +9,9 @@
 
 .prose h3 {
     margin-top: 1.6em;
-    margin-bottom: .6em;
+    margin-bottom: 0.6em;
     font-size: 1.25em;
-    font-family: theme('fontFamily.display');
+    font-family: theme("fontFamily.display");
     font-weight: 600;
     line-height: 1.6;
 }
@@ -27,7 +27,8 @@
     text-decoration: underline;
 }
 
-.prose ul, .prose ol {
+.prose ul,
+.prose ol {
     margin-top: 1.25em;
     margin-bottom: 1.25em;
     padding-left: 1.625em;
@@ -42,9 +43,9 @@
 }
 
 .prose li {
-    padding-left: .375em;
-    margin-top: .5em;
-    margin-bottom: .5em;
+    padding-left: 0.375em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 .prose li > :last-child {

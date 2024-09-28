@@ -1,4 +1,4 @@
-import type {Node, ProcessedNode, Sector} from "@/types/index.d.ts";
+import type {Node, ProcessedNode, Sector} from "@/types/index.d.ts"
 import {
     changeAppState,
     debug,
@@ -10,17 +10,17 @@ import {
     lt,
     PI,
     PIPI,
-    shortestDistanceBetweenRectangles
+    shortestDistanceBetweenRectangles,
 } from "@/utils"
-import {FilterMetadata, Filters, shouldFilterEntry} from "@/filters";
+import {FilterMetadata, Filters, shouldFilterEntry} from "@/filters"
 
-type PreparedNode = (typeof window.nodes[number]) & { el: SVGElement } & Partial<ProcessedNode>
+type PreparedNode = (typeof window.nodes)[number] & {el: SVGElement} & Partial<ProcessedNode>
 
 export function updateMap(state: Filters, metadata: FilterMetadata) {
     let nodes: PreparedNode[] = []
     let stack: PreparedNode[] = []
 
-    changeAppState('loading', {})
+    changeAppState("loading", {})
     resetGlobalMapState()
 
     let maxDepth = 0
@@ -41,14 +41,20 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 
             for (const entryId of entryIds) {
                 let filterData = window.filterData[entryId]
-                let shouldFilter = shouldFilterEntry(state, {
-                    activities: filterData[0],
-                    focuses: filterData[1],
-                    domains: filterData[2],
-                    gcbrFocus: filterData[3],
-                }, metadata)
+                let shouldFilter = shouldFilterEntry(
+                    state,
+                    {
+                        activities: filterData[0],
+                        focuses: filterData[1],
+                        domains: filterData[2],
+                        gcbrFocus: filterData[3],
+                    },
+                    metadata,
+                )
 
-                document.querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!.classList.toggle("matches-filters", !shouldFilter)
+                document
+                    .querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!
+                    .classList.toggle("matches-filters", !shouldFilter)
 
                 if (!shouldFilter) {
                     matchingEntries.push(entryId)
@@ -68,8 +74,8 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         if (node.el.firstElementChild === null) {
             throw new Error(
                 "It is expected that the foreignObject representing the node " +
-                "has a single child to compute its real bounding box, not " +
-                "the advertised (100%, 100%)",
+                    "has a single child to compute its real bounding box, not " +
+                    "the advertised (100%, 100%)",
             )
         }
 
@@ -102,7 +108,6 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
             node.filtered = children.length === 0
         }
 
-
         stack.push(node)
     }
 
@@ -111,7 +116,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
     root.position = fitToSector(root as Required<PreparedNode>, [{position: [0, 0], size: root.size!}])
 
     if (nodes.length === 0) {
-        changeAppState('empty', {})
+        changeAppState("empty", {})
         return
     }
 
@@ -131,17 +136,25 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         let theta = delta + (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
 
         node.sector = [delta, theta]
-        node.position = fitToSector(node as Required<PreparedNode>, node.trail.map((id: number) => idToNode[id] as Required<PreparedNode>), 150)
+        node.position = fitToSector(
+            node as Required<PreparedNode>,
+            node.trail.map((id: number) => idToNode[id] as Required<PreparedNode>),
+            150,
+        )
 
         deltaFromSiblings[node.parent] = theta
 
         showNode(node)
     }
 
-    changeAppState('success', {})
+    changeAppState("success", {})
 }
 
-export function fitToSector(node: Pick<ProcessedNode, 'position' | 'size' | 'sector'>, trail: Pick<ProcessedNode, 'position' | 'size'>[], spacing: number | null = null): [number, number] {
+export function fitToSector(
+    node: Pick<ProcessedNode, "position" | "size" | "sector">,
+    trail: Pick<ProcessedNode, "position" | "size">[],
+    spacing: number | null = null,
+): [number, number] {
     if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
         throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
     }
@@ -163,7 +176,7 @@ export function fitToSector(node: Pick<ProcessedNode, 'position' | 'size' | 'sec
     for (const candidate of trail) {
         let candidateDistance = shortestDistanceBetweenRectangles(
             [pos[0], pos[1], node.size[0], node.size[1]],
-            [candidate.position![0], candidate.position![1], candidate.size[0], candidate.size[1]]
+            [candidate.position![0], candidate.position![1], candidate.size[0], candidate.size[1]],
         )
 
         if (candidateDistance < distanceToNeighbour) {
@@ -176,12 +189,17 @@ export function fitToSector(node: Pick<ProcessedNode, 'position' | 'size' | 'sec
         throw new Error("Should not happen: no neighbour found in the trail")
     }
 
-    let neighbourRect: [number, number, number, number] = [neighbour.position![0], neighbour.position![1], neighbour.size[0], neighbour.size[1]]
+    let neighbourRect: [number, number, number, number] = [
+        neighbour.position![0],
+        neighbour.position![1],
+        neighbour.size[0],
+        neighbour.size[1],
+    ]
 
     let m = (node.sector[0] + node.sector[1]) / 2
 
     while (shortestDistanceBetweenRectangles([pos[0], pos[1], node.size[0], node.size[1]], neighbourRect) < spacing) {
-        if (inIE(m, PI / 4, 3 * PI / 4) || inIE(m, 5 * PI / 4, 7 * PI / 4)) {
+        if (inIE(m, PI / 4, (3 * PI) / 4) || inIE(m, (5 * PI) / 4, (7 * PI) / 4)) {
             size[0] += 20
         } else {
             size[1] += 20
@@ -231,8 +249,8 @@ function fitRectToSector(sector: Sector, size: [number, number]): [number, numbe
     let tan_t = Math.tan(t)
 
     if (q_d === q_t) {
-        let x = ((w + l * tan_d) / (tan_t - tan_d))
-        let y = (tan_d * (x + l))
+        let x = (w + l * tan_d) / (tan_t - tan_d)
+        let y = tan_d * (x + l)
 
         if (q_od === 2 || q_od === 3) {
             x = -x - l
@@ -249,14 +267,13 @@ function fitRectToSector(sector: Sector, size: [number, number]): [number, numbe
     // its symmetry, q_od=4 and q_ot=1, as our sectors start and end
     // at 0 and 2*PI.
     if (q_od === 2 && q_ot === 3) {
-        let x = (w / (Math.tan(od) - Math.tan(ot)) - l)
+        let x = w / (Math.tan(od) - Math.tan(ot)) - l
         let y = Math.tan(ot) * (x + l)
 
         return [x, y]
     }
 
     if (q_d + 1 === q_t && !(eq(d, 0) && gt(t, PI / 2))) {
-
         let x = (tan_d * l) / (tan_t - tan_d)
         let y = tan_t * x
 
@@ -270,7 +287,6 @@ function fitRectToSector(sector: Sector, size: [number, number]): [number, numbe
 
         return [x, y]
     }
-
 
     if (eq(d, 0) && gt(t, PI / 2)) {
         let x = gte(t, PI) ? -l / 2 : 0
@@ -323,11 +339,10 @@ function getEffectiveSector(sector: Sector): Sector {
         return [t, d]
     }
 
-
     return [d, t]
 }
 
-function showNode(node: Pick<ProcessedNode, 'el' | 'id' | 'parent' | 'position'>) {
+function showNode(node: Pick<ProcessedNode, "el" | "id" | "parent" | "position">) {
     node.el.classList.remove("off-screen")
     node.el.ariaHidden = "false"
     node.el.style.transform = `translate(${node.position![0]}px, ${node.position![1]}px)`
@@ -343,7 +358,7 @@ function showNode(node: Pick<ProcessedNode, 'el' | 'id' | 'parent' | 'position'>
 
 function resetGlobalMapState() {
     for (let i = 0; i < window.nodes.length; i++) {
-        let node = window.nodes[i] as Node & Partial<ProcessedNode> & { el: SVGElement }
+        let node = window.nodes[i] as Node & Partial<ProcessedNode> & {el: SVGElement}
 
         node.el.classList.add("off-screen")
         node.el.ariaHidden = "true"

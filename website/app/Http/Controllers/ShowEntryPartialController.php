@@ -18,11 +18,6 @@ class ShowEntryPartialController
             'entrygroup' => $tree->lookup[$id],
             'entry' => $tree->lookup[$entryId],
             'breadcrumbs' => collect($tree->nodes)->where('id', $id)->sole()->breadcrumbs($tree),
-
-            // This is used only in development to conditionally load
-            // the CSS before the entry's HTML to debug it directly on the page
-            // instead of through the map's interface.
-            'isXHR' => request()->header('X-Requested-With') === 'XMLHttpRequest',
         ]);
     }
 }

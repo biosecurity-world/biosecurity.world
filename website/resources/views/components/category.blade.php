@@ -1,3 +1,3 @@
-<div class="px-2.5 h-8 border w-fit bg-white rounded-xl flex items-center justify-center shadow">
+<div class="flex h-8 w-fit items-center justify-center rounded-xl border bg-white px-2.5 shadow">
     <span>{{ $category->label }}</span>
 </div>

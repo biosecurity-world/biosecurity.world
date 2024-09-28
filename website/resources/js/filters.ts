@@ -1,13 +1,13 @@
 export type Filters = {
-    activities: number,
-    domains: number,
-    focuses: number,
-    gcbrFocus: boolean,
+    activities: number
+    domains: number
+    focuses: number
+    gcbrFocus: boolean
 }
 
 export type FilterMetadata = {
-    activityCount: number,
-    focusesCount: number,
+    activityCount: number
+    focusesCount: number
 }
 
 const TECHNICAL_DOMAIN = 1 << 0 // 1
@@ -41,18 +41,18 @@ export default class FiltersState<
     // If you add a new type for a filter's value, you need to update
     // the getQueryParam and setQueryParam methods which handle
     // the serialization and deserialization of the filters.
-    S extends Record<string, number|boolean|string>
+    S extends Record<string, number | boolean | string>,
 > {
-    private getters: { [K in keyof S]: () => S[K] }
-    private setters: { [K in keyof S]: (v: S[K]) => void }
-    private defaults: { [K in keyof S]: S[K] }
-    private changeCallbacks: { [K in keyof S]: ChangeCallback<S>[] }
+    private getters: {[K in keyof S]: () => S[K]}
+    private setters: {[K in keyof S]: (v: S[K]) => void}
+    private defaults: {[K in keyof S]: S[K]}
+    private changeCallbacks: {[K in keyof S]: ChangeCallback<S>[]}
 
-    constructor(gettersSetters: { [K in keyof S]: [() => S[K], (v: S[K]) => void] }) {
+    constructor(gettersSetters: {[K in keyof S]: [() => S[K], (v: S[K]) => void]}) {
         this.getters = {} as any
         this.setters = {} as any
         this.defaults = {} as any
-        this.changeCallbacks = { } as any
+        this.changeCallbacks = {} as any
 
         for (const id in gettersSetters) {
             const [getter, setter] = gettersSetters[id]
@@ -97,8 +97,12 @@ export default class FiltersState<
         return this
     }
 
-    onChange(keys: (keyof S)[] | '*', callback: (state: S) => void, executeImmediately: boolean = false): FiltersState<S> {
-        if (keys === '*') {
+    onChange(
+        keys: (keyof S)[] | "*",
+        callback: (state: S) => void,
+        executeImmediately: boolean = false,
+    ): FiltersState<S> {
+        if (keys === "*") {
             keys = Object.keys(this.defaults) as (keyof S)[]
         }
 
@@ -134,8 +138,8 @@ export default class FiltersState<
         return this
     }
 
-    getQueryParam<K extends keyof S>(key: K): S[K] | null {
-        let value = (new URL(window.location.toString())).searchParams.get(key as string)
+    private getQueryParam<K extends keyof S>(key: K): S[K] | null {
+        let value = new URL(window.location.toString()).searchParams.get(key as string)
 
         if (value === null) {
             return null
@@ -143,23 +147,22 @@ export default class FiltersState<
 
         let type = typeof this.defaults[key]
 
-        if (type === 'string') {
+        if (type === "string") {
             return value as any
-        } else if (type === 'number') {
+        } else if (type === "number") {
             return parseInt(value, 10) as any
-        } else if (type === 'boolean') {
-            return (value === 'true') as any
+        } else if (type === "boolean") {
+            return (value === "true") as any
         } else {
             throw new Error(`Could not deserialize key [${key.toString()}]`)
         }
     }
 
-    setQueryParam<K extends keyof S>(key: K, value: S[K]) {
+    private setQueryParam<K extends keyof S>(key: K, value: S[K]) {
         let loc = new URL(window.location.toString())
 
         loc.searchParams.set(key as string, value.toString())
 
-        window.history.replaceState({}, '', loc.toString())
+        window.history.replaceState({}, "", loc.toString())
     }
 }
-

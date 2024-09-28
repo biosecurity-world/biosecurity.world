@@ -6,13 +6,12 @@
             window.testCase = @js($case)
         </script>
 
-        @vite(['resources/js/render-testcase.ts'])
-    </x-slot:head>
+        @vite(["resources/js/render-testcase.ts"])
+    </x-slot>
 
     <svg width="100%" height="100%" id="map">
         <g id="zoom-wrapper">
-            <g id="center-wrapper">
-            </g>
+            <g id="center-wrapper"></g>
         </g>
     </svg>
 </x-layouts.default>
