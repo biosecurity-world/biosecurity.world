@@ -138,7 +138,7 @@ export default class FiltersState<
         return this
     }
 
-    getQueryParam<K extends keyof S>(key: K): S[K] | null {
+    private getQueryParam<K extends keyof S>(key: K): S[K] | null {
         let value = new URL(window.location.toString()).searchParams.get(key as string)
 
         if (value === null) {
@@ -158,7 +158,7 @@ export default class FiltersState<
         }
     }
 
-    setQueryParam<K extends keyof S>(key: K, value: S[K]) {
+    private setQueryParam<K extends keyof S>(key: K, value: S[K]) {
         let loc = new URL(window.location.toString())
 
         loc.searchParams.set(key as string, value.toString())

@@ -1,12 +1,15 @@
 @php
     use App\Services\NotionData\Enums\FocusCategory;
+    /** @var \App\Services\NotionData\Tree\Tree $tree */
 @endphp
 
 <x-layouts.default class="w-full bg-white antialiased" title="Understand the biosecurity landscape.">
     <x-slot:head>
         <script>
-            window.nodes = @json($nodes)
-            window.filterData = @json($filterData)
+            {{-- format-ignore-start --}}
+            window.nodes = @json($nodes);
+            window.filterData = @json($filterData);
+            {{-- format-ignore-end --}}
         </script>
 
         @vite("resources/js/map.ts")
@@ -51,9 +54,9 @@
                 <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
                     As an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
-                    ,
+                    and
                     <a class="underline" href="{{ $databaseUrl }}">open-data</a>
-                    , scientific non-profit, we keep a record of our inclusion decisions for people to challenge.
+                    scientific non-profit, we keep a record of our inclusion decisions for people to challenge.
                 </p>
             </li>
         </ul>
@@ -194,21 +197,26 @@
 
                     <ul class="clear-both mt-1 flex flex-wrap gap-x-2 gap-y-2">
                         @foreach ($tree->activities() as $activity)
+                            @php($fg = $activity->color->foreground())
+                            @php($bg = $activity->color->background())
                             <li>
                                 <x-checkbox-as-pill
                                     name="activity_{{ $activity->id }}"
                                     value="{{ $activity->id }}"
                                     kind="activity-checkbox"
-                                    style="background: {{ $activity->color->foreground() }}"
-                                    class="border-gray-500/10 text-white"
+                                    style="--fg: hsl({{ $fg->hue }} {{ $fg->saturation }}% {{ $fg->lightness }}% / var(--tw-text-opacity, 100));
+                                           --bg: hsl({{ $bg->hue }} {{ $bg->saturation }}% {{ $bg->lightness }}% / var(--tw-bg-opacity, 100));
+                                           --border: hsl({{ $fg->hue }} {{ $fg->saturation }}% {{ $fg->lightness }} / var(--tw-border-opacity, 100));
+                                    "
+                                    class="hover:border-primary-700 hover:bg-white hover:text-[--fg] transition bg-white text-gray-700 peer-checked:bg-[--bg] border peer-checked:border-[--border] peer-checked:border-opacity-20 peer-checked:text-[--fg]"
                                 >
                                     <span class="sr-only">Toggle activity</span>
                                     <x-activity-icon
                                         :activity="$activity"
                                         aria-hidden="true"
-                                        class="size-[1.125rem] group-hover:opacity-75"
+                                        class="size-[1.125rem] opacity-75 group-hover:opacity-100 transition"
                                     />
-                                    <span class="ml-1.5 select-none leading-none group-hover:opacity-75">
+                                    <span class="ml-1.5 font-bold select-none">
                                         {{ $activity->label }}
                                     </span>
                                 </x-checkbox-as-pill>
@@ -247,7 +255,7 @@
                                                 value="{{ $focus->id }}"
                                                 kind="focus-checkbox"
                                                 data-global-offset="{{ $focus->globalSortOrder() }}"
-                                                class="bg-primary-50 text-primary-700 hover:border-primary-700"
+                                                class="bg-white text-gray-700 border hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-100 peer-checked:text-primary-800"
                                             >
                                                 <span class="ml-1.5 select-none leading-none group-hover:opacity-75">
                                                     {{ $focus->label }}

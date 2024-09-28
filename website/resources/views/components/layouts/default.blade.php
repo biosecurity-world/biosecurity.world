@@ -19,7 +19,7 @@
 
         @vite("resources/css/main.css")
 
-        {{ $head ?? "" }}
+        {!! $head ?? "" !!}
     </head>
     <body {{ $attributes }}>
         {{ $slot }}

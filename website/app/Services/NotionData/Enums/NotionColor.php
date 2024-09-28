@@ -2,6 +2,9 @@
 
 namespace App\Services\NotionData\Enums;
 
+
+use Felix\PHPColor\Hsla;
+
 enum NotionColor: string
 {
     case Default = 'default';
@@ -15,9 +18,9 @@ enum NotionColor: string
     case Orange = 'orange';
     case Brown = 'brown';
 
-    public function foreground(): string
+    public function foreground(): Hsla
     {
-        return match ($this) {
+        $hex = match ($this) {
             self::Default => '#37352F',
             self::Gray => '#9B9A97',
             self::Red => '#E03E3E',
@@ -29,11 +32,13 @@ enum NotionColor: string
             self::Orange => '#D9730D',
             self::Brown => '#64473A',
         };
+
+        return Hsla::fromHex($hex);
     }
 
-    public function background(): string
+    public function background(): Hsla
     {
-        return match ($this) {
+        $hex = match ($this) {
             self::Default => '#FFFFFF',
             self::Gray => '#EBECED',
             self::Red => '#FBE4E4',
@@ -45,5 +50,7 @@ enum NotionColor: string
             self::Orange => '#FAEBDD',
             self::Brown => '#E9E5E3',
         };
+
+        return Hsla::fromHex($hex);
     }
 }

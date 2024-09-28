@@ -1,9 +1,3 @@
-@if (! $isXHR && ! app()->isProduction())
-    {{-- format-ignore-start --}}
-    <x-layouts.default class="h-full max-w-lg border-l bg-gray-50">
-    {{-- format-ignore-end --}}
-@endif
-
 <div class="entry flex h-full flex-col justify-between rounded-r-3xl border-r border-t-0 bg-white">
     <div>
         <div class="flex items-center justify-between rounded-tr-3xl border-b border-r bg-gray-50 py-4 pl-4 pr-6">
@@ -176,8 +170,3 @@
         </a>
     </div>
 </div>
-@if (! $isXHR && ! app()->isProduction())
-    {{-- format-ignore-start --}}
-    </x-layouts.default>
-    {{-- format-ignore-end --}}
-@endif

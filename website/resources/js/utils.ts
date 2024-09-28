@@ -181,7 +181,6 @@ export function trapClickAndDoubleClick(
     }
 }
 
-export function flip(num: number, n: number): number {
-    // This is more semantically correct than ~num.
-    return num ^ ((1 << n) - 1)
+export function semanticBitFlip(x: number, length: number): number {
+    return x ^ ((1 << length) - 1)
 }

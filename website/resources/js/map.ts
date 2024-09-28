@@ -1,5 +1,5 @@
 import {D3ZoomEvent, select, zoom} from "d3"
-import {changeAppState, debug, flip, trapClickAndDoubleClick} from "./utils"
+import {changeAppState, debug, semanticBitFlip, trapClickAndDoubleClick} from "./utils"
 import type {AppStateChangeEvent, Node, ProcessedNode} from "@/types/index.d.ts"
 import {updateMap} from "./layout"
 import FiltersStore, {Filters} from "@/filters"
@@ -21,7 +21,10 @@ async function openEntry(entry: HTMLElement): Promise<void> {
             headers: {"X-Requested-With": "XMLHttpRequest"},
         })
 
-        elEntryWrapper.innerHTML = await entryResponse.text()
+        let content = await entryResponse.text()
+        console.log(elEntryWrapper, content)
+
+        elEntryWrapper.innerHTML = content
 
         setLastFocusedEntry([entrygroup, entryId])
 
@@ -150,8 +153,9 @@ for (const el of document.querySelectorAll("button.resets-filters")) {
     })
 }
 for (const el of activityInputs) {
-    el.addEventListener("change", () => filtersStore.syncFilter("activities"))
-    el.addEventListener(
+    let label = document.querySelector(`label[for="${el.id}"]`)! as HTMLLabelElement
+
+    label.addEventListener(
         "click",
         trapClickAndDoubleClick(
             () => {
@@ -161,9 +165,9 @@ for (const el of activityInputs) {
             () => {
                 let mask = 1 << Array.from(activityInputs).indexOf(el)
 
-                // The double-clicked activity is already the only one active, so we flip all of them
+                // The double-clicked activity is already the only one active, so we semanticBitFlip all of them
                 if (filtersStore.getState("activities") === mask) {
-                    mask = flip(mask, activityInputs.length)
+                    mask = semanticBitFlip(mask, activityInputs.length)
                 }
 
                 filtersStore.setState("activities", mask)
@@ -176,9 +180,10 @@ for (const el of domainInputs) {
 }
 gcbrFocus.addEventListener("change", () => filtersStore.syncFilter("gcbrFocus"))
 
+let groupedFocuses: Map<HTMLElement, NodeListOf<HTMLInputElement>> = new Map()
 let masterCheckboxes: Record<string, HTMLInputElement> = {}
 let focusesLabels: Record<string, HTMLLabelElement> = {}
-let groupedFocuses: Map<HTMLElement, NodeListOf<HTMLInputElement>> = new Map()
+let previousFocuses: Record<string, boolean[]> = {}
 
 focusesWrapper.forEach((focusWrapper) => {
     let focuses = focusWrapper.querySelectorAll(".focus-checkbox") as NodeListOf<HTMLInputElement>
@@ -188,16 +193,20 @@ focusesWrapper.forEach((focusWrapper) => {
     }
 
     groupedFocuses.set(focusWrapper, focuses)
+    previousFocuses[focusWrapper.id] = Array.from(focuses).map((focus) => focus.checked)
     masterCheckboxes[focusWrapper.id] = focusWrapper.querySelector(".focuses-master-checkbox") as HTMLInputElement
 })
 
-function toggleGroupedFocus(focuses: NodeListOf<HTMLInputElement>, force: boolean | null = null): void {
+function toggleGroupedFocus(focusesWrapper: HTMLElement, force: boolean | null = null): void {
+    let focuses = groupedFocuses.get(focusesWrapper)!
     if (force === null) {
         force = getGroupOffsets(focuses).length === 0
     }
 
-    for (const focus of focuses) {
-        focus.checked = force
+    if (force) {
+        focuses.forEach((focus, k) => (focus.checked = previousFocuses[focusesWrapper.id][k]))
+    } else {
+        focuses.forEach((focus) => (focus.checked = false))
     }
 }
 function getGroupOffsets(focuses: NodeListOf<HTMLInputElement>): number[] {
@@ -239,7 +248,7 @@ for (let [focusesWrapper, focuses] of groupedFocuses) {
     }
 
     masterCheckboxes[focusesWrapper.id].addEventListener("click", () => {
-        toggleGroupedFocus(focuses)
+        toggleGroupedFocus(focusesWrapper)
         filtersStore.syncFilter("focuses")
     })
 
@@ -247,12 +256,12 @@ for (let [focusesWrapper, focuses] of groupedFocuses) {
         "click",
         trapClickAndDoubleClick(
             () => {
-                toggleGroupedFocus(focuses)
+                toggleGroupedFocus(focusesWrapper)
                 filtersStore.syncFilter("focuses")
             },
             () => {
-                for (const [comparisonGroup, comparisonFocuses] of groupedFocuses) {
-                    toggleGroupedFocus(comparisonFocuses, comparisonGroup.id === focusesWrapper.id)
+                for (const [comparisonGroup, _] of groupedFocuses) {
+                    toggleGroupedFocus(comparisonGroup, comparisonGroup.id === focusesWrapper.id)
                 }
                 filtersStore.syncFilter("focuses")
             },
@@ -260,19 +269,23 @@ for (let [focusesWrapper, focuses] of groupedFocuses) {
     )
 }
 
-filtersStore.onChange(["focuses"], () => {
-    for (const [focusesWrapper, focuses] of groupedFocuses) {
-        let offsets = getGroupOffsets(focuses)
+filtersStore.onChange(
+    ["focuses"],
+    () => {
+        for (const [focusesWrapper, focuses] of groupedFocuses) {
+            let offsets = getGroupOffsets(focuses)
 
-        if (offsets.length === 0 || offsets.length === focuses.length) {
-            masterCheckboxes[focusesWrapper.id].checked = offsets.length === focuses.length
-            masterCheckboxes[focusesWrapper.id].indeterminate = false
-        } else {
-            masterCheckboxes[focusesWrapper.id].checked = true
-            masterCheckboxes[focusesWrapper.id].indeterminate = true
+            if (offsets.length === 0 || offsets.length === focuses.length) {
+                masterCheckboxes[focusesWrapper.id].checked = offsets.length === focuses.length
+                masterCheckboxes[focusesWrapper.id].indeterminate = false
+            } else {
+                masterCheckboxes[focusesWrapper.id].checked = true
+                masterCheckboxes[focusesWrapper.id].indeterminate = true
+            }
         }
-    }
-})
+    },
+    true,
+)
 ;(async function () {
     try {
         let mapContentRes = await fetch("/_/m")
@@ -288,7 +301,6 @@ filtersStore.onChange(["focuses"], () => {
             let el = document.querySelector(
                 `button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`,
             ) as HTMLButtonElement
-            console.log(el)
             openEntry(el)
         }
 
