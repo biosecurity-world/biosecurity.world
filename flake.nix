@@ -22,8 +22,8 @@
             ++ (with all; [
               xdebug
             ]);
-        };
-      in
+            };
+        in
         [php php.packages.composer]
         ++ (with pkgs; [
           nodejs
