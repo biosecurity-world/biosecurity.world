@@ -5,7 +5,7 @@
     >
         <ul class="items-center md:flex md:space-x-4">
             <li
-                class="@if ($invert) text-white lg:hover:bg-white/20 lg:focus:bg-white/20 @else lg:hover:bg-primary-50 lg:focus:bg-primary-50 @endif mb-1.5 mr-4 inline-block rounded-xl font-display underline focus:outline-none md:mb-0 lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
+                class="@if ($invert) text-white lg:hover:bg-white/20 lg:focus:bg-white/20 @else lg:hover:bg-primary-50 lg:focus:bg-primary-50 @endif mb-1.5 mr-4 inline-block rounded-xl font-display underline focus:outline-hidden md:mb-0 lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
             >
                 <a href="{{ route("welcome", absolute: false) }}">biosecurity.world</a>
             </li>
@@ -18,7 +18,7 @@
                 <li class="inline">
                     <a
                         href="{{ $url }}"
-                        class="@if ($invert) text-white lg:hover:bg-white/20 lg:focus:bg-white/20 @else lg:hover:bg-primary-50 lg:focus:bg-primary-50 @endif mr-4 rounded-xl underline focus:outline-none lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
+                        class="@if ($invert) text-white lg:hover:bg-white/20 lg:focus:bg-white/20 @else lg:hover:bg-primary-50 lg:focus:bg-primary-50 @endif mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
                     >
                         {{ $label }}
                     </a>

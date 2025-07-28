@@ -61,14 +61,14 @@
             <div class="mt-10 flex items-center justify-center gap-x-6">
                 <a
                     href="{{ route("how-to-contribute", absolute: false) }}"
-                    class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-xs hover:bg-gray-100 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                     Learn how to contribute
                 </a>
             </div>
             <svg
                 viewBox="0 0 1024 1024"
-                class="absolute left-1/2 top-1/3 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
+                class="absolute left-1/2 top-1/3 -z-10 h-256 w-5xl -translate-x-1/2 mask-[radial-gradient(closest-side,white,transparent)]"
                 aria-hidden="true"
             >
                 <circle cx="512" cy="512" r="512" fill="white" fill-opacity="0.7" />

@@ -5,7 +5,7 @@
         </style>
     </x-slot>
 
-    <x-navbar class="mt-4 shadow-sm lg:mt-8 lg:bg-white" border />
+    <x-navbar class="mt-4 shadow-xs lg:mt-8 lg:bg-white" border />
     <article class="prose mx-auto mt-8 max-w-7xl px-6 xl:px-0">
         <h1 class="max-w-3xl text-left font-display text-4xl font-bold tracking-tight text-primary-900 sm:text-6xl">
             Terms of Service

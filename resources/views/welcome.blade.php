@@ -14,7 +14,7 @@
 
         @vite("resources/js/map.ts")
     </x-slot>
-    <header class="w-full bg-gradient-to-tl from-primary-600 to-primary-950 pb-36 pt-4 lg:pt-8">
+    <header class="w-full bg-linear-to-tl from-primary-600 to-primary-950 pb-36 pt-4 lg:pt-8">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="absolute -mx-8" viewBox="0 0 8505 4061">
             <defs>
                 <filter id="a" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
@@ -311,7 +311,7 @@
                 <fieldset class="mt-2">
                     <legend class="font-display leading-6 text-gray-900">Domain</legend>
 
-                    <div class="mt-0.5 rounded-xl bg-white shadow-sm">
+                    <div class="mt-0.5 rounded-xl bg-white shadow-xs">
                         <div>
                             <input
                                 type="checkbox"
@@ -325,7 +325,7 @@
                                 for="domain_technical"
                                 class="flex cursor-pointer items-center rounded-t-xl border px-4 py-1.5 transition hover:bg-gray-50 peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-2 peer-focus:ring-technical"
                             >
-                                <x-at-technical class="flex-grow" />
+                                <x-at-technical class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
                             </label>
                         </div>
@@ -339,16 +339,16 @@
                             />
                             <label
                                 for="domain_governance"
-                                class="domain-checkbox-label flex cursor-pointer items-center rounded-b-xl border !border-t-0 px-4 py-1.5 transition hover:bg-gray-50 peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-2 peer-focus:ring-governance"
+                                class="domain-checkbox-label flex cursor-pointer items-center rounded-b-xl border border-t-0! px-4 py-1.5 transition hover:bg-gray-50 peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-2 peer-focus:ring-governance"
                             >
-                                <x-at-governance class="flex-grow" />
+                                <x-at-governance class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
                             </label>
                         </div>
                     </div>
                 </fieldset>
                 <div class="mt-6 flex items-center justify-between">
-                    <span class="flex flex-grow flex-col">
+                    <span class="flex grow flex-col">
                         <span class="font-display leading-6 text-gray-900">Focus on GCBRs prevention</span>
                         <span class="text-sm text-gray-500">
                             Include only organizations focused on large-scale pandemics prevention.
@@ -372,13 +372,13 @@
                                            --bg: hsl({{ $bg->hue }} {{ $bg->saturation }}% {{ $bg->lightness }}% / var(--tw-bg-opacity, 100));
                                            --border: hsl({{ $fg->hue }} {{ $fg->saturation }}% {{ $fg->lightness }} / var(--tw-border-opacity, 100));
                                     "
-                                    class="hover:border-primary-700 hover:bg-white hover:text-[--fg] transition bg-white text-gray-700 peer-checked:bg-[--bg] border peer-checked:border-[--border] peer-checked:border-opacity-20 peer-checked:text-[--fg]"
+                                    class="hover:border-primary-700 hover:bg-white hover:text-(--fg) transition bg-white text-gray-700 peer-checked:bg-(--bg) border peer-checked:border-(--border) peer-checked:border-opacity-20 peer-checked:text-(--fg)"
                                 >
                                     <span class="sr-only">Toggle activity</span>
                                     <x-activity-icon
                                         :activity="$activity"
                                         aria-hidden="true"
-                                        class="size-[1.125rem] opacity-75 group-hover:opacity-100 transition"
+                                        class="size-4.5 opacity-75 group-hover:opacity-100 transition"
                                     />
                                     <span class="ml-1.5 font-bold select-none">
                                         {{ $activity->label }}
@@ -410,7 +410,7 @@
                                 </div>
 
                                 <ul
-                                    class="focuses-list -mx-6 mt-0.5 flex cursor-pointer flex-wrap gap-x-2 gap-y-2 rounded-xl border border-transparent bg-white px-4 py-4 shadow-sm transition"
+                                    class="focuses-list -mx-6 mt-0.5 flex cursor-pointer flex-wrap gap-x-2 gap-y-2 rounded-xl border border-transparent bg-white px-4 py-4 shadow-xs transition"
                                 >
                                     @foreach ($focuses as $focus)
                                         <li>
@@ -501,7 +501,7 @@
             <section data-state="success" class="app-state state-inactive" aria-hidden="true">
                 <div class="absolute inset-0 z-20 h-full w-full max-w-md border-y" id="entry-wrapper"></div>
                 <div
-                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center rounded-r-3xl border-y border-r bg-gray-50 pt-16 opacity-0 transition-[opacity]"
+                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center rounded-r-3xl border-y border-r bg-gray-50 pt-16 opacity-0 transition-opacity"
                     id="entry-loader"
                 >
                     <svg
@@ -528,7 +528,7 @@
                     <!-- The map will be dynamically inserted here -->
                 </svg>
                 <div class="absolute bottom-6 right-6">
-                    <div class="flex flex-col divide-y rounded-lg bg-white shadow">
+                    <div class="flex flex-col divide-y rounded-lg bg-white shadow-sm">
                         <button class="focusable rounded-t-lg p-2 hover:bg-gray-50" id="zoom-in">
                             <x-heroicon-s-plus class="size-5 text-gray-700" />
                         </button>

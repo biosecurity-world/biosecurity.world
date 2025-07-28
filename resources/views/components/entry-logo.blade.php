@@ -5,7 +5,7 @@
     {{
         $attributes->class([
             "entry-logo inline-block flex size-6 items-center justify-center overflow-hidden rounded-md border",
-            "p-[0.125rem]" => ! $logo->filled,
+            "p-0.5" => ! $logo->filled,
             "border-transparent" => $logo->filled,
         ])
     }}
