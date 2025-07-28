@@ -6,7 +6,7 @@
 <x-layouts.default class="w-full bg-white antialiased" title="Understand the biosecurity landscape.">
     <x-slot:head>
         <script>
-            {{-- format-ignore-start --}}
+            ;{{-- format-ignore-start --}}
             window.nodes = @json($nodes);
             window.filterData = @json($filterData);
             {{-- format-ignore-end --}}
@@ -14,7 +14,7 @@
 
         @vite("resources/js/map.ts")
     </x-slot>
-    <header class="w-full bg-linear-to-tl from-primary-600 to-primary-950 pb-36 pt-4 lg:pt-8">
+    <header class="from-primary-600 to-primary-950 w-full bg-linear-to-tl pt-4 pb-36 lg:pt-8">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="absolute -mx-8" viewBox="0 0 8505 4061">
             <defs>
                 <filter id="a" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
@@ -181,13 +181,13 @@
         <x-navbar class="md:bg-white/20 md:shadow-inner md:shadow-white/30" invert />
 
         <h1
-            class="mx-auto mt-6 max-w-3xl px-6 font-display text-3xl font-bold tracking-tight text-white sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
+            class="font-display mx-auto mt-6 max-w-3xl px-6 text-3xl font-bold tracking-tight text-white sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
         >
             Understand the biosecurity landscape.
         </h1>
 
         <ul
-            class="mx-auto mt-6 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:gap-x-8 md:space-y-0 lg:mt-20 xl:gap-x-12 xl:px-0"
+            class="mx-auto mt-6 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
         >
             <li>
                 <h2 class="font-display text-white lg:text-lg xl:text-2xl">Up-to-date</h2>
@@ -217,8 +217,7 @@
                 <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
                     As an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
-                    and
-                    ,
+                    and ,
                     <a class="underline" href="{{ $databaseUrl }}">open-data</a>
                     , scientific project, we keep a record of our inclusion decisions for people to challenge.
                 </p>
@@ -230,12 +229,12 @@
         id="map-wrapper"
     >
         <aside
-            class="hidden h-full w-full max-w-md overflow-y-scroll rounded-l-3xl border-y border-l border-r bg-white lg:flex lg:flex-col"
+            class="hidden h-full w-full max-w-md overflow-y-scroll rounded-l-3xl border-y border-r border-l bg-white lg:flex lg:flex-col"
         >
             <header class="border-b">
                 <div class="px-6 pt-4">
                     <div class="flex items-center">
-                        <h3 class="flex-1 font-display text-2xl">Map of Biosecurity</h3>
+                        <h3 class="font-display flex-1 text-2xl">Map of Biosecurity</h3>
 
                         <button
                             title="Toggle fullscreen (shortcut: F)"
@@ -269,13 +268,13 @@
 
                 <ul class="mt-4 flex space-x-4 px-6 pb-2">
                     <li>
-                        <a href="#" class="inline-flex whitespace-nowrap text-sm">
+                        <a href="#" class="inline-flex text-sm whitespace-nowrap">
                             <span class="mt-px text-gray-400">&bull;&nbsp;</span>
                             <span class="-mt-px text-gray-700 underline">Inclusion criteria</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="inline-flex whitespace-nowrap text-sm">
+                        <a href="#" class="inline-flex text-sm whitespace-nowrap">
                             <span class="mt-px text-gray-400">&bull;&nbsp;</span>
                             <span class="-mt-px text-gray-700 underline">Rejected entries</span>
                         </a>
@@ -283,7 +282,7 @@
                     <li>
                         <a
                             href="https://notion.so/{{ config("services.notion.database") }}"
-                            class="inline-flex whitespace-nowrap text-sm"
+                            class="inline-flex text-sm whitespace-nowrap"
                         >
                             <span class="mt-px text-gray-400">&bull;&nbsp;</span>
                             <span class="-mt-px mr-0.5 text-gray-700 underline">Notion</span>
@@ -291,7 +290,7 @@
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 16 16"
                                 fill="currentColor"
-                                class="-mt-px size-4 text-gray-400 group-hover:text-primary-700"
+                                class="group-hover:text-primary-700 -mt-px size-4 text-gray-400"
                                 aria-label="External link icon"
                             >
                                 <path
@@ -306,7 +305,7 @@
                 </ul>
             </header>
             <div class="bg-gray-50 px-6 py-4 lg:flex-1">
-                <h4 class="flex-1 font-display text-lg">Filters</h4>
+                <h4 class="font-display flex-1 text-lg">Filters</h4>
 
                 <fieldset class="mt-2">
                     <legend class="font-display leading-6 text-gray-900">Domain</legend>
@@ -323,7 +322,7 @@
 
                             <label
                                 for="domain_technical"
-                                class="flex cursor-pointer items-center rounded-t-xl border px-4 py-1.5 transition hover:bg-gray-50 peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-2 peer-focus:ring-technical"
+                                class="peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-technical flex cursor-pointer items-center rounded-t-xl border px-4 py-1.5 transition peer-focus:ring-2 hover:bg-gray-50"
                             >
                                 <x-at-technical class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
@@ -339,7 +338,7 @@
                             />
                             <label
                                 for="domain_governance"
-                                class="domain-checkbox-label flex cursor-pointer items-center rounded-b-xl border border-t-0! px-4 py-1.5 transition hover:bg-gray-50 peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-2 peer-focus:ring-governance"
+                                class="domain-checkbox-label peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-governance flex cursor-pointer items-center rounded-b-xl border border-t-0! px-4 py-1.5 transition peer-focus:ring-2 hover:bg-gray-50"
                             >
                                 <x-at-governance class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
@@ -357,28 +356,27 @@
                     <x-big-toggle name="has_gcbr_focus" kind="has-gcbr-focus" />
                 </div>
                 <fieldset class="mt-6">
-                    <legend class="inline font-display leading-6 text-gray-900">Activities</legend>
+                    <legend class="font-display inline leading-6 text-gray-900">Activities</legend>
 
                     <ul class="clear-both mt-1 flex flex-wrap gap-x-2 gap-y-2">
                         @foreach ($tree->activities() as $activity)
-                            @php($fg = $activity->color->foreground())
-                            @php($bg = $activity->color->background())
+                            @php($fg = $activity->color->foreground()->withAlpha(1)->toHsla())
+                            @php($bg = $activity->color->background()->withAlpha(1)->toHsla())
+                            @php($border = $activity->color->foreground()->withAlpha(0.2)->toHsla())
+
                             <li>
                                 <x-checkbox-as-pill
                                     name="activity_{{ $activity->id }}"
                                     value="{{ $activity->id }}"
                                     kind="activity-checkbox"
-                                    style="--fg: hsl({{ $fg->hue }} {{ $fg->saturation }}% {{ $fg->lightness }}% / var(--tw-text-opacity, 100));
-                                           --bg: hsl({{ $bg->hue }} {{ $bg->saturation }}% {{ $bg->lightness }}% / var(--tw-bg-opacity, 100));
-                                           --border: hsl({{ $fg->hue }} {{ $fg->saturation }}% {{ $fg->lightness }} / var(--tw-border-opacity, 100));
-                                    "
-                                    class="hover:border-primary-700 hover:bg-white hover:text-(--fg) transition bg-white text-gray-700 peer-checked:bg-(--bg) border peer-checked:border-(--border) peer-checked:border-opacity-20 peer-checked:text-(--fg)"
+                                    style="--fg: {{ $fg }}; --bg: {{ $bg }}; --border: {{ $border}}"
+                                    class="hover:border-primary-700 peer-checked:border-opacity-20 border bg-white text-gray-700 transition peer-checked:border-(--border) peer-checked:bg-(--bg) peer-checked:text-(--fg) hover:bg-white hover:text-(--fg)"
                                 >
                                     <span class="sr-only">Toggle activity</span>
                                     <x-activity-icon
                                         :activity="$activity"
                                         aria-hidden="true"
-                                        class="size-4.5 opacity-75 group-hover:opacity-100 transition"
+                                        class="size-4.5 opacity-75 transition group-hover:opacity-100"
                                     />
                                     <span class="ml-1.5 font-bold select-none">
                                         {{ $activity->label }}
@@ -389,7 +387,7 @@
                     </ul>
                 </fieldset>
                 <div class="mt-6">
-                    <h4 class="flex-1 font-display leading-6 text-gray-900">Intervention focuses</h4>
+                    <h4 class="font-display flex-1 leading-6 text-gray-900">Intervention focuses</h4>
 
                     <div class="mt-4 space-y-8">
                         @foreach ($categorizedFocuses as $category => $focuses)
@@ -419,9 +417,9 @@
                                                 value="{{ $focus->id }}"
                                                 kind="focus-checkbox"
                                                 data-global-offset="{{ $focus->globalSortOrder() }}"
-                                                class="bg-white text-gray-700 border hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-100 peer-checked:text-primary-800"
+                                                class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-100 peer-checked:text-primary-800 border bg-white text-gray-700"
                                             >
-                                                <span class="ml-1.5 select-none leading-none group-hover:opacity-75">
+                                                <span class="ml-1.5 leading-none select-none group-hover:opacity-75">
                                                     {{ $focus->label }}
                                                 </span>
                                             </x-checkbox-as-pill>
@@ -435,7 +433,7 @@
             </div>
         </aside>
         <main
-            class="relative h-full w-full rounded-l-3xl rounded-r-3xl border-b border-r bg-gray-100 lg:rounded-l-none"
+            class="relative h-full w-full rounded-l-3xl rounded-r-3xl border-r border-b bg-gray-100 lg:rounded-l-none"
         >
             <section data-state="error" aria-hidden="true" class="app-state state-inactive">
                 <div class="text-center">
@@ -470,7 +468,7 @@
             <section data-state="loading" aria-hidden="false" class="app-state state-active">
                 <div>
                     <svg
-                        class="inline h-8 w-8 animate-spin fill-primary-600 text-gray-200"
+                        class="fill-primary-600 inline h-8 w-8 animate-spin text-gray-200"
                         viewBox="0 0 100 101"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -505,7 +503,7 @@
                     id="entry-loader"
                 >
                     <svg
-                        class="inline h-8 w-8 animate-spin fill-primary-600 text-gray-200"
+                        class="fill-primary-600 inline h-8 w-8 animate-spin text-gray-200"
                         viewBox="0 0 100 101"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -527,7 +525,7 @@
                 <svg id="map" width="100%" height="100%" class="rounded-tr-3xl">
                     <!-- The map will be dynamically inserted here -->
                 </svg>
-                <div class="absolute bottom-6 right-6">
+                <div class="absolute right-6 bottom-6">
                     <div class="flex flex-col divide-y rounded-lg bg-white shadow-sm">
                         <button class="focusable rounded-t-lg p-2 hover:bg-gray-50" id="zoom-in">
                             <x-heroicon-s-plus class="size-5 text-gray-700" />

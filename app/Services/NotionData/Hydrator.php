@@ -38,35 +38,40 @@ class Hydrator
      * The IDs are hardcoded (no other way is much better) but they do not change,
      * even if the database is duplicated or the column changes, so they are _very_ stable.
      */
-     public const array SCHEMA = [
-     /* THE REAL DEAL
-     'organizationType' => '%3EfkD',
-     'link' => 'BEe%7D',
-     'description' => 'C%3Fc%3A',
-     'interventionFocuses' => 'L%3FRx',
-     'parent' => 'QTQ%5D',
-     'locationHints' => 'VQ%5B%7D',
-     'activityTypes' => 'Wmi~',
-     'gcbrFocus' => 'kC%5Cr',
-     'name' => 'title',
-     'isCategory' => 'uR%3DA',
-     */
-     'organizationType' => '%3EjRh',
-     'link' => 'V%40%3EE',
-     'description' => 'h~xN',
-     'interventionFocuses' => '%3A%3EmA',
-     'parent' => 'lWV%5D',
-     'locationHints' => '%3CbKb',
-     'activityTypes' => 'iPD%5C',
-     'gcbrFocus' => '%3B%3DpX',
-     'name' => 'title',
-     'isCategory' => 'Ydo%5E',
-     ];
+        public const array SCHEMA = [
+        /* THE REAL DEAL
+        'organizationType' => '%3EfkD',
+        'link' => 'BEe%7D',
+        'description' => 'C%3Fc%3A',
+        'interventionFocuses' => 'L%3FRx',
+        'parent' => 'QTQ%5D',
+        'locationHints' => 'VQ%5B%7D',
+        'activityTypes' => 'Wmi~',
+        'gcbrFocus' => 'kC%5Cr',
+        'name' => 'title',
+        'isCategory' => 'uR%3DA',
+        */
+
+        // My dev org
+        'organizationType' => '%3C%5Ce%7D',
+        //'Notes' => '%40HC%3F',
+        'parent' => 'NIbg',
+        'interventionFocuses' => 'NpsX',
+        //'Label' => 'Q%7C~I',
+        'link' => 'S%3CY%5C',
+        'gcbrFocus' => 'TMZQ',
+        'isCategory' => 'VOtz',
+        'activityTypes' => 'Vbs%5D',
+        //'Children' => 'gOgj',
+        'description' => 'hR%3E%3D',
+        'locationHints' => 'wYKB',
+        'name' => 'title',
+        ];
 
     //public const TECHNICAL_DOMAIN = '|tSq';
     //public const GOVERNANCE_DOMAIN =  'rBTY';
-    public const TECHNICAL_DOMAIN = '96397c58-8c0f-403a-95eb-6c7063815d58';
-    public const GOVERNANCE_DOMAIN = 'a5c9012b-1946-4aba-94b4-a3b569541f0e';
+    public const TECHNICAL_DOMAIN = 'fec88d1b-3a2c-4c60-9166-9d7107ec8005';
+    public const GOVERNANCE_DOMAIN = '3fda0bd6-f188-4363-b21b-c7b330e8844b';
 
 
      public function __construct(protected Database $database) {}
