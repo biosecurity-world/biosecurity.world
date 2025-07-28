@@ -137,7 +137,6 @@ func FindLogo(URL *url.URL, targetSize int) (*Logo, error) {
 			return logo, nil
 		}
 
-		fmt.Println(logo)
 		decodedLogo, _, err := image.Decode(bytes.NewReader(logo.Body))
 		if err != nil {
 			fmt.Println(err)
