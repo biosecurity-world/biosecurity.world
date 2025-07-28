@@ -2,10 +2,12 @@
 
 namespace App\Services\NotionData\Enums;
 
+use App\Services\NotionData\Hydrator;
+
 enum DomainEnum: string
 {
-    case Technical = '|tSq';
-    case Governance = 'rBTY';
+    case Technical = Hydrator::TECHNICAL_DOMAIN;
+    case Governance = Hydrator::GOVERNANCE_DOMAIN;
 
     public function mask(): int
     {

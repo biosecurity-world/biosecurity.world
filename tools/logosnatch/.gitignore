@@ -1,0 +1,9 @@
+.idea/
+favicons/
+result/
+*.bin
+.env
+test.png
+default-logo.svg
+urls.txt
+logosnatch
