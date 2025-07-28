@@ -11,9 +11,8 @@
             </li>
             <li class="block flex-1" aria-hidden="true"></li>
             @foreach ([
-                    [route("how-to-contribute", absolute: false), "Contribute"],
-                    [route("give-feedback", absolute: false), "Give feedback"],
-                    [route("about", absolute: false), "About us"]
+                    [route("inclusion-criteria", absolute: false), "Inclusion criteria"],
+                    [route("give-feedback", absolute: false), "Give feedback"]
                 ]
                 as [$url, $label])
                 <li class="inline">

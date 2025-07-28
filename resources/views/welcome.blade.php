@@ -55,8 +55,9 @@
                     As an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
                     and
+                    ,
                     <a class="underline" href="{{ $databaseUrl }}">open-data</a>
-                    scientific non-profit, we keep a record of our inclusion decisions for people to challenge.
+                    , scientific project, we keep a record of our inclusion decisions for people to challenge.
                 </p>
             </li>
         </ul>

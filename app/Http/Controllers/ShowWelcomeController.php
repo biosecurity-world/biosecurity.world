@@ -34,6 +34,7 @@ class ShowWelcomeController
             return $exportedNode;
         });
 
+
         return view('welcome', [
             'tree' => $tree,
             'categorizedFocuses' => $tree->interventionFocuses()->groupBy(fn (InterventionFocus $f) => $f->category())->sortKeys()->map->sortBy('name'),
