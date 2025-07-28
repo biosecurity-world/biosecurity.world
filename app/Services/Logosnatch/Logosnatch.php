@@ -11,10 +11,10 @@ class Logosnatch
     {
         $cacheKey = sprintf('logosnatch-download-%s-%d', base64_encode($url), $targetSize);
         if (Cache::has($cacheKey)) {
-            return self::createFromLogosnatchResponse(Cache::get($cacheKey));
+            return self::createFromLogosnatchResponse(Cache::get($cacheKey), $url, $targetSize);
         }
 
-        $logosnatchBinary = base_path('/../tools/logosnatch/logosnatch');
+        $logosnatchBinary = base_path('tools/logosnatch/logosnatch');
         if (! is_string($logosnatchBinary) || ! file_exists($logosnatchBinary)) {
             throw new RuntimeException('Could not find logosnatch binary at '.$logosnatchBinary);
         }
@@ -53,10 +53,23 @@ class Logosnatch
         $ret = proc_close($process);
 
         if ($ret !== 0 || ! $body) {
-            throw new RuntimeException('Failed to download logo: '.$error);
+            throw new RuntimeException(
+                sprintf('Failed to download logo for URL "%s". STDERR: %s. STDOUT: %s', $url, $error, $body)
+            );
         }
 
         $decoded = json_decode($body, true);
+        if (! is_array($decoded) || ! isset($decoded['format'], $decoded['path'], $decoded['filled'], $decoded['size'])) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unexpected response from logosnatch for URL "%s" (size: %d). Got: %s',
+                    $url,
+                    $targetSize,
+                    $body,
+                )
+            );
+        }
+
         $logo = self::createFromLogosnatchResponse($decoded);
 
         Cache::forever($cacheKey, $decoded);
@@ -64,17 +77,13 @@ class Logosnatch
         return $logo;
     }
 
-    private static function createFromLogosnatchResponse(mixed $decoded): Logo
-    {
-        if (! is_array($decoded) || ! isset($decoded['format'], $decoded['path'], $decoded['filled'], $decoded['size'])) {
-            throw new RuntimeException('Unexpected response from logosnatch, expected key format, path, filled, got '.$decoded);
-        }
-
-        return new Logo(
-            $decoded['format'],
-            '/storage/logos/'.$decoded['path'],
-            $decoded['size'],
-            $decoded['filled']
-        );
+    private static function createFromLogosnatchResponse(mixed $decoded): Logo {
+       return  new Logo(
+              $decoded['format'],
+              '/storage/logos/'.$decoded['path'],
+              $decoded['size'],
+              $decoded['filled']
+              );
     }
+
 }
