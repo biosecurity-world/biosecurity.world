@@ -9,6 +9,7 @@ enum FocusCategory: int
     case Therapies = 3;
     case Preparedness = 4;
     case EmergingBiotechnologies = 5;
+    case Uncategorized = 6;
 
     public function label(): string
     {
@@ -17,7 +18,8 @@ enum FocusCategory: int
             self::Surveillance => 'Surveillance and diagnostics',
             self::Therapies => 'Therapies',
             self::Preparedness => 'Preparedness',
-            self::EmergingBiotechnologies => 'Emerging biotechnologies'
+            self::EmergingBiotechnologies => 'Emerging biotechnologies',
+            self::Uncategorized => 'Uncategorized'
         };
     }
 }

@@ -18,7 +18,8 @@ class InterventionFocus
             'CNRk', 'hop{', 'ZXKA' => FocusCategory::Therapies,
             'k\\\\W', '{[Rj', '8fa4d53b-aa93-49ef-af76-32940fb918e7' => FocusCategory::Preparedness,
             'Yjy:', 'K~O{', 'f815b152-f213-4e99-bcfa-830e1143e59c' => FocusCategory::EmergingBiotechnologies,
-            default => throw new \Exception("Unknown focus category: {$id}"),
+            default => FocusCategory::Uncategorized,
+            //default => throw new \Exception("Unknown focus category: {$id}"),
         };
     }
 

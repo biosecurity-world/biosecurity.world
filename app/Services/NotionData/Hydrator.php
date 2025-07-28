@@ -65,7 +65,7 @@ class Hydrator
 
     //public const TECHNICAL_DOMAIN = '|tSq';
     //public const GOVERNANCE_DOMAIN =  'rBTY';
-    public const TECHNICAL_DOMAIN = '|tSq';
+    public const TECHNICAL_DOMAIN = '96397c58-8c0f-403a-95eb-6c7063815d58';
     public const GOVERNANCE_DOMAIN = 'a5c9012b-1946-4aba-94b4-a3b569541f0e';
 
 
@@ -168,10 +168,7 @@ class Hydrator
      {
          $props = $page->properties();
 
-        dump($props);
-
-         $link = $props->getUrlById(self::SCHEMA['link'])->url;
-
+         $link = str_replace('‧', '.', $props->getUrlById(self::SCHEMA['link'])->url);
 
          $interventionFocuses = $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options;
          $domains = [];

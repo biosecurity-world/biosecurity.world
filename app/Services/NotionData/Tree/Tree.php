@@ -61,7 +61,6 @@ class Tree
 
     public static function buildFromPages(HydratedPages $pages): Tree
     {
-        dd($pages);
         $tree = new Tree([], [], $pages->errors, IdMap::hash('root'));
 
         foreach ($pages->data as $page) {
