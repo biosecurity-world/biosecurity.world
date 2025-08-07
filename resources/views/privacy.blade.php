@@ -1,13 +1,11 @@
 <x-layouts.default title="Privacy Policy" class="bg-gray-100 antialiased">
     <x-slot:head>
-        <style>
-            {!! Vite::content("resources/css/prose.css") !!}
-        </style>
-    </x-slot>
+        @vite(["resources/css/prose.css"])
+    </x-slot:head>
     <x-navbar class="mt-4 shadow-xs lg:mt-8 lg:bg-white" border />
 
     <article class="prose mx-auto mt-8 max-w-7xl px-6 xl:px-0">
-        <h1 class="max-w-3xl text-left font-display text-4xl font-bold tracking-tight text-primary-900 sm:text-6xl">
+        <h1 class="font-display text-primary-900 max-w-3xl text-left text-4xl font-bold tracking-tight sm:text-6xl">
             Privacy Policy
         </h1>
 

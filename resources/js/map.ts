@@ -17,7 +17,7 @@ async function openEntry(entry: HTMLElement): Promise<void> {
   let entryId = parseInt(entry.dataset.entry!, 10)
 
   try {
-    let entryResponse = await fetch(`/e/${entrygroup}/${entryId}`, {
+    let entryResponse = await fetch(`/entry/${entrygroup}/${entryId}`, {
       headers: {"X-Requested-With": "XMLHttpRequest"},
     })
 
@@ -288,7 +288,7 @@ filtersStore.onChange(
 )
 ;(async function () {
   try {
-    let mapContentRes = await fetch("/_/m")
+    let mapContentRes = await fetch("/partials/map-content")
     let mapContent = await mapContentRes.text()
 
     $map.html(mapContent)

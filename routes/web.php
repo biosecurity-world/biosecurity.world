@@ -16,17 +16,21 @@ Route::redirect('/inclusion-criteria', 'https://docs.google.com/document/d/12JhG
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
 
-Route::get('/e/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
+Route::get('/entry/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
 
-Route::get('/_/m', ShowMapPartialController::class);
+Route::get('/partials/map-content', function (NotionClient $notion) {
+    return view('partials.map', [
+    'tree' => Tree::buildFromPages($notion->pages()),
+    ]);
+});
 Route::get('/_/entries', function (NotionClient $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
     $links = $tree
-        ->entrygroups()
-        ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
-            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
-        ));
+    ->entrygroups()
+    ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
+    fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+    ));
 
     return view('entries.index', ['links' => $links]);
 });
