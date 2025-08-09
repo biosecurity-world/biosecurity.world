@@ -22,6 +22,30 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 
   changeAppState("loading", {})
   resetGlobalMapState()
+  const background = document.getElementById("background") as SVGGElement | null
+  if (background) {
+    background.innerHTML = ""
+  }
+  const topPalette = [
+    "#e41a1c",
+    "#377eb8",
+    "#4daf4a",
+    "#984ea3",
+    "#ff7f00",
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#66c2a5",
+    "#fc8d62",
+    "#8da0cb",
+    "#e78ac3",
+    "#a6d854",
+    "#ffd92f",
+    "#e5c494",
+    "#b3b3b3",
+  ]
+  const topColorById: Record<number, string> = {}
+  let topColorIndex = 0
 
   let maxDepth = 0
   let idToNode: Record<number, PreparedNode> = {}
@@ -122,6 +146,55 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 
   showNode(root)
 
+  const getRectCenter = (n: Required<PreparedNode>): [number, number] => [
+    n.position![0] + n.size![0] / 2,
+    n.position![1] + n.size![1] / 2,
+  ]
+  // Compute intersection point between a ray from the center of an axis-aligned
+  // rectangle and the rectangle's edge in the ray's direction.
+  function rectEdgeIntersection(
+    cx: number,
+    cy: number,
+    w: number,
+    h: number,
+    dx: number,
+    dy: number,
+  ): [number, number] {
+    const hw = w / 2
+    const hh = h / 2
+    // Normalize direction
+    const L = Math.hypot(dx, dy) || 1
+    const ux = dx / L
+    const uy = dy / L
+    // Candidate hit on vertical sides
+    let x: number, y: number
+    if (Math.abs(ux) > 1e-8) {
+      const tx = (ux > 0 ? hw : -hw) / ux
+      const yx = uy * tx
+      if (Math.abs(yx) <= hh + 1e-8) {
+        x = cx + (ux > 0 ? hw : -hw)
+        y = cy + yx
+        return [x, y]
+      }
+    }
+    // Otherwise hit on horizontal sides
+    const ty =
+      (uy > 0 ? hh : -hh) /
+      (Math.abs(uy) > 1e-8 ? uy
+      : uy >= 0 ? 1
+      : -1)
+    const xy = ux * ty
+    x = cx + xy
+    y = cy + (uy > 0 ? hh : -hh)
+    return [x, y]
+  }
+  const getTopAncestorId = (n: Required<PreparedNode>): number => {
+    let cur: Required<PreparedNode> = n
+    while (cur.depth > 1) {
+      cur = idToNode[cur.parent] as Required<PreparedNode>
+    }
+    return cur.id
+  }
   let deltaFromSiblings: Record<number, number> = {}
 
   for (let i = nodes.length - 1; i >= 0; i--) {
@@ -139,12 +212,95 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
     node.position = fitToSector(
       node as Required<PreparedNode>,
       node.trail.map((id: number) => idToNode[id] as Required<PreparedNode>),
-      150,
     )
 
     deltaFromSiblings[node.parent] = theta
 
     showNode(node)
+
+    if (background) {
+      const p = parent as Required<PreparedNode>
+
+      const [pcx, pcy] = getRectCenter(p)
+      const [ccx, ccy] = getRectCenter(node)
+
+      // Direction from parent to child
+      const dx = ccx - pcx
+      const dy = ccy - pcy
+      const len = Math.hypot(dx, dy) || 1
+      const ux = dx / len
+      const uy = dy / len
+
+      // Attach precisely to rectangle edges along the segment direction
+      const start = rectEdgeIntersection(pcx, pcy, p.size![0], p.size![1], ux, uy)
+      const end = rectEdgeIntersection(ccx, ccy, node.size![0], node.size![1], -ux, -uy)
+
+      // Control point for curvature
+      const mx = (start[0] + end[0]) / 2
+      const my = (start[1] + end[1]) / 2
+      const nx = -uy
+      const ny = ux
+      const segLen = Math.hypot(end[0] - start[0], end[1] - start[1])
+      const ctrlX = mx + nx * segLen * 0.25
+      const ctrlY = my + ny * segLen * 0.25
+
+      const topId = getTopAncestorId(node)
+      if (!topColorById[topId]) {
+        topColorById[topId] = topPalette[topColorIndex++ % topPalette.length]
+      }
+
+      const alpha = Math.max(0, 1 - 0.05 * (node.depth - 1))
+      const thickness = Math.max(2, 40 * Math.sqrt((node.weight as number) / (root.weight as number)))
+
+      // Band offsets using normals to the curve at endpoints
+      const t0x = ctrlX - start[0]
+      const t0y = ctrlY - start[1]
+      const t0l = Math.hypot(t0x, t0y) || 1
+      const n0x = -t0y / t0l
+      const n0y = t0x / t0l
+
+      const t1x = end[0] - ctrlX
+      const t1y = end[1] - ctrlY
+      const t1l = Math.hypot(t1x, t1y) || 1
+      const n1x = -t1y / t1l
+      const n1y = t1x / t1l
+
+      const half = thickness / 2
+
+      const startLeftX = start[0] + n0x * half
+      const startLeftY = start[1] + n0y * half
+      const startRightX = start[0] - n0x * half
+      const startRightY = start[1] - n0y * half
+
+      const endLeftX = end[0] + n1x * half
+      const endLeftY = end[1] + n1y * half
+      const endRightX = end[0] - n1x * half
+      const endRightY = end[1] - n1y * half
+
+      // Approximate offset for control point using averaged normals
+      const avgNx = n0x + n1x
+      const avgNy = n0y + n1y
+      const avgNl = Math.hypot(avgNx, avgNy) || 1
+      const offX = (avgNx / avgNl) * half
+      const offY = (avgNy / avgNl) * half
+
+      const ctrlLeftX = ctrlX + offX
+      const ctrlLeftY = ctrlY + offY
+      const ctrlRightX = ctrlX - offX
+      const ctrlRightY = ctrlY - offY
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+      const d =
+        `M ${startLeftX} ${startLeftY} ` +
+        `Q ${ctrlLeftX} ${ctrlLeftY} ${endLeftX} ${endLeftY} ` +
+        `L ${endRightX} ${endRightY} ` +
+        `Q ${ctrlRightX} ${ctrlRightY} ${startRightX} ${startRightY} Z`
+      path.setAttribute("d", d)
+      path.setAttribute("fill", topColorById[topId])
+      path.setAttribute("fill-opacity", alpha.toString())
+      path.setAttribute("class", "connector")
+      background.appendChild(path)
+    }
   }
 
   changeAppState("success", {})
@@ -155,191 +311,87 @@ export function fitToSector(
   trail: Pick<ProcessedNode, "position" | "size">[],
   spacing: number | null = null,
 ): [number, number] {
-  if (gt(node.sector[1] - node.sector[0], PI) && !eq(node.sector[0], 0)) {
-    throw new Error("Should not happen: sectors were not sorted correctly, alpha >= PI but delta is not 0")
+  // Radial placement along the sector bisector with clearance from trail rectangles.
+  const [w, h] = node.size!
+  const [a, b] = node.sector
+  const angle = (a + b) / 2
+  const ux = Math.cos(angle)
+  const uy = Math.sin(angle)
+
+  // Special case root centered at origin (full circle, trail with origin sentinel)
+  if (
+    trail.length === 1 &&
+    Array.isArray(trail[0].position) &&
+    trail[0].position![0] === 0 &&
+    trail[0].position![1] === 0
+  ) {
+    return [-w / 2, -h / 2]
   }
 
-  if (eq(node.sector[0], 0) && eq(node.sector[1], PIPI)) {
-    return [-node.size[0] / 2, -node.size[1] / 2]
+  // Compute an automatic spacing based on ancestor average size and local size
+  const ancAvg =
+    trail.length ? trail.reduce((sum, anc) => sum + Math.min(anc.size![0], anc.size![1]), 0) / trail.length : 0
+  const s = Math.max(64, 0.08 * ancAvg + 0.12 * Math.min(w, h))
+  const rNode = Math.sqrt(w * w + h * h) / 2
+
+  // Initial radius guess using circle-approx clearance from all ancestors
+  let r = 0
+  for (const anc of trail) {
+    const ax = anc.position![0]
+    const ay = anc.position![1]
+    const aw = anc.size![0]
+    const ah = anc.size![1]
+    const acx = ax + aw / 2
+    const acy = ay + ah / 2
+    const RA = Math.hypot(acx, acy)
+    const rA = Math.sqrt(aw * aw + ah * ah) / 2
+    r = Math.max(r, RA + rA + rNode + s)
   }
 
-  let pos = fitRectToSector(node.sector, node.size)
-
-  if (spacing === null) {
-    return pos
+  const candidateRect = (rv: number): [number, number, number, number] => {
+    const cx = ux * rv
+    const cy = uy * rv
+    return [cx - w / 2, cy - h / 2, w, h]
   }
 
-  let size: [number, number] = [node.size[0], node.size[1]]
-  // Take the closest node in the trail, ensure that there's 100 pixels between this one and the one in the trail.
-  let neighbour: Pick<ProcessedNode, "position" | "size"> | null = null
-  let distanceToNeighbour = Infinity
-  for (const candidate of trail) {
-    let candidateDistance = shortestDistanceBetweenRectangles(
-      [pos[0], pos[1], node.size[0], node.size[1]],
-      [candidate.position![0], candidate.position![1], candidate.size[0], candidate.size[1]],
-    )
-
-    if (candidateDistance < distanceToNeighbour) {
-      neighbour = candidate
-      distanceToNeighbour = candidateDistance
+  const getMinDist = (rect: [number, number, number, number]) => {
+    let min = Infinity
+    for (const anc of trail) {
+      const rectA: [number, number, number, number] = [anc.position![0], anc.position![1], anc.size![0], anc.size![1]]
+      const d = shortestDistanceBetweenRectangles(rect, rectA)
+      if (d < min) min = d
     }
+    return min
   }
 
-  if (neighbour === null) {
-    throw new Error("Should not happen: no neighbour found in the trail")
+  let rect = candidateRect(r)
+  let minDist = getMinDist(rect)
+  if (!isFinite(minDist)) {
+    minDist = s
   }
 
-  let neighbourRect: [number, number, number, number] = [
-    neighbour.position![0],
-    neighbour.position![1],
-    neighbour.size[0],
-    neighbour.size[1],
-  ]
-
-  let m = (node.sector[0] + node.sector[1]) / 2
-
-  while (shortestDistanceBetweenRectangles([pos[0], pos[1], node.size[0], node.size[1]], neighbourRect) < spacing) {
-    if (inIE(m, PI / 4, (3 * PI) / 4) || inIE(m, (5 * PI) / 4, (7 * PI) / 4)) {
-      size[0] += 20
-    } else {
-      size[1] += 20
-    }
-
-    pos = fitRectToSector(node.sector, size)
+  let iterations = 0
+  while (minDist < s && iterations < 1000) {
+    const deficit = s - minDist
+    r += Math.max(1, deficit * 1.1)
+    rect = candidateRect(r)
+    minDist = getMinDist(rect)
+    iterations++
   }
 
-  let [x, y] = pos
-
-  x += (size[0] - node.size[0]) / 2
-  y += (size[1] - node.size[1]) / 2
-
-  return [x, y]
-}
-
-function fitRectToSector(sector: Sector, size: [number, number]): [number, number] {
-  let [od, ot] = sector
-  // These checks will save you at some point, don't remove them.
-  if (eq(od, ot)) {
-    throw new Error(`Sector has a 0 angle: ${sector}`)
-  }
-  if (gt(od, ot)) {
-    throw new Error(`Sector is not correct (delta > theta): ${sector}`)
-  }
-  if (lt(od, 0) || gt(od, PIPI)) {
-    throw new Error(`Sector is not in the range [0, 2*PI]: ${sector}`)
+  // Enforce angular sector boundaries so the rectangle stays within [a, b]
+  const phi = Math.max(1e-3, (b - a) / 2)
+  const nx = -uy
+  const ny = ux
+  const extentPerp = 0.5 * (Math.abs(nx) * w + Math.abs(ny) * h)
+  const requiredR = extentPerp / Math.tan(phi)
+  if (isFinite(requiredR)) {
+    r = Math.max(r, requiredR + s)
   }
 
-  let [d, t] = getEffectiveSector(sector)
-  if (gt(d, t)) {
-    throw new Error(`Effective sector is not correct (delta > theta): ${sector} -> ${[d, t]}`)
-  }
-  if (lt(d, 0) || gt(d, PIPI)) {
-    throw new Error(`Effective sector is not in the range [0, 2*PI]: ${sector} -> ${[d, t]}`)
-  }
-  if (!eq(ot - od, t - d)) {
-    throw new Error(`Effective sector is not correct (delta != theta): ${sector} -> ${[d, t]}`)
-  }
-
-  let [l, w] = size
-  let q_od = getQuadrant(od)
-  let q_ot = getQuadrant(ot)
-  let q_d = getQuadrant(d)
-  let q_t = getQuadrant(t)
-  let tan_d = Math.tan(d)
-  let tan_t = Math.tan(t)
-
-  if (q_d === q_t) {
-    let x = (w + l * tan_d) / (tan_t - tan_d)
-    let y = tan_d * (x + l)
-
-    if (q_od === 2 || q_od === 3) {
-      x = -x - l
-    }
-
-    if (q_od > 2) {
-      y = -y - w
-    }
-
-    return [x, y]
-  }
-
-  // This is a special case only because we don't have to deal with
-  // its symmetry, q_od=4 and q_ot=1, as our sectors start and end
-  // at 0 and 2*PI.
-  if (q_od === 2 && q_ot === 3) {
-    let x = w / (Math.tan(od) - Math.tan(ot)) - l
-    let y = Math.tan(ot) * (x + l)
-
-    return [x, y]
-  }
-
-  if (q_d + 1 === q_t && !(eq(d, 0) && gt(t, PI / 2))) {
-    let x = (tan_d * l) / (tan_t - tan_d)
-    let y = tan_t * x
-
-    if (q_od === 2 || q_od === 3) {
-      x = -x - l
-    }
-
-    if (q_od > 2) {
-      y = -y - w
-    }
-
-    return [x, y]
-  }
-
-  if (eq(d, 0) && gt(t, PI / 2)) {
-    let x = gte(t, PI) ? -l / 2 : 0
-    let y = l / 2
-
-    if (q_od > 2) {
-      y = -y - w
-    }
-
-    return [x, y]
-  }
-
-  // This happens only if q_od = 2 and q_ot = 4, where d is close to PI
-  // and t close to 3*PI/2, because there is necessarily a bigger sector
-  // that precedes this one.
-  if (q_d + 2 === q_t) {
-    return [-l, -w]
-  }
-
-  throw new Error(`Unexpected: could not fit sector ${size} in ${sector} (effective sector: ${[d, t]})`)
-}
-
-function getEffectiveSector(sector: Sector): Sector {
-  let [od, ot] = sector
-  let q_od = getQuadrant(od)
-  let q_ot = getQuadrant(ot)
-
-  if (q_ot - q_od >= 2) {
-    return [od, ot]
-  }
-
-  let d: number, t: number
-
-  if (eq(ot, PIPI)) {
-    d = 0
-    t = ot - od
-  } else {
-    d = od % PI
-    t = d + (ot - od)
-  }
-
-  if (gte(d, PI / 2)) {
-    if (lt(PI - t, 0)) {
-      return [d, t]
-    }
-
-    d = PI - d
-    t = PI - t
-
-    return [t, d]
-  }
-
-  return [d, t]
+  const cx = ux * r
+  const cy = uy * r
+  return [cx - w / 2, cy - h / 2]
 }
 
 function showNode(node: Pick<ProcessedNode, "el" | "id" | "parent" | "position">) {
@@ -350,13 +402,6 @@ function showNode(node: Pick<ProcessedNode, "el" | "id" | "parent" | "position">
   if (node.id === node.parent) {
     return
   }
-  if (node.depth === 1) {
-    debug().sector(node.sector)
-  }
-  debug().point({
-    p: node.position!,
-    label: node.id.toString(10),
-  })
 }
 
 function resetGlobalMapState() {
