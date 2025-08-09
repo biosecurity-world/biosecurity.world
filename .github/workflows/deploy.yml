@@ -13,6 +13,13 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - name: Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+          cache-dependency-path: tools/logosnatch/go.sum
+
       - uses: cachix/install-nix-action@v27
 
       - name: Set pnpm cache store
@@ -48,22 +55,23 @@ jobs:
           COMPOSER_HOME: ~/.composer-store
 
       - name: Build logosnatch
-        run: nix develop --command go build
+        run: go build
         working-directory: ./tools/logosnatch
-        env:
-          GOMODCACHE: /home/runner/.go-store
 
       - name: Copy .env
         run: cp .env.example .env
 
       - name: Install bare
-        run: nix develop --ignore-environment --command go install github.com/felixdorn/bare@latest
+        run: go install github.com/felixdorn/bare@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Start server
         run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
 
       - name: Build website
-        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command bare export http://localhost:8000 --with-js -o dist/
+        run: bare export http://localhost:8000 --with-js -o dist/
         env:
           NOTION_DATABASE: ${{ vars.DEV_NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.DEV_NOTION_TOKEN }}
