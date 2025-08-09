@@ -65,6 +65,11 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
 
+      - name: Add Notion credentials to .env
+        run: |
+          echo "NOTION_DATABASE=${{ vars.DEV_NOTION_DATABASE }}" >> .env
+          echo "NOTION_TOKEN=${{ secrets.DEV_NOTION_TOKEN }}" >> .env
+
       - name: Install bare
         run: go install github.com/felixdorn/bare@v0.2.0
 
