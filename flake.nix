@@ -31,7 +31,6 @@
           go
           wrangler
           chromium
-          google-chrome
         ]);
     };
   };
