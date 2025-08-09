@@ -4,21 +4,19 @@ namespace App\Services\NotionData\Enums;
 
 enum FocusCategory: int
 {
-    case SafeEthicalResearch = 1;
-    case Surveillance = 2;
-    case Therapies = 3;
-    case Preparedness = 4;
-    case EmergingBiotechnologies = 5;
-    case Uncategorized = 6;
+    case UpstreamInterventions = 1;
+    case DetectionAndEarlyWarning = 2;
+    case ResponseAndConsequenceManagement = 3;
+    case CrossCuttingTopics = 4;
+    case Uncategorized = 5;
 
     public function label(): string
     {
         return match ($this) {
-            self::SafeEthicalResearch => 'Safe and ethical research',
-            self::Surveillance => 'Surveillance and diagnostics',
-            self::Therapies => 'Therapies',
-            self::Preparedness => 'Preparedness',
-            self::EmergingBiotechnologies => 'Emerging biotechnologies',
+            self::UpstreamInterventions => 'Preventing and reducing threat emergence',
+            self::DetectionAndEarlyWarning => 'Detection and early warning',
+            self::ResponseAndConsequenceManagement => 'Response and consequence management',
+            self::CrossCuttingTopics => 'Cross-cutting topics',
             self::Uncategorized => 'Uncategorized'
         };
     }

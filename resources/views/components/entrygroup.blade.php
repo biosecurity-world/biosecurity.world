@@ -6,7 +6,8 @@
             <h4 class="org-type -mb-1.5 text-xs font-semibold tracking-tight text-gray-500">{{ $name }}</h4>
             <div class="grid grid-cols-6 gap-x-2">
                 @foreach ($collection as $k => $entry)
-                    <button
+                    <a
+                        href="{{ route("entries.show", ["id" => $entry->id, "slug" => $entry->slug()]) }}"
                         title="{{ $entry->label }}"
                         data-entry="{{ $entry->id }}"
                         data-entrygroup="{{ $entrygroup->id }}"
@@ -17,7 +18,7 @@
                             class="hover:border-primary-600"
                             alt="Open {{ $entry->label }}'s entry"
                         />
-                    </button>
+                    </a>
                 @endforeach
             </div>
         </div>

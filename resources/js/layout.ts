@@ -77,7 +77,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         )
 
         document
-          .querySelector(`button[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!
+          .querySelector(`a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!
           .classList.toggle("matches-filters", !shouldFilter)
 
         if (!shouldFilter) {

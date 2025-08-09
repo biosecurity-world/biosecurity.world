@@ -8,6 +8,7 @@ use App\Services\Logosnatch\Logo;
 use App\Services\NotionData\Enums\DomainEnum;
 use App\Support\IdMap;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\In;
 use Notion\Pages\Properties\RichTextProperty;
 
@@ -68,6 +69,11 @@ class Entry
         }
 
         return $host;
+    }
+
+    public function slug(): string
+    {
+        return Str::slug($this->label);
     }
 
     public function getActivitiesBitmask(): int

@@ -2,7 +2,6 @@
 
 namespace App\Services\NotionData\Enums;
 
-
 use Felix\PHPColor\Hsla;
 
 enum NotionColor: string

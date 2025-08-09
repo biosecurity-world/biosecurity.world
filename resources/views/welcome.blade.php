@@ -54,9 +54,9 @@
                 <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
                     As an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
-                    and ,
-                    <a class="underline" href="{{ $databaseUrl }}">open-data</a>
-                    , scientific project, we keep a record of our inclusion decisions for people to challenge.
+                    and
+                    <a class="underline" href="{{ $databaseUrl }}">open-data,</a>
+                    scientific project, we keep a record of our inclusion decisions for people to challenge.
                 </p>
             </li>
         </ul>
@@ -101,45 +101,30 @@
                         </time>
                         .
                     </p>
-                </div>
 
-                <ul class="mt-4 flex space-x-4 px-6 pb-2">
-                    <li>
-                        <a href="#" class="inline-flex text-sm whitespace-nowrap">
-                            <span class="mt-px text-gray-400">&bull;&nbsp;</span>
-                            <span class="-mt-px text-gray-700 underline">Inclusion criteria</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="inline-flex text-sm whitespace-nowrap">
-                            <span class="mt-px text-gray-400">&bull;&nbsp;</span>
-                            <span class="-mt-px text-gray-700 underline">Rejected entries</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="https://notion.so/{{ config("services.notion.database") }}"
-                            class="inline-flex text-sm whitespace-nowrap"
-                        >
-                            <span class="mt-px text-gray-400">&bull;&nbsp;</span>
-                            <span class="-mt-px mr-0.5 text-gray-700 underline">Notion</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                fill="currentColor"
-                                class="group-hover:text-primary-700 -mt-px size-4 text-gray-400"
-                                aria-label="External link icon"
-                            >
-                                <path
-                                    d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"
-                                />
-                                <path
-                                    d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"
-                                />
-                            </svg>
-                        </a>
-                    </li>
-                </ul>
+                    <h5 class="font-display text-primary-950 mt-4 text-lg">Criteria for inclusion</h5>
+
+                    <ul class="mt-1 mb-6 space-y-4">
+                        <li>
+                            <span class="font-display font-bold text-gray-700">Productive</span>
+                            <p class="mt-0.5 text-gray-700">
+                                Has relevant research or policy output, or a relevant product, device, published funding
+                                decision.
+                            </p>
+                        </li>
+                        <li>
+                            <span class="font-display font-bold text-gray-700">Active</span>
+                            <p class="mt-0.5 text-gray-700">Is likely to produce more relevant outputs.</p>
+                        </li>
+                        <li>
+                            <span class="font-display font-bold text-gray-700">Focused</span>
+                            <p class="mt-0.5 text-gray-700">
+                                Aims to prevent large scale pandemics, or is a key player in one of the intervention
+                                focuses listed below.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
             </header>
             <div class="bg-gray-50 px-6 py-4 lg:flex-1">
                 <h4 class="font-display flex-1 text-lg">Filters</h4>
@@ -159,7 +144,7 @@
 
                             <label
                                 for="domain_technical"
-                                class="peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-technical flex cursor-pointer items-center rounded-t-xl border px-4 py-1.5 transition peer-focus:ring-2 hover:bg-gray-50"
+                                class="peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-technical hover:peer-checked:bg-technical/80 hover:peer-checked:ring-technical/70 flex cursor-pointer items-center rounded-t-xl border border-gray-200 px-4 py-1.5 transition peer-focus:ring-2 hover:peer-not-checked:bg-gray-50"
                             >
                                 <x-at-technical class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
@@ -175,7 +160,7 @@
                             />
                             <label
                                 for="domain_governance"
-                                class="domain-checkbox-label peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-governance flex cursor-pointer items-center rounded-b-xl border border-t-0! px-4 py-1.5 transition peer-focus:ring-2 hover:bg-gray-50"
+                                class="peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-governance hover:peer-checked:bg-governance/80 hover:peer-checked:ring-governance/70 flex cursor-pointer items-center rounded-b-xl border border-t-0! border-gray-200 px-4 py-1.5 transition peer-focus:ring-2 hover:peer-not-checked:bg-gray-50"
                             >
                                 <x-at-governance class="grow" />
                                 <x-heroicon-m-check class="check size-5 text-white" />
@@ -376,5 +361,4 @@
         </main>
     </div>
     <x-footer />
-    <a href="/_/entries" class="hidden" aria-hidden="true">entries</a>
 </x-layouts.default>

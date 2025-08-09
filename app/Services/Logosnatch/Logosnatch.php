@@ -77,13 +77,13 @@ class Logosnatch
         return $logo;
     }
 
-    private static function createFromLogosnatchResponse(mixed $decoded): Logo {
-       return  new Logo(
-              $decoded['format'],
-              '/storage/logos/'.$decoded['path'],
-              $decoded['size'],
-              $decoded['filled']
-              );
+    private static function createFromLogosnatchResponse(mixed $decoded): Logo
+    {
+        return new Logo(
+            $decoded['format'],
+            '/storage/logos/'.$decoded['path'],
+            $decoded['size'],
+            $decoded['filled']
+        );
     }
-
 }

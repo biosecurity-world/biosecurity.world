@@ -153,6 +153,41 @@ class Tree
 
         $tree->nodes = $nodes;
 
+        // Compute domain entry counts per Category
+        $categoryCounts = [];
+        foreach ($tree->lookup as $id => $page) {
+            if ($page instanceof Category) {
+                $categoryCounts[$id] = ['tech' => 0, 'gov' => 0];
+            }
+        }
+
+        foreach ($tree->nodes as $node) {
+            $page = $tree->lookup[$node->id] ?? null;
+            if (! $page instanceof Entrygroup) {
+                continue;
+            }
+
+            $counts = $page->countDomains($tree->lookup);
+
+            foreach ($node->trail as $ancestorId) {
+                $ancestor = $tree->lookup[$ancestorId] ?? null;
+                if (! $ancestor instanceof Category) {
+                    continue;
+                }
+
+                $categoryCounts[$ancestorId]['tech'] += $counts['tech'];
+                $categoryCounts[$ancestorId]['gov'] += $counts['gov'];
+            }
+        }
+
+        foreach ($categoryCounts as $categoryId => $counts) {
+            $category = $tree->lookup[$categoryId];
+            if ($category instanceof Category) {
+                    $category->technicalEntriesCount = $counts['tech'];
+                    $category->governanceEntriesCount = $counts['gov'];
+            }
+        }
+
         return $tree;
     }
 

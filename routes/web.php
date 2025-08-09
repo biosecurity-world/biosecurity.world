@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ShowEntryPartialController;
-use App\Http\Controllers\ShowMapPartialController;
+use App\Http\Controllers\ShowEntryController;
 use App\Http\Controllers\ShowWelcomeController;
-use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
 use Illuminate\Support\Facades\Route;
@@ -16,24 +15,34 @@ Route::redirect('/inclusion-criteria', 'https://docs.google.com/document/d/12JhG
 Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
 Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
 
-Route::get('/entry/{id}/{entryId}', ShowEntryPartialController::class)->name('entries.show');
+Route::get('/entry/{id}/{slug}', ShowEntryController::class)->name('entries.show');
+Route::get('/entry/{id}', function (NotionClient $notion, int $id) {
+    $tree = Tree::buildFromPages($notion->pages());
+    abort_if(! isset($tree->lookup[$id]), 404);
+    $entry = $tree->lookup[$id];
 
+    return redirect()->route('entries.show', ['id' => $id, 'slug' => $entry->slug()]);
+});
+
+Route::get('/partials/entries/{entryGroup}/{entryId}', ShowEntryPartialController::class)->name('partials.entry');
 Route::get('/partials/map-content', function (NotionClient $notion) {
     return view('partials.map', [
-    'tree' => Tree::buildFromPages($notion->pages()),
+        'tree' => Tree::buildFromPages($notion->pages()),
     ]);
 });
+/*
 Route::get('/_/entries', function (NotionClient $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
     $links = $tree
-    ->entrygroups()
-    ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
-    fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
-    ));
+        ->entrygroups()
+        ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
+            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
+        ));
 
     return view('entries.index', ['links' => $links]);
 });
+ */
 
 if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library

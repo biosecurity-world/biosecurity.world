@@ -44,7 +44,7 @@ class PageResponseTest extends TestCase
         $entrygroup = $tree->entrygroups()->first();
         $entryId = $entrygroup->entries[0];
 
-        $response = $this->get(route('entries.show', ['id' => $entrygroup->id, 'entryId' => $entryId]));
+        $response = $this->get(route('entries.show', ['entryGroup' => $entrygroup->id, 'entryId' => $entryId]));
         $response->assertStatus(200);
     }
 }

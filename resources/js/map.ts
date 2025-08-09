@@ -17,7 +17,7 @@ async function openEntry(entry: HTMLElement): Promise<void> {
   let entryId = parseInt(entry.dataset.entry!, 10)
 
   try {
-    let entryResponse = await fetch(`/entry/${entrygroup}/${entryId}`, {
+    let entryResponse = await fetch(`/partials/entries/${entrygroup}/${entryId}`, {
       headers: {"X-Requested-With": "XMLHttpRequest"},
     })
 
@@ -298,14 +298,12 @@ filtersStore.onChange(
     let lastFocusedEntry = getRememberedOpenEntry()
     if (lastFocusedEntry !== null) {
       let [entrygroup, entry] = lastFocusedEntry
-      let el = document.querySelector(
-        `button[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`,
-      ) as HTMLButtonElement
+      let el = document.querySelector(`a[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`) as HTMLButtonElement
       openEntry(el)
     }
 
     let elEntrygroupContainer = document.getElementById("entrygroups")!
-    let elsEntryButtons = document.querySelectorAll("button[data-entry]") as NodeListOf<HTMLButtonElement>
+    let elsEntryButtons = document.querySelectorAll("a[data-entry]") as NodeListOf<HTMLButtonElement>
 
     let highlightEntries = (commonEntryId: number) => {
       let instances = 0
@@ -323,7 +321,10 @@ filtersStore.onChange(
     elsEntryButtons.forEach((el: HTMLButtonElement) => {
       let entryId = parseInt(el.dataset.entry!, 10)
 
-      el.addEventListener("click", () => openEntry(el))
+      el.addEventListener("click", (e) => {
+        e.preventDefault()
+        openEntry(el)
+      })
       el.addEventListener("mouseenter", () => highlightEntries(entryId))
       el.addEventListener("mouseleave", () => removeHighlight())
       el.addEventListener("focus", () => highlightEntries(entryId))
