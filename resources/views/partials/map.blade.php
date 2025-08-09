@@ -8,7 +8,7 @@
             aria-hidden="true"
             data-node="{{ $tree->rootNodeId }}"
         >
-            <div class="font-display text-primary-900 inline-block px-2 text-2xl">Biosecurity</div>
+            <div class="font-display text-primary-900 inline-block bg-white px-2 text-2xl">Biosecurity</div>
         </foreignObject>
 
         <g>

@@ -1,6 +1,6 @@
-<div class="entry flex h-full flex-col justify-between rounded-r-3xl border-t-0 border-r bg-white">
+<div class="entry flex h-full flex-col justify-between rounded-r-3xl border-t-0 border-r border-gray-200 bg-white">
     <div>
-        <div class="flex items-center justify-between rounded-tr-3xl border-r border-b bg-gray-50 py-4 pr-6 pl-4">
+        <div class="flex items-center justify-between rounded-tr-3xl border-r border-b border-gray-200 bg-gray-50 py-4 pr-6 pl-4">
             <ol role="list" class="flex items-center space-x-1 overflow-x-scroll">
                 @foreach ($breadcrumbs as $breadcrumb)
                     <li class="flex items-center">
@@ -133,7 +133,7 @@
             @endif
         </div>
     </div>
-    <div class="space-x-2 rounded-br-3xl border-t bg-gray-50 px-6 py-2">
+    <div class="space-x-2 rounded-br-3xl border-t border-gray-200 bg-gray-50 px-6 py-2">
         <a class="inline-flex text-sm text-gray-700 underline" href="{{ $entry->notionUrl() }}">
             <span class="mr-0.5">Open in Notion</span>
             <svg

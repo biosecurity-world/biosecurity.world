@@ -1,5 +1,5 @@
 <div
-    class="entrygroup pointer-events-auto relative w-fit cursor-pointer rounded-xl border bg-white px-3 pb-2 shadow-xs"
+    class="entrygroup pointer-events-auto relative w-fit cursor-pointer rounded-xl border border-gray-200 bg-white px-3 pb-2 shadow-xs"
 >
     @foreach ($entries as $name => $collection)
         <div>

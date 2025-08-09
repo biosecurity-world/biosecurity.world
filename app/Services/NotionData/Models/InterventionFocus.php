@@ -34,12 +34,11 @@ class InterventionFocus
             'ea850109-25e5-480b-8c16-fef8834b5f45',
             '7978ca82-618e-473f-a622-8c55c73701ca' => FocusCategory::ResponseAndConsequenceManagement,
 
-            // Cross-cutting Topics
-            '09c5b80c-a4ce-4de2-94f2-22eb6c5cf3c',
-            'c8ecfb42-b364-4dc5-8f17-636140d5f45e',
-            '426f1779-35d6-4baa-8cae-3946ba8c6e52',
-            '4eea4955-bfa9-433a-8c20-3055493bd83f' => FocusCategory::CrossCuttingTopics,
-
+            // Uncategorized
+            // '09c5b80c-a4ce-4de2-94f2-22eb6c5cf3c',
+            // 'c8ecfb42-b364-4dc5-8f17-636140d5f45e',
+            // '426f1779-35d6-4baa-8cae-3946ba8c6e52',
+            // '4eea4955-bfa9-433a-8c20-3055493bd83f',
             default => FocusCategory::Uncategorized,
         };
     }

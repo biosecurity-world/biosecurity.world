@@ -1,5 +1,5 @@
-<span {{ $attributes->class("at-governance inline-flex items-center font-display text-governance") }}>
-    <span class="mr-1 font-semibold">Governance</span>
+<span {{ $attributes->class("at-governance font-display text-governance inline-flex items-center") }}>
+    <span class="mr-1 font-semibold">Policy-making</span>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-px size-4">
         <path
             fill-rule="evenodd"

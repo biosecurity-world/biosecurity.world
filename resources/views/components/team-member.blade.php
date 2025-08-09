@@ -5,7 +5,7 @@
     "bio",
     "linkedin",
 ])
-<li class="rounded-3xl border bg-white px-6 py-8 text-center">
+<li class="rounded-3xl border border-gray-200 bg-white px-6 py-8 text-center">
     <img class="mx-auto size-36 rounded-full md:size-48" src="{{ $picture }}" alt="" />
     <h3 class="mt-6 font-display text-xl font-semibold leading-7 tracking-tight">{{ $name }}</h3>
     <p class="px-5 text-lg text-gray-900">{{ $title }}</p>

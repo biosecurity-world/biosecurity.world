@@ -4,7 +4,7 @@
 <span
     {{
         $attributes->class([
-            "entry-logo inline-block flex size-6 items-center justify-center overflow-hidden rounded-md border",
+            "entry-logo inline-block flex size-6 items-center justify-center overflow-hidden rounded-md border border-gray-200",
             "p-0.5" => ! $logo->filled,
             "border-transparent" => $logo->filled,
         ])

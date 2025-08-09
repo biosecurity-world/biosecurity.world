@@ -66,9 +66,9 @@
         id="map-wrapper"
     >
         <aside
-            class="hidden h-full w-full max-w-md overflow-y-scroll rounded-l-3xl border-y border-r border-l bg-white lg:flex lg:flex-col"
+            class="hidden h-full w-full max-w-md overflow-y-scroll rounded-l-3xl border-y border-r border-l border-gray-200 bg-white lg:flex lg:flex-col"
         >
-            <header class="border-b">
+            <header class="border-b border-gray-200">
                 <div class="px-6 pt-4">
                     <div class="flex items-center">
                         <h3 class="font-display flex-1 text-2xl">Map of Biosecurity</h3>
@@ -102,35 +102,84 @@
                         .
                     </p>
 
-                    <h5 class="font-display text-primary-950 mt-4 text-lg">Criteria for inclusion</h5>
-
-                    <ul class="mt-1 mb-6 space-y-4">
-                        <li>
-                            <span class="font-display font-bold text-gray-700">Productive</span>
-                            <p class="mt-0.5 text-gray-700">
-                                Has relevant research or policy output, or a relevant product, device, published funding
-                                decision.
-                            </p>
-                        </li>
-                        <li>
-                            <span class="font-display font-bold text-gray-700">Active</span>
-                            <p class="mt-0.5 text-gray-700">Is likely to produce more relevant outputs.</p>
-                        </li>
-                        <li>
-                            <span class="font-display font-bold text-gray-700">Focused</span>
-                            <p class="mt-0.5 text-gray-700">
-                                Aims to prevent large scale pandemics, or is a key player in one of the intervention
-                                focuses listed below.
-                            </p>
-                        </li>
-                    </ul>
+                    <div class="mt-4">
+                        <h4 class="font-display text-gray-900">Team</h4>
+                        <p class="flex flex-wrap text-gray-700">
+                            <a
+                                href="https://www.linkedin.com/in/alix-pham/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Alix Pham
+                            </a>
+                            <span>,&nbsp;</span>
+                            <a
+                                href="https://www.linkedin.com/in/sofyalebedeva/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Sofya Lebedeva
+                            </a>
+                            <span>,&nbsp;</span>
+                            <a
+                                href="https://www.linkedin.com/in/johantang/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Johan Täng
+                            </a>
+                            <span>,&nbsp;</span>
+                            <a
+                                href="https://www.linkedin.com/in/jeremy-andreoletti-330445216/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Jérémy Andréoletti
+                            </a>
+                        </p>
+                    </div>
+                    <div class="mt-2 mb-6">
+                        <h4 class="font-display text-gray-900">Support</h4>
+                        <p class="flex flex-wrap text-gray-700">
+                            <a
+                                href="https://www.linkedin.com/in/linbowkerlonnecker/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Lin Bowker-Lonnecker
+                            </a>
+                            <span>,&nbsp;</span>
+                            <a
+                                href="https://www.linkedin.com/in/will-saunter/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Will Saunter
+                            </a>
+                            <span>,&nbsp;</span>
+                            <a
+                                href="https://www.linkedin.com/in/dornfelix/"
+                                class="underline"
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                Félix Dorn
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </header>
             <div class="bg-gray-50 px-6 py-4 lg:flex-1">
                 <h4 class="font-display flex-1 text-lg">Filters</h4>
 
                 <fieldset class="mt-2">
-                    <legend class="font-display leading-6 text-gray-900">Domain</legend>
+                    <legend class="font-display leading-6 text-gray-900">High-level focus</legend>
 
                     <div class="mt-0.5 rounded-xl bg-white shadow-xs">
                         <div>
@@ -239,7 +288,7 @@
                                                 value="{{ $focus->id }}"
                                                 kind="focus-checkbox"
                                                 data-global-offset="{{ $focus->globalSortOrder() }}"
-                                                class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-100 peer-checked:text-primary-800 border bg-white text-gray-700"
+                                                class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-100 peer-checked:text-primary-800 border border-gray-200 bg-white text-gray-700"
                                             >
                                                 <span class="ml-1.5 leading-none select-none group-hover:opacity-75">
                                                     {{ $focus->label }}
@@ -255,7 +304,7 @@
             </div>
         </aside>
         <main
-            class="relative h-full w-full rounded-l-3xl rounded-r-3xl border-r border-b bg-gray-100 lg:rounded-l-none"
+            class="relative h-full w-full rounded-l-3xl rounded-r-3xl border-r border-b border-gray-200 bg-gray-100 lg:rounded-l-none"
         >
             <section data-state="error" aria-hidden="true" class="app-state state-inactive">
                 <div class="text-center">
@@ -274,7 +323,7 @@
                     </p>
                     <a
                         href="javascript:window.location.reload();"
-                        class="focusable mt-4 inline-flex items-center space-x-2 rounded-md border bg-white px-4 py-1"
+                        class="focusable mt-4 inline-flex items-center space-x-2 rounded-md border border-gray-200 bg-white px-4 py-1"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
                             <path
@@ -312,16 +361,19 @@
                 <div class="flex flex-col items-center justify-center text-center">
                     <h3 class="font-display text-xl">There are no entries matching your filters.</h3>
                     <button
-                        class="resets-filters focusable mt-4 flex items-center space-x-2 rounded-md border bg-white px-4 py-1 hover:bg-gray-50"
+                        class="resets-filters focusable mt-4 flex items-center space-x-2 rounded-md border border-gray-200 bg-white px-4 py-1 hover:bg-gray-50"
                     >
                         Reset the filters
                     </button>
                 </div>
             </section>
             <section data-state="success" class="app-state state-inactive" aria-hidden="true">
-                <div class="absolute inset-0 z-20 h-full w-full max-w-md border-y" id="entry-wrapper"></div>
                 <div
-                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center rounded-r-3xl border-y border-r bg-gray-50 pt-16 opacity-0 transition-opacity"
+                    class="absolute inset-0 z-20 h-full w-full max-w-md border-y border-gray-200"
+                    id="entry-wrapper"
+                ></div>
+                <div
+                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center rounded-r-3xl border-y border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity"
                     id="entry-loader"
                 >
                     <svg
@@ -360,5 +412,151 @@
             </section>
         </main>
     </div>
+    <section id="faq" class="mx-auto w-full max-w-3xl px-6 xl:px-0">
+        <h2 class="font-display text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
+
+        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Goals</h3>
+        <div class="mt-4 space-y-4">
+            <x-faq-item title="What is the purpose of this biosecurity landscape map?">
+                <p>
+                    This map provides a comprehensive overview of organizations working in the biosecurity field
+                    according to a specific set of criteria (see
+                    <a
+                        class="text-primary-700 hover:text-primary-900 underline"
+                        href="{{ route("inclusion-criteria") }}"
+                        rel="noopener noreferrer"
+                    >
+                        Inclusion criteria
+                    </a>
+                    ), allowing users to explore and understand the global biosecurity ecosystem.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="What does GCBR stand for?">
+                <p>
+                    GCBR stands for
+                    <a
+                        class="text-primary-700 hover:text-primary-900 underline"
+                        href="https://www.nti.org/about/programs-projects/project/global-catastrophic-biological-risks/"
+                        rel="noopener noreferrer"
+                    >
+                        Global Catastrophic Biological Risks
+                    </a>
+                    . These are biological risks that could lead to severe and potentially irreversible damage to human
+                    civilization on a global scale.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="How can I use this information?">
+                <p>
+                    We want users to use this database to better understand the field, and learn about the different
+                    actors.
+                </p>
+                <p class="mt-2">
+                    This map can be used for research, networking, identifying potential collaborations, or simply
+                    understanding the scope and diversity of work being done in biosecurity.
+                </p>
+            </x-faq-item>
+        </div>
+
+        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Content</h3>
+        <div class="mt-4 space-y-4">
+            <x-faq-item title="How often is the database updated?">
+                <p>
+                    We strive to keep the database as current as possible. Updates are made on a regular basis as we
+                    receive new information or as organizations change. If you notice something is outdated, please
+                    reach out via our
+                    <a
+                        class="text-primary-700 hover:text-primary-900 underline"
+                        href="{{ route("give-feedback") }}"
+                        rel="noopener noreferrer"
+                    >
+                        contact form
+                    </a>
+                    .
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="How can I contribute to the map?">
+                <p>
+                    You can contribute by using the
+                    <a
+                        class="text-primary-700 hover:text-primary-900 underline"
+                        href="{{ route("give-feedback") }}"
+                        rel="noopener noreferrer"
+                    >
+                        contact form
+                    </a>
+                    at the top of the page. We welcome feedback, suggestions, and information about organizations that
+                    should be included (or excluded).
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="What are the inclusion criteria for organizations?">
+                <p>
+                    We have a specific
+                    <a
+                        class="text-primary-700 hover:text-primary-900 underline"
+                        href="{{ route("inclusion-criteria") }}"
+                        rel="noopener noreferrer"
+                    >
+                        set of criteria
+                    </a>
+                    that determine whether an organization is included in our database.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="Is this information publicly available?">
+                <p>
+                    Yes, this database is publicly accessible. Please share with anyone that could find it useful, or
+                    help us make it better.
+                </p>
+            </x-faq-item>
+        </div>
+
+        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Properties &amp; Filters</h3>
+        <div class="mt-4 space-y-4">
+            <x-faq-item title="Can I filter the map to show only organizations focused on GCBRs?">
+                <p>
+                    Yes, we have a specific view called "GCBR only" that filters the database to show only organizations
+                    with a focus on Global Catastrophic Biological Risks.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="What do the different 'Organization Types' mean?">
+                <p>
+                    The organization types (such as Research institute, For-profit company, Think tank, etc.) categorize
+                    the primary nature of each entity. This helps users understand the diversity of organizations in the
+                    biosecurity landscape, and filter if they are looking for a specific type of organization. There is
+                    also a specific view where the organizations are sorted via this property.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="How is the 'Activity Type' determined for each organization?">
+                <p>
+                    The Activity Type is based on the primary functions of each organization. An organization can have
+                    multiple activity types, reflecting the diverse nature of their work in biosecurity. Users can
+                    filter according to a specific type of activity. There is also a specific view where the
+                    organizations are sorted via this property.
+                </p>
+            </x-faq-item>
+
+            <x-faq-item title="What is the 'Intervention Focus' category?">
+                <p>
+                    The Intervention Focus category provides more specific information about the areas each organization
+                    works on, such as synthetic biology, lab biosafety, or crisis management.
+                </p>
+                <p class="mt-2">
+                    There is a higher-level focus type which is "Technical" or "Governance" which helps differentiate
+                    whether the organization is more focused on research ("Technical") or policymaking ("Governance").
+                </p>
+                <p class="mt-2">
+                    Sometimes an organization will not have any intervention focus: it usually means that they might
+                    touch on any of the topics, and their mission is more general.
+                </p>
+            </x-faq-item>
+        </div>
+    </section>
+
     <x-footer />
 </x-layouts.default>

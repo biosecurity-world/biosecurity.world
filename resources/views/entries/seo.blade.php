@@ -5,7 +5,7 @@
 
     <main class="mx-auto mt-8 w-full max-w-5xl px-6 xl:px-0">
         <section class="mx-auto mt-8 max-w-5xl">
-            <div class="rounded-2xl border bg-white px-6 py-5">
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 py-5">
                 <div class="items-center justify-between gap-6 md:flex">
                     <div>
                         <h2 class="font-display text-lg font-bold text-gray-900">Explore the biosecurity landscape</h2>
@@ -36,14 +36,14 @@
                 </div>
             </div>
         </section>
-        <article class="mt-8 rounded-3xl border bg-white shadow-xs">
+        <article class="mt-8 rounded-3xl border border-gray-200 bg-white shadow-xs">
             <header
-                class="flex flex-col items-start justify-between gap-4 rounded-t-3xl border-b bg-gray-50 px-6 py-5 md:flex-row md:items-center"
+                class="flex flex-col items-start justify-between gap-4 rounded-t-3xl border-b border-gray-200 bg-gray-50 px-6 py-5 md:flex-row md:items-center"
             >
                 <div class="flex items-center gap-3">
                     <x-entry-logo
                         :logo="$entry->logo"
-                        class="size-12 rounded-lg border bg-white"
+                        class="size-12 rounded-lg border border-gray-200 bg-white"
                         alt="{{ $entry->label }}'s logo"
                     />
                     <div>
@@ -127,7 +127,7 @@
                 @endif
             </section>
 
-            <footer class="flex flex-wrap items-center gap-4 border-t bg-gray-50 px-6 py-3">
+            <footer class="flex flex-wrap items-center gap-4 border-t border-gray-200 bg-gray-50 px-6 py-3">
                 <a
                     class="inline-flex items-center text-sm text-gray-700 underline"
                     href="{{ $entry->notionUrl() }}"
