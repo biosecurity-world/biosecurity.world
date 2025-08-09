@@ -5,7 +5,7 @@
 
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
-    pkgs = import nixpkgs  { inherit system;  config = { allowUnfree = true; };  };
+pkgs = import nixpkgs  { inherit system;  };
   in {
     devShells.${system}.default = pkgs.mkShell {
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true";
@@ -28,7 +28,7 @@
         ++ (with pkgs; [
           nodejs
           pnpm
-          go
+          go_1_23
           wrangler
           chromium
         ]);

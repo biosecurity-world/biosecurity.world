@@ -1,6 +1,8 @@
 module logosnatch
 
-go 1.23
+go 1.23.0
+
+toolchain go1.23.1
 
 require (
 	github.com/h2non/bimg v1.1.9
