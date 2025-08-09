@@ -2,15 +2,13 @@ name: ci
 on:
   push:
     paths:
-      - 'website/**'
+      - "**"
+      - "!.github/**"
   workflow_dispatch:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./website
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -25,7 +23,7 @@ jobs:
           cache-name: cache-composer-packages
         with:
           path: ~/.composer-store
-          key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+          key: build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
 
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install

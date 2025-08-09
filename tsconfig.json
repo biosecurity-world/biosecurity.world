@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "esnext",
+        "module": "esnext",
+        "strict": true,
+        "isolatedModules": true,
+        "noImplicitAny": true,
+        "noEmit": true,
+        "noUnusedLocals": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@/*": ["resources/js/*"]
+        }
+    },
+    "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts"]
+}

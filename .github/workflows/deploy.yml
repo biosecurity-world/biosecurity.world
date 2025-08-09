@@ -2,15 +2,13 @@ name: deploy
 on:
   push:
     paths:
-      - 'website/**'
+      - "**"
+      - "!.github/**"
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./website
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -27,7 +25,7 @@ jobs:
           cache-name: cache-node-modules
         with:
           path: ~/.pnpm-store
-          key: build-${{ env.cache-name }}-${{ hashFiles('website/pnpm-lock.yaml') }}
+          key: build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install node dependencies
         run: nix develop --ignore-environment --command pnpm install
@@ -42,7 +40,7 @@ jobs:
           cache-name: cache-composer-packages
         with:
           path: ~/.composer-store
-          key: build-${{ env.cache-name }}-${{ hashFiles('website/composer.lock') }}
+          key: build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
 
       - name: Install PHP dependencies
         run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
@@ -64,12 +62,11 @@ jobs:
       - name: Build website
         run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
         env:
-          NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE: ${{ vars.DEV_NOTION_DATABASE }}
+          NOTION_TOKEN: ${{ secrets.DEV_NOTION_TOKEN }}
 
       - name: Copy icons
-        run:
-          mkdir -p ./dist/storage/logos/ &&
+        run: mkdir -p ./dist/storage/logos/ &&
           cp -r ./storage/app/public/logos ./dist/storage/
 
       - name: Deploy website

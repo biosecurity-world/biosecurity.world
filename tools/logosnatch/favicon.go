@@ -4,12 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/h2non/bimg"
-	"github.com/kolesa-team/go-webp/encoder"
-	"github.com/kolesa-team/go-webp/webp"
-	_ "golang.org/x/image/bmp"
-	_ "golang.org/x/image/webp"
-	"golang.org/x/net/html"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -23,6 +17,13 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/h2non/bimg"
+	"github.com/kolesa-team/go-webp/encoder"
+	"github.com/kolesa-team/go-webp/webp"
+	_ "golang.org/x/image/bmp"
+	_ "golang.org/x/image/webp"
+	"golang.org/x/net/html"
 )
 
 var (

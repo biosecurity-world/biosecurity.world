@@ -54,6 +54,48 @@ func decodePaletted(r io.Reader, c image.Config, topDown bool) (image.Image, err
 	return paletted, nil
 }
 
+// decodePaletted4 reads a 4 bit-per-pixel BMP image from r.
+// If topDown is false, the image rows will be read bottom-up.
+func decodePaletted4(r io.Reader, c image.Config, topDown bool) (image.Image, error) {
+	paletted := image.NewPaletted(image.Rect(0, 0, c.Width, c.Height), c.ColorModel.(color.Palette))
+	if c.Width == 0 || c.Height == 0 {
+		return paletted, nil
+	}
+	y0, y1, yDelta := c.Height-1, -1, -1
+	if topDown {
+		y0, y1, yDelta = 0, c.Height, +1
+	}
+
+	bytesPerLine := (c.Width*4 + 7) / 8 // 4 bits per pixel
+	paddedLineSize := (bytesPerLine + 3) &^ 3
+	line := make([]byte, paddedLineSize)
+
+	for y := y0; y != y1; y += yDelta {
+		p := paletted.Pix[y*paletted.Stride : y*paletted.Stride+c.Width]
+		if _, err := io.ReadFull(r, line); err != nil {
+			return nil, err
+		}
+
+		byteIndex := 0
+		for pixelIndex := 0; pixelIndex < c.Width; {
+			if byteIndex >= bytesPerLine {
+				break
+			}
+			dataByte := line[byteIndex]
+			byteIndex++
+
+			p[pixelIndex] = dataByte >> 4
+			pixelIndex++
+
+			if pixelIndex < c.Width {
+				p[pixelIndex] = dataByte & 0x0F
+				pixelIndex++
+			}
+		}
+	}
+	return paletted, nil
+}
+
 // decodeRGB reads a 24 bit-per-pixel BMP image from r.
 // If topDown is false, the image rows will be read bottom-up.
 func decodeRGB(r io.Reader, c image.Config, topDown bool) (image.Image, error) {
@@ -111,13 +153,15 @@ func decodeNRGBA(r io.Reader, c image.Config, topDown, allowAlpha bool) (image.I
 }
 
 // Decode reads a BMP image from r and returns it as an image.Image.
-// Limitation: The file must be 8, 24 or 32 bits per pixel.
+// Limitation: The file must be 4, 8, 24 or 32 bits per pixel.
 func DecodeBMP(r io.Reader) (image.Image, error) {
 	c, bpp, topDown, allowAlpha, err := decodeConfig(r)
 	if err != nil {
 		return nil, err
 	}
 	switch bpp {
+	case 4:
+		return decodePaletted4(r, c, topDown)
 	case 8:
 		return decodePaletted(r, c, topDown)
 	case 24:
@@ -125,12 +169,12 @@ func DecodeBMP(r io.Reader) (image.Image, error) {
 	case 32:
 		return decodeNRGBA(r, c, topDown, allowAlpha)
 	}
-	panic("unreachable")
+	return nil, ErrUnsupported
 }
 
 // DecodeConfig returns the color model and dimensions of a BMP image without
 // decoding the entire image.
-// Limitation: The file must be 8, 24 or 32 bits per pixel.
+// Limitation: The file must be 4, 8, 24 or 32 bits per pixel.
 func DecodeConfigBMP(r io.Reader) (image.Config, error) {
 	config, _, _, _, err := decodeConfig(r)
 	return config, err
@@ -176,7 +220,7 @@ func decodeConfig(r io.Reader) (config image.Config, bitsPerPixel int, topDown b
 	if width < 0 || height < 0 {
 		return image.Config{}, 0, false, false, ErrUnsupported
 	}
-	// We only support 1 plane and 8, 24 or 32 bits per pixel and no
+	// We only support 1 plane and 4, 8, 24 or 32 bits per pixel and no
 	// compression.
 	planes, bpp, compression := readUint16(b[26:28]), readUint16(b[28:30]), readUint32(b[30:34])
 	// if compression is set to BI_BITFIELDS, but the bitmask is set to the default bitmask
@@ -190,6 +234,29 @@ func decodeConfig(r io.Reader) (config image.Config, bitsPerPixel int, topDown b
 		return image.Config{}, 0, false, false, ErrUnsupported
 	}
 	switch bpp {
+	case 4:
+		colorUsed := readUint32(b[46:50])
+		// If colorUsed is 0, it is set to the maximum number of colors for the given bpp.
+		if colorUsed == 0 {
+			colorUsed = 16
+		} else if colorUsed > 16 {
+			return image.Config{}, 0, false, false, ErrUnsupported
+		}
+
+		if offset != fileHeaderLen+infoLen+colorUsed*4 {
+			return image.Config{}, 0, false, false, ErrUnsupported
+		}
+		_, err = io.ReadFull(r, b[:colorUsed*4])
+		if err != nil {
+			return image.Config{}, 0, false, false, err
+		}
+		pcm := make(color.Palette, colorUsed)
+		for i := range pcm {
+			// BMP images are stored in BGR order rather than RGB order.
+			// Every 4th byte is padding.
+			pcm[i] = color.RGBA{b[4*i+2], b[4*i+1], b[4*i+0], 0xFF}
+		}
+		return image.Config{ColorModel: pcm, Width: width, Height: height}, 4, topDown, false, nil
 	case 8:
 		colorUsed := readUint32(b[46:50])
 		// If colorUsed is 0, it is set to the maximum number of colors for the given bpp, which is 2^bpp.
