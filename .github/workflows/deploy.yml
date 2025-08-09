@@ -56,11 +56,14 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
 
+      - name: Install bare
+        run: nix develop --ignore-environment --command go install github.com/felixdorn/bare@latest
+
       - name: Start server
         run: nix develop --ignore-environment --command php artisan serve --host 0.0.0.0 --port 8000 &
 
       - name: Build website
-        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command php artisan export
+        run: nix develop --ignore-environment --keep NOTION_DATABASE --keep NOTION_TOKEN --command bare export http://localhost:8000 --with-js -o dist/
         env:
           NOTION_DATABASE: ${{ vars.DEV_NOTION_DATABASE }}
           NOTION_TOKEN: ${{ secrets.DEV_NOTION_TOKEN }}
