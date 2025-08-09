@@ -557,6 +557,6 @@
             </x-faq-item>
         </div>
     </section>
-
     <x-footer />
+    <a href="/_/entries" class="sr-only" aria-hidden="true" rel="noopener nofollow noreferer">_</a>
 </x-layouts.default>

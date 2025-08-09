@@ -5,8 +5,10 @@ declare(strict_types=1);
 use App\Http\Controllers\ShowEntryController;
 use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowWelcomeController;
+use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
+use Dom\HTMLCollection;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', ShowWelcomeController::class)->name('welcome');
@@ -30,19 +32,22 @@ Route::get('/partials/map-content', function (NotionClient $notion) {
         'tree' => Tree::buildFromPages($notion->pages()),
     ]);
 });
-/*
+
 Route::get('/_/entries', function (NotionClient $notion) {
     $tree = Tree::buildFromPages($notion->pages());
 
     $links = $tree
         ->entrygroups()
         ->flatMap(fn (Entrygroup $group) => collect($group->entries)->map(
-            fn (int $entryId) => route('entries.show', ['id' => $group->id, 'entryId' => $entryId])
-        ));
+            fn (int $entryId) => route('partials.entry', ['entryGroup' => $group->id, 'entryId' => $entryId])
+        ))
+        ->map(fn ($link) => <<<HTML
+        <a href="$link">$link</a>
+        HTML)
+        ->join(PHP_EOL);
 
-    return view('entries.index', ['links' => $links]);
+    return $links;
 });
- */
 
 if (! app()->isProduction()) {
     // The code for rendering the tree could be an independent library

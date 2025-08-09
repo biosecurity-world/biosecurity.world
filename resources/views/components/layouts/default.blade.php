@@ -9,7 +9,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>{{ $title }} | biosecurity.world</title>
 
-        <link rel="preload" href="{{ Vite::asset("resources/fonts/Gilroy.woff2") }}" as="font" crossorigin />
+        {{-- <link rel="preload" href="{{ Vite::asset("resources/fonts/Gilroy.woff2") }}" as="font" crossorigin /> --}}
         {{-- <link rel="preload" href="{{ Vite::asset('resources/fonts/Nunito-Regular.woff2') }}" as="font" crossorigin/> --}}
         {{-- <link rel="preload" href="{{ Vite::asset('resources/fonts/Nunito-Bold.woff2') }}" as="font" crossorigin/> --}}
 
