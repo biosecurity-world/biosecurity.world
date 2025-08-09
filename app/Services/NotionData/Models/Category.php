@@ -7,8 +7,8 @@ namespace App\Services\NotionData\Models;
 class Category
 {
     /**
-     * @param int $technicalEntriesCount Number of entries in this category's subtree in the Technical domain
-     * @param int $governanceEntriesCount Number of entries in this category's subtree in the Governance domain
+     * @param  int  $technicalEntriesCount  Number of entries in this category's subtree in the Technical domain
+     * @param  int  $governanceEntriesCount  Number of entries in this category's subtree in the Governance domain
      */
     public function __construct(
         public int $id,

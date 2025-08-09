@@ -7,7 +7,7 @@
 ])
 <li class="rounded-3xl border border-gray-200 bg-white px-6 py-8 text-center">
     <img class="mx-auto size-36 rounded-full md:size-48" src="{{ $picture }}" alt="" />
-    <h3 class="mt-6 font-display text-xl font-semibold leading-7 tracking-tight">{{ $name }}</h3>
+    <h3 class="font-display mt-6 text-xl leading-7 font-semibold tracking-tight">{{ $name }}</h3>
     <p class="px-5 text-lg text-gray-900">{{ $title }}</p>
     <p class="mt-6 leading-6 text-gray-700">
         {{ $bio }}
@@ -15,7 +15,7 @@
     @if ($linkedin)
         <ul role="list" class="mt-6 flex justify-center gap-x-6">
             <li>
-                <a href="{{ $linkedin }}" class="-m-2 block rounded-full p-2 text-primary-700 hover:bg-gray-100">
+                <a href="{{ $linkedin }}" class="text-primary-700 -m-2 block rounded-full p-2 hover:bg-gray-100">
                     <span class="sr-only">LinkedIn</span>
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path

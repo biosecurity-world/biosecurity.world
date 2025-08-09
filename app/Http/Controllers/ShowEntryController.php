@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\NotionData\NotionClient;
-
 use App\Services\NotionData\Tree\Tree;
 
 class ShowEntryController

@@ -11,7 +11,7 @@
 />
 <label
     for="{{ $name }}"
-    class="{{ isset($kind) ? $kind . "-label" : "" }} relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:outline-hidden peer-focus:ring-2 peer-focus:ring-primary-600 peer-focus:ring-offset-2"
+    class="{{ isset($kind) ? $kind . "-label" : "" }} peer-focus:ring-primary-600 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:outline-hidden"
 >
     <span
         aria-hidden="true"

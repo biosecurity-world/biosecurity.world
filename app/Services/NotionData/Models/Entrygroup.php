@@ -12,7 +12,8 @@ class Entrygroup
 
     /**
      * Count technical and governance entries within this group.
-     * @param array $lookup Map of id => model, containing Entry instances for $this->entries
+     *
+     * @param  array  $lookup  Map of id => model, containing Entry instances for $this->entries
      * @return array{tech:int,gov:int}
      */
     public function countDomains(array $lookup): array

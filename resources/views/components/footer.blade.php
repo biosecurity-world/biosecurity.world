@@ -12,7 +12,7 @@
                 <li>
                     <a
                         href="{{ route("privacy-policy", absolute: false) }}"
-                        class="inline-flex whitespace-nowrap text-sm text-gray-700 underline"
+                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
                     >
                         Privacy Policy
                     </a>
@@ -20,7 +20,7 @@
                 <li>
                     <a
                         href="{{ route("terms-of-service", absolute: false) }}"
-                        class="inline-flex whitespace-nowrap text-sm text-gray-700 underline"
+                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
                     >
                         Terms of Service
                     </a>
@@ -28,14 +28,14 @@
                 <li>
                     <a
                         href="https://github.com/biosecurity-world/biosecurity.world"
-                        class="inline-flex whitespace-nowrap text-sm text-gray-700 underline"
+                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
                     >
                         <span class="mr-0.5">GitHub</span>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
                             fill="currentColor"
-                            class="mt-px size-4 text-gray-400 group-hover:text-primary-700"
+                            class="group-hover:text-primary-700 mt-px size-4 text-gray-400"
                             aria-label="External link icon"
                         >
                             <path
@@ -50,14 +50,14 @@
                 <li>
                     <a
                         href="https://notion.so/{{ config("services.notion.database") }}"
-                        class="inline-flex whitespace-nowrap text-sm text-gray-700 underline"
+                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
                     >
                         <span class="mr-0.5">Notion</span>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
                             fill="currentColor"
-                            class="mt-px size-4 text-gray-400 group-hover:text-primary-700"
+                            class="group-hover:text-primary-700 mt-px size-4 text-gray-400"
                             aria-label="External link icon"
                         >
                             <path

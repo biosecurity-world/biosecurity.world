@@ -1,7 +1,7 @@
 <x-layouts.default title="Privacy Policy" class="bg-gray-100 antialiased">
     <x-slot:head>
         @vite(["resources/css/prose.css"])
-    </x-slot:head>
+    </x-slot>
     <x-navbar class="mt-4 shadow-xs lg:mt-8 lg:bg-white" border />
 
     <article class="prose mx-auto mt-8 max-w-7xl px-6 xl:px-0">

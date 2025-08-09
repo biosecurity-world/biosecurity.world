@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowEntryController;
+use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;

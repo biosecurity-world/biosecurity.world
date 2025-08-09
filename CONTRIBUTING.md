@@ -1,9 +1,9 @@
 # How to contribute?
 
-* [For developers](#for-developers)
-
+- [For developers](#for-developers)
 
 ## For developers
+
 **This guide is intended for developers. If you're looking to contribute to the data, check out <LINK_HERE>.**
 
 We use [Nix](https://nixos.org/download/#download-nix), the package manager, to have consistent development environment. Install it, and we recommend you install `nix-direnv` as well.

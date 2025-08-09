@@ -183,8 +183,8 @@ class Tree
         foreach ($categoryCounts as $categoryId => $counts) {
             $category = $tree->lookup[$categoryId];
             if ($category instanceof Category) {
-                    $category->technicalEntriesCount = $counts['tech'];
-                    $category->governanceEntriesCount = $counts['gov'];
+                $category->technicalEntriesCount = $counts['tech'];
+                $category->governanceEntriesCount = $counts['gov'];
             }
         }
 
