@@ -8,7 +8,6 @@ use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Tree;
-use Dom\HTMLCollection;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', ShowWelcomeController::class)->name('welcome');
