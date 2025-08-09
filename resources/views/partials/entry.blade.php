@@ -1,10 +1,10 @@
-<div class="entry flex h-full flex-col justify-between rounded-r-3xl border-r border-t-0 bg-white">
+<div class="entry flex h-full flex-col justify-between rounded-r-3xl border-t-0 border-r bg-white">
     <div>
-        <div class="flex items-center justify-between rounded-tr-3xl border-b border-r bg-gray-50 py-4 pl-4 pr-6">
+        <div class="flex items-center justify-between rounded-tr-3xl border-r border-b bg-gray-50 py-4 pr-6 pl-4">
             <ol role="list" class="flex items-center space-x-1 overflow-x-scroll">
                 @foreach ($breadcrumbs as $breadcrumb)
                     <li class="flex items-center">
-                        <span class="mr-1 whitespace-nowrap text-sm font-bold text-gray-700">{{ $breadcrumb }}</span>
+                        <span class="mr-1 text-sm font-bold whitespace-nowrap text-gray-700">{{ $breadcrumb }}</span>
 
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +33,7 @@
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
-                    class="size-5 text-gray-700 group-hover:text-primary-600"
+                    class="group-hover:text-primary-600 size-5 text-gray-700"
                 >
                     <path
                         d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
@@ -49,7 +49,7 @@
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 16"
                         fill="currentColor"
-                        class="size-4 text-primary-600"
+                        class="text-primary-600 size-4"
                     >
                         <path
                             fill-rule="evenodd"
@@ -58,7 +58,7 @@
                         />
                     </svg>
 
-                    <span class="ml-1 text-xs text-primary-700">
+                    <span class="text-primary-700 ml-1 text-xs">
                         This {{ $entry->nounForOrganizationType() }} focuses on
                         <abbr title="Global Catastrophic Biological Risks">GCBRs</abbr>
                         .
@@ -75,7 +75,7 @@
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 16"
                         fill="currentColor"
-                        class="mb-3 inline size-4 text-gray-400 group-hover:text-primary-700"
+                        class="group-hover:text-primary-700 mb-3 inline size-4 text-gray-400"
                         aria-label="External link icon"
                     >
                         <path
@@ -140,7 +140,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
                 fill="currentColor"
-                class="mt-px size-4 text-gray-400 group-hover:text-primary-700"
+                class="group-hover:text-primary-700 mt-px size-4 text-gray-400"
                 aria-label="External link icon"
             >
                 <path
@@ -151,13 +151,13 @@
                 />
             </svg>
         </a>
-        <a class="inline-flex text-sm text-gray-700 underline">
+        <a class="inline-flex text-sm text-gray-700 underline" href="{{ route("give-feedback") }}">
             <span class="mr-0.5">Report a problem</span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
                 fill="currentColor"
-                class="mt-px size-4 text-gray-400 group-hover:text-primary-700"
+                class="group-hover:text-primary-700 mt-px size-4 text-gray-400"
                 aria-label="External link icon"
             >
                 <path
