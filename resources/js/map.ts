@@ -16,6 +16,12 @@ async function openEntry(entry: HTMLElement): Promise<void> {
   let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
   let entryId = parseInt(entry.dataset.entry!, 10)
 
+  // On mobile, redirect to the SEO entry page instead of loading the inline partial
+  if (isMobile()) {
+    window.location.href = `/entry/${entryId}`
+    return
+  }
+
   try {
     let entryResponse = await fetch(`/partials/entries/${entrygroup}/${entryId}`, {
       headers: {"X-Requested-With": "XMLHttpRequest"},
@@ -46,45 +52,102 @@ function hasEntryOpen(): boolean {
   return elEntryWrapper.children.length > 0
 }
 
-/* Fullscreen mode */
-{
-  let lastScrollTop = 0
+/* Fullscreen mode and mobile UX */
+function isMobile(): boolean {
+  return window.matchMedia("(max-width: 1023.98px)").matches
+}
 
-  // element.requestFullscreen() is not available in Safari
-  // so we implement a fake fullscreen mode.
-  function toggleFullscreen() {
-    let isFullscreen = elMapWrapper.classList.contains("fullscreen")
+const elMobileIntro = document.getElementById("mobile-map-intro") as HTMLElement | null
+const elMobileFullscreenUI = document.getElementById("mobile-map-fullscreen-ui") as HTMLElement | null
+const btnOpenMapMobile = document.getElementById("open-map-mobile") as HTMLButtonElement | null
+const btnCloseMapMobile = document.getElementById("close-map-mobile") as HTMLButtonElement | null
+const elMobileFiltersDrawer = document.getElementById("mobile-filters-drawer") as HTMLElement | null
 
-    document.getElementById("not-fullscreen")!.classList.toggle("hidden", !isFullscreen)
-    document.getElementById("is-fullscreen")!.classList.toggle("hidden", isFullscreen)
+const btnMobileFiltersExpand = document.getElementById("mobile-filters-expand") as HTMLButtonElement | null
 
-    if (!isFullscreen) {
-      lastScrollTop = window.scrollY
-      elMapWrapper.classList.add("fullscreen")
-    } else {
-      elMapWrapper.classList.remove("fullscreen")
-      elMapWrapper.scrollIntoView()
-      window.scrollTo(0, lastScrollTop)
-    }
+// Initialize collapsed state for filters UI on first render
+if (btnMobileFiltersExpand) {
+  btnMobileFiltersExpand.setAttribute("aria-expanded", "false")
+  const label = btnMobileFiltersExpand.querySelector("span")
+  if (label) label.textContent = "Expand"
+  const icon = btnMobileFiltersExpand.querySelector("svg") as SVGElement | null
+  if (icon) icon.style.transform = ""
+}
+
+let mobileUIState = {fullscreen: false, filtersExpanded: false}
+
+function setMapInteractable(interactable: boolean): void {
+  // Disable map interactions behind the intro overlay on mobile; enable in fullscreen
+  $map.style("pointer-events", interactable ? "auto" : "none")
+}
+
+// On first load, default to non-interactive map on mobile
+if (isMobile()) {
+  setMapInteractable(false)
+}
+
+function setFiltersExpanded(expanded: boolean): void {
+  if (!elMobileFiltersDrawer) return
+
+  if (expanded) {
+    // Expand to ~95% viewport height
+    elMobileFiltersDrawer.style.maxHeight = "95vh"
+    btnMobileFiltersExpand?.setAttribute("aria-expanded", "true")
+
+    let label = btnMobileFiltersExpand?.querySelector("span")
+    if (label) label.textContent = "Retract"
+    let icon = btnMobileFiltersExpand?.querySelector("svg") as SVGElement | null
+    if (icon) icon.style.transform = "rotate(180deg)"
+  } else {
+    // Collapse back to default (56px via class max-h-14)
+    elMobileFiltersDrawer.style.maxHeight = ""
+    btnMobileFiltersExpand?.setAttribute("aria-expanded", "false")
+
+    let label = btnMobileFiltersExpand?.querySelector("span")
+    if (label) label.textContent = "Expand"
+    let icon = btnMobileFiltersExpand?.querySelector("svg") as SVGElement | null
+    if (icon) icon.style.transform = ""
   }
 
-  document.getElementById("toggle-fullscreen")!.addEventListener("click", toggleFullscreen)
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (hasEntryOpen()) {
-        closeEntry()
-      } else if (elMapWrapper.classList.contains("fullscreen")) {
-        e.preventDefault()
-        toggleFullscreen()
-      }
-    }
-
-    if (e.key === "f") {
-      e.preventDefault()
-      toggleFullscreen()
-    }
-  })
+  mobileUIState.filtersExpanded = expanded
 }
+
+function openMobileFullscreen(): void {
+  if (!isMobile()) return
+  mobileUIState.fullscreen = true
+  elMobileIntro?.classList.add("hidden")
+  elMobileFullscreenUI?.classList.remove("hidden")
+  elMobileFiltersDrawer?.classList.remove("hidden")
+  if (elMobileFiltersDrawer) elMobileFiltersDrawer.style.display = "block"
+  elMapWrapper?.classList.add("mobile-map-fullscreen")
+  setFiltersExpanded(false)
+  setMapInteractable(true)
+}
+
+function closeMobileFullscreen(): void {
+  mobileUIState.fullscreen = false
+  elMobileIntro?.classList.remove("hidden")
+  elMobileFullscreenUI?.classList.add("hidden")
+  elMobileFiltersDrawer?.classList.add("hidden")
+  if (elMobileFiltersDrawer) elMobileFiltersDrawer.style.display = ""
+  elMapWrapper?.classList.remove("mobile-map-fullscreen")
+  setFiltersExpanded(false)
+  // When not on mobile, keep map interactive; on mobile and closed, disable it
+  setMapInteractable(!isMobile())
+}
+
+// Wire up mobile controls
+btnOpenMapMobile?.addEventListener("click", () => openMobileFullscreen())
+btnCloseMapMobile?.addEventListener("click", () => closeMobileFullscreen())
+
+btnMobileFiltersExpand?.addEventListener("click", () => setFiltersExpanded(!mobileUIState.filtersExpanded))
+
+// Reset mobile UI when leaving mobile breakpoint
+window.addEventListener("resize", () => {
+  if (!isMobile()) {
+    closeMobileFullscreen()
+  }
+})
 
 /* Handle app state changes */
 let stateElements = document.querySelectorAll(".app-state") as NodeListOf<HTMLElement>

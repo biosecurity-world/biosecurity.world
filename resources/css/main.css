@@ -3,27 +3,27 @@
 @plugin '@tailwindcss/forms';
 
 @theme {
-    --color-technical: #b45309;
-    --color-governance: #2563eb;
+  --color-technical: #b45309;
+  --color-governance: #2563eb;
 
-    --color-primary-50: #ecfdf5;
-    --color-primary-100: #d1fae5;
-    --color-primary-200: #a7f3d0;
-    --color-primary-300: #6ee7b7;
-    --color-primary-400: #34d399;
-    --color-primary-500: #10b981;
-    --color-primary-600: #059669;
-    --color-primary-700: #047857;
-    --color-primary-800: #065f46;
-    --color-primary-900: #064e3b;
-    --color-primary-950: #022c22;
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+  --color-primary-950: #022c22;
 
-    --font-sans:
-        Nunito, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
-    --font-display:
-        Gilroy, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+  --font-sans:
+    Nunito, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-display:
+    Gilroy, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 }
 
 /*
@@ -35,127 +35,149 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-    .off-screen {
-        position: absolute !important;
-        top: -9999px !important;
-        left: -9999px !important;
-    }
+  .off-screen {
+    transform: translate(-100000px, -100000px) !important;
+  }
 }
 
 /** Map */
 .app-state {
-    @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
+  @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
 }
 
 .state-active {
-    @apply pointer-events-auto opacity-100;
+  @apply pointer-events-auto opacity-100;
 }
 
 .state-inactive {
-    @apply pointer-events-none opacity-0;
-}
-
-#map-wrapper:not(.fullscreen) {
-    transform: translateY(-10em) scale(0.9);
-}
-
-#map-wrapper.fullscreen {
-    @apply absolute inset-0;
-    transform: translateY(0em) scale(1);
-
-    & .rounded-l-3xl {
-        border-bottom-left-radius: 0 !important;
-        border-top-left-radius: 0 !important;
-    }
-
-    & .rounded-r-3xl {
-        border-bottom-right-radius: 0 !important;
-        border-top-right-radius: 0 !important;
-    }
-
-    & .rounded-tr-3xl {
-        border-top-right-radius: 0 !important;
-    }
-
-    & aside {
-        @apply border-y-0;
-    }
+  @apply pointer-events-none opacity-0;
 }
 
 #entry-wrapper:not(:has(> .entry)) {
-    display: none;
+  display: none;
 }
 
 #entry-wrapper:has(> .entry) {
-    display: block;
+  display: block;
 }
 
 /** Filters: Domain */
 .domain-checkbox:checked + label > .check {
-    opacity: 1;
+  opacity: 1;
 }
 
 .domain-checkbox:not(:checked) + label > .check {
-    opacity: 0;
+  opacity: 0;
 }
 
 .domain-checkbox:checked + label > .at-technical,
 .domain-checkbox:checked + label > .at-governance {
-    color: white;
+  color: white;
 }
 
 /** Filters: Focuses */
 .focuses-list:hover:not(:has(* :hover)) {
-    @apply border-primary-700;
+  @apply border-primary-700;
 }
 
 /** Handle the hover logic on entries */
 #entrygroups.hovered [data-entry]:not(.active) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 #entrygroups.hovered [data-sum].active > .entry-logo {
-    @apply border-primary-600 border;
+  @apply border-primary-600 border;
 }
 
 #entrygroups.hovered .org-type:not(:has(+ div > [data-sum].active)) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 .org-type:not(:has(+ div > .matches-filters)) {
-    display: none;
-    margin: 0 !important;
+  display: none;
+  margin: 0 !important;
 }
 
 .big-toggle:not(:checked) + label {
-    @apply bg-gray-200;
+  @apply bg-gray-200;
 
-    & > span {
-        @apply translate-x-0;
-    }
+  & > span {
+    @apply translate-x-0;
+  }
 }
 
 .big-toggle:checked + label {
-    @apply bg-primary-600;
+  @apply bg-primary-600;
 
-    & > span {
-        @apply translate-x-full;
-    }
+  & > span {
+    @apply translate-x-full;
+  }
 }
 
 /** ...? */
 [data-entry]:not(.matches-filters) {
-    display: none;
+  display: none;
 }
 
 .entrygroup:not(:has(*.matches-filters)) {
-    display: none;
+  display: none;
 }
 
 .org-type:has(+ div > .matches-filters) {
-    @apply mt-2;
+  @apply mt-2;
 }
 
 #entry-loader.loading-entry {
-    opacity: 1;
+  opacity: 1;
+}
+
+/* Mobile map experience (revamped) */
+@media (max-width: 1023.98px) {
+  /* Ensure the filters drawer overlays the footer and other content */
+  #map-wrapper > #mobile-filters-drawer {
+    z-index: 1000;
+  }
+
+  /* Intro overlay panel sizing (30–50% viewport height window) */
+  #mobile-map-intro > div {
+    min-height: 30vh;
+    max-height: 50vh;
+  }
+
+  /* Fullscreen fixed wrapper toggled via JS (apply on #map-wrapper) */
+  #map-wrapper.mobile-map-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0 !important;
+    box-shadow: none;
+    background: #f3f4f6; /* bg-gray-100 fallback */
+    overflow: hidden;
+  }
+
+  /* Ensure the SVG map fills the viewport when fullscreen */
+  #map-wrapper.mobile-map-fullscreen #map {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* Safe-area spacing for the bottom bar (iOS) */
+  #mobile-map-fullscreen-ui .mb-4 {
+    margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+
+  /* Fullscreen UI z-index override removed
+     (bottom bar removed; expand control moved into drawer)
+     Intentionally left blank.
+  */
+
+  /* Rotate expand chevron based on aria-expanded (drawer button) */
+  #mobile-filters-expand svg {
+    transition: transform 200ms ease;
+  }
+  #mobile-filters-expand[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
 }

@@ -1,5 +1,5 @@
 <span {{ $attributes->class(["at-technical font-display inline-flex items-center text-amber-700"]) }}>
-    <span class="mr-1 font-semibold">Research</span>
+    <span class="mr-1 font-semibold">Technical</span>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path
             fill-rule="evenodd"

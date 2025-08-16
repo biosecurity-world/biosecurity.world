@@ -14,7 +14,7 @@
 
         @vite("resources/js/map.ts")
     </x-slot>
-    <header class="from-primary-600 to-primary-950 w-full bg-linear-to-tl pt-4 pb-36 lg:pt-8">
+    <header class="from-primary-600 to-primary-950 w-full bg-linear-to-tl pt-4 pb-24 lg:pt-8">
         <x-navbar class="md:bg-white/20 md:shadow-inner md:shadow-white/30" invert />
 
         <h1
@@ -55,28 +55,44 @@
                     As an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
                     and
-                    <a class="underline" href="{{ $databaseUrl }}">open-data,</a>
+                    <a class="underline" href="{{ $databaseUrl }}">open-data</a>
                     scientific project, we keep a record of our inclusion decisions for people to challenge.
                 </p>
             </li>
         </ul>
     </header>
-    <div
-        class="mx-auto flex h-screen w-full rounded-3xl shadow-lg duration-1000 motion-safe:transition-[transform,order]"
-        id="map-wrapper"
-    >
+    <section class="mx-auto w-full max-w-3xl px-6 pt-6 pb-4 lg:hidden">
+        <x-map-info id="map-info" :last-edited-at="$lastEditedAt" />
+    </section>
+    <!-- Legacy mobile overlay/checkbox removed; controlled via JS now -->
+    <div class="mx-auto flex h-screen w-full rounded-3xl shadow-lg duration-1000" id="map-wrapper">
         <aside
-            class="hidden h-full w-full max-w-md overflow-y-scroll rounded-l-3xl border-y border-r border-l border-gray-200 bg-white lg:flex lg:flex-col"
+            id="mobile-filters-drawer"
+            class="fixed inset-x-0 bottom-0 z-30 hidden max-h-14 w-full overflow-y-auto rounded-t-3xl border-t border-gray-200 bg-white transition-[max-height] duration-300 lg:static lg:z-auto lg:flex lg:h-full lg:max-h-none lg:w-full lg:max-w-md lg:flex-col lg:overflow-y-scroll lg:rounded-l-3xl lg:border-y lg:border-r lg:border-l"
         >
-            <header class="border-b border-gray-200">
+            <div class="lg:hidden">
+                <div class="flex items-center justify-between px-4 py-3">
+                    <div class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <x-heroicon-o-funnel class="size-5 text-gray-600" />
+                        <span>Filters</span>
+                    </div>
+                    <button
+                        id="mobile-filters-expand"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-gray-700"
+                    >
+                        <x-heroicon-o-chevron-up class="size-5 text-gray-600" />
+                        <span>Expand</span>
+                    </button>
+                </div>
+            </div>
+            <header class="hidden border-b border-gray-200 lg:block">
                 <div class="px-6 pt-4">
                     <div class="flex items-center">
-                        <h3 class="font-display flex-1 text-2xl">Map of Biosecurity</h3>
-
+                        <x-map-info id="map-info" :last-edited-at="$lastEditedAt" />
                         <button
                             title="Toggle fullscreen (shortcut: F)"
                             id="toggle-fullscreen"
-                            class="-m-2 rounded-full border border-transparent p-2 transition hover:border-gray-200 hover:bg-gray-100 hover:shadow-inner"
+                            class="-m-2 self-start rounded-full border border-transparent p-2 transition hover:border-gray-200 hover:bg-gray-100 hover:shadow-inner"
                         >
                             <span class="sr-only">Toggle fullscreen</span>
                             <x-heroicon-o-arrows-pointing-out
@@ -91,91 +107,9 @@
                             />
                         </button>
                     </div>
-                    <p class="mt-& text-gray-700">
-                        Last updated on
-                        <time
-                            datetime="{{ $lastEditedAt->toIso8601String() }}"
-                            title="{{ $lastEditedAt->diffForHumans() }}"
-                        >
-                            {{ $lastEditedAt->format("F j, Y") }}
-                        </time>
-                        .
-                    </p>
-
-                    <div class="mt-4">
-                        <h4 class="font-display text-gray-900">Team</h4>
-                        <p class="flex flex-wrap text-gray-700">
-                            <a
-                                href="https://www.linkedin.com/in/alix-pham/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Alix Pham
-                            </a>
-                            <span>,&nbsp;</span>
-                            <a
-                                href="https://www.linkedin.com/in/sofyalebedeva/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Sofya Lebedeva
-                            </a>
-                            <span>,&nbsp;</span>
-                            <a
-                                href="https://www.linkedin.com/in/johantang/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Johan Täng
-                            </a>
-                            <span>,&nbsp;</span>
-                            <a
-                                href="https://www.linkedin.com/in/jeremy-andreoletti-330445216/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Jérémy Andréoletti
-                            </a>
-                        </p>
-                    </div>
-                    <div class="mt-2 mb-6">
-                        <h4 class="font-display text-gray-900">Support</h4>
-                        <p class="flex flex-wrap text-gray-700">
-                            <a
-                                href="https://www.linkedin.com/in/linbowkerlonnecker/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Lin Bowker-Lonnecker
-                            </a>
-                            <span>,&nbsp;</span>
-                            <a
-                                href="https://www.linkedin.com/in/will-saunter/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Will Saunter
-                            </a>
-                            <span>,&nbsp;</span>
-                            <a
-                                href="https://www.linkedin.com/in/dornfelix/"
-                                class="underline"
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                            >
-                                Félix Dorn
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </header>
-            <div class="bg-gray-50 px-6 py-4 lg:flex-1">
+            <div class="h-full max-h-[calc(95vh-56px)] overflow-y-auto bg-gray-50 px-6 py-4 lg:max-h-none lg:flex-1">
                 <h4 class="font-display flex-1 text-lg">Filters</h4>
 
                 <fieldset class="mt-2">
@@ -219,9 +153,23 @@
                 </fieldset>
                 <div class="mt-6 flex items-center justify-between">
                     <span class="flex grow flex-col">
-                        <span class="font-display leading-6 text-gray-900">Focus on GCBRs prevention</span>
-                        <span class="text-sm text-gray-500">
-                            Include only organizations focused on large-scale pandemics prevention.
+                        <span class="font-display leading-6 text-gray-900">
+                            Has focus on
+                            <abbr title="Global Catastrophic Biological Risks">GCBR</abbr>
+                            prevention
+                        </span>
+                        <span class="">
+                            <a
+                                class="text-primary-700 hover:text-primary-900 inline underline"
+                                href="https://www.nti.org/about/programs-projects/project/global-catastrophic-biological-risks/"
+                                rel="noopener noreferrer nofollow"
+                            >
+                                GCBRs
+                            </a>
+                            <span class="inline text-sm text-gray-500">
+                                are biological risks that could lead to severe and potentially irreversible damage to
+                                human civilization on a global scale.
+                            </span>
                         </span>
                     </span>
                     <x-big-toggle name="has_gcbr_focus" kind="has-gcbr-focus" />
@@ -396,9 +344,36 @@
                 </div>
 
                 <div id="above-map"></div>
+
                 <svg id="map" width="100%" height="100%" class="rounded-tr-3xl">
                     <!-- The map will be dynamically inserted here -->
                 </svg>
+
+                <!-- Mobile: default intro overlay with blur and central "Open the map" button -->
+                <div id="mobile-map-intro" class="absolute inset-0 z-30 flex items-center justify-center lg:hidden">
+                    <div
+                        class="flex h-[40vh] w-11/12 max-w-md items-center justify-center rounded-2xl bg-white/40 shadow-lg backdrop-blur-md"
+                    >
+                        <button
+                            id="open-map-mobile"
+                            class="bg-primary-600 hover:bg-primary-700 focus:ring-primary-600 inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
+                        >
+                            <span>Open the map</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile: fullscreen UI (close button + bottom filters bar), shown when map is opened -->
+                <div id="mobile-map-fullscreen-ui" class="pointer-events-none absolute inset-0 z-50 hidden lg:hidden">
+                    <!-- Close button (top-right) -->
+                    <button
+                        id="close-map-mobile"
+                        class="pointer-events-auto absolute top-4 right-4 rounded-full bg-white p-2 shadow-md"
+                    >
+                        <span class="sr-only">Close the map</span>
+                        <x-heroicon-o-x-mark class="size-5 text-gray-700" />
+                    </button>
+                </div>
                 <div class="absolute right-6 bottom-6">
                     <div class="flex flex-col divide-y rounded-lg bg-white shadow-sm">
                         <button class="focusable rounded-t-lg p-2 hover:bg-gray-50" id="zoom-in">
@@ -412,7 +387,7 @@
             </section>
         </main>
     </div>
-    <section id="faq" class="mx-auto w-full max-w-3xl px-6 xl:px-0">
+    <section id="faq" class="mx-auto mt-12 w-full max-w-3xl px-6 lg:mt-16 xl:px-0">
         <h2 class="font-display text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
 
         <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Goals</h3>
@@ -557,5 +532,7 @@
             </x-faq-item>
         </div>
     </section>
-    <x-footer />
+    <div id="page-footer" class="hidden">
+        <x-footer />
+    </div>
 </x-layouts.default>
