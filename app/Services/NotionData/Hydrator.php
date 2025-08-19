@@ -39,7 +39,6 @@ class Hydrator
      * even if the database is duplicated or the column changes, so they are _very_ stable.
      */
     public const array SCHEMA = [
-        /* THE REAL DEAL
     'organizationType' => '%3EfkD',
     'link' => 'BEe%7D',
     'description' => 'C%3Fc%3A',
@@ -50,9 +49,9 @@ class Hydrator
     'gcbrFocus' => 'kC%5Cr',
     'name' => 'title',
     'isCategory' => 'uR%3DA',
-    */
 
-        // My dev org
+    /*
+    // My dev org
         'organizationType' => '%3C%5Ce%7D',
         // 'Notes' => '%40HC%3F',
         'parent' => 'NIbg',
@@ -66,13 +65,14 @@ class Hydrator
         'description' => 'hR%3E%3D',
         'locationHints' => 'wYKB',
         'name' => 'title',
+        */
     ];
 
-    // public const TECHNICAL_DOMAIN = '|tSq';
-    // public const GOVERNANCE_DOMAIN =  'rBTY';
-    public const TECHNICAL_DOMAIN = 'fec88d1b-3a2c-4c60-9166-9d7107ec8005';
-
-    public const GOVERNANCE_DOMAIN = '3fda0bd6-f188-4363-b21b-c7b330e8844b';
+    public const TECHNICAL_DOMAIN = '|tSq';
+    public const GOVERNANCE_DOMAIN =  'rBTY';
+    // dev
+    //    public const TECHNICAL_DOMAIN = 'fec88d1b-3a2c-4c60-9166-9d7107ec8005';
+//  public const GOVERNANCE_DOMAIN = '3fda0bd6-f188-4363-b21b-c7b330e8844b';
 
     public function __construct(protected Database $database) {}
 

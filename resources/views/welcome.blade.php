@@ -491,13 +491,6 @@
 
         <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Properties &amp; Filters</h3>
         <div class="mt-4 space-y-4">
-            <x-faq-item title="Can I filter the map to show only organizations focused on GCBRs?">
-                <p>
-                    Yes, we have a specific view called "GCBR only" that filters the database to show only organizations
-                    with a focus on Global Catastrophic Biological Risks.
-                </p>
-            </x-faq-item>
-
             <x-faq-item title="What do the different 'Organization Types' mean?">
                 <p>
                     The organization types (such as Research institute, For-profit company, Think tank, etc.) categorize
