@@ -1,9 +1,6 @@
 .prose h2 {
     margin-top: 2em;
     margin-bottom: 1em;
-    font-family:
-        Gilroy, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
     font-size: 1.5em;
     font-weight: 700;
     line-height: 1.33333;
@@ -13,9 +10,6 @@
     margin-top: 1.6em;
     margin-bottom: 0.6em;
     font-size: 1.25em;
-    font-family:
-        Gilroy, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
     font-weight: 600;
     line-height: 1.6;
 }

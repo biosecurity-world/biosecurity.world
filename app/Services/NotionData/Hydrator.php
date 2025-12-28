@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\NotionData;
 
 use App\Rules\OkStatusRule;
-use App\Services\Logosnatch\Logosnatch;
+use App\Services\NotionData\Models\Logo;
 use App\Services\NotionData\Enums\DomainEnum;
 use App\Services\NotionData\Models\Activity;
 use App\Services\NotionData\Models\Category;
@@ -251,7 +251,9 @@ class Hydrator
         $data['activities'] = collect($data['activities']);
         /** @phpstan-ignore-next-line  */
         $data['locationHints'] = collect($data['locationHints']);
-        $data['logo'] = Logosnatch::retrieve($data['link'], targetSize: 64);
+        $domain = parse_url($data['link'], PHP_URL_HOST);
+        $token = env('LOGO_DEV_TOKEN');
+        $data['logo'] = new Logo("https://img.logo.dev/{$domain}?token={$token}&size=128&format=png");
 
         return new Entry(...$data);
     }

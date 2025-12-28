@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\NotionData\Models;
 
-use App\Services\Logosnatch\Logo;
 use App\Services\NotionData\Enums\DomainEnum;
 use App\Support\IdMap;
 use Illuminate\Support\Collection;
