@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', ShowWelcomeController::class)->name('welcome');
 Route::redirect('/give-feedback', 'https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form')->name('give-feedback');
 Route::redirect('/inclusion-criteria', 'https://docs.google.com/document/d/12JhGqx5PaA_jD0UKPDfWX4dfDp1gBoxdVM5tDTykPCA/edit?tab=t.0')->name('inclusion-criteria');
-Route::view('/legal/privacy-policy', 'privacy')->name('privacy-policy');
-Route::view('/legal/terms-of-service', 'terms-of-service')->name('terms-of-service');
-
 Route::get('/entry/{id}/{slug}', ShowEntryController::class)->name('entries.show');
 Route::get('/entry/{id}', function (NotionClient $notion, int $id) {
     $tree = Tree::buildFromPages($notion->pages());

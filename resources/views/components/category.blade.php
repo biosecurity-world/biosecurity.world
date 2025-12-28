@@ -8,9 +8,13 @@
         {{ $category->label }}
     </span>
 
-    @if ($category->dominantDomainDisplay())
-        <span class="{{ $category->dominantDomain() === "technical" ? "text-technical" : "text-governance" }} block">
-            {{ $category->dominantDomainDisplay() }}
-        </span>
+    @if (! in_array($category->label, ["Transversal"]))
+        @if ($category->dominantDomainDisplay())
+            <span
+                class="{{ $category->dominantDomain() === "technical" ? "text-technical" : "text-governance" }} block"
+            >
+                {{ $category->dominantDomainDisplay() }}
+            </span>
+        @endif
     @endif
 </div>

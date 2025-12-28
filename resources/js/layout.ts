@@ -1,17 +1,5 @@
-import type {Node, ProcessedNode, Sector} from "@/types/index.d.ts"
-import {
-  changeAppState,
-  debug,
-  eq,
-  getQuadrant,
-  gt,
-  gte,
-  inIE,
-  lt,
-  PI,
-  PIPI,
-  shortestDistanceBetweenRectangles,
-} from "@/utils"
+import type {Node, ProcessedNode} from "@/types/index.d.ts"
+import {changeAppState, PIPI, shortestDistanceBetweenRectangles} from "@/utils"
 import {FilterMetadata, Filters, shouldFilterEntry} from "@/filters"
 
 type PreparedNode = (typeof window.nodes)[number] & {el: SVGElement} & Partial<ProcessedNode>

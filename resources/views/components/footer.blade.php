@@ -1,6 +1,7 @@
 <footer aria-labelledby="footer-heading" class="mx-auto max-w-7xl px-6 xl:px-0">
-    <div class="mt-12 border-t border-gray-900/10 py-4">
+    <div class="mt-12 border-t border-gray-900/10 py-8">
         <h2 id="footer-heading" class="sr-only">Footer</h2>
+
         <div class="justify-between lg:flex">
             <p>
                 <a href="{{ route("welcome", absolute: false) }}" class="font-display">biosecurity.world</a>
@@ -11,24 +12,34 @@
             <ul class="mt-2 flex space-x-4 overflow-x-scroll lg:mt-0">
                 <li>
                     <a
-                        href="{{ route("privacy-policy", absolute: false) }}"
+                        href="https://foreview.org"
                         class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
-                        Privacy Policy
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="{{ route("terms-of-service", absolute: false) }}"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
-                    >
-                        Terms of Service
+                        <span class="mr-0.5">Built by Foreview</span>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            class="group-hover:text-primary-700 mt-px size-4 text-gray-400"
+                            aria-label="External link icon"
+                        >
+                            <path
+                                d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"
+                            />
+                            <path
+                                d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"
+                            />
+                        </svg>
                     </a>
                 </li>
                 <li>
                     <a
                         href="https://github.com/biosecurity-world/biosecurity.world"
                         class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <span class="mr-0.5">GitHub</span>
                         <svg
@@ -51,6 +62,8 @@
                     <a
                         href="https://notion.so/{{ config("services.notion.database") }}"
                         class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <span class="mr-0.5">Notion</span>
                         <svg
@@ -71,5 +84,18 @@
                 </li>
             </ul>
         </div>
+
+        <p class="mt-4 flex max-w-lg flex-wrap text-gray-700">
+            <a href="https://www.linkedin.com/in/alix-pham/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Alix Pham</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/sofyalebedeva/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Sofya Lebedeva</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/johantang/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Johan Täng</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/jeremy-andreoletti-330445216/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Jérémy Andréoletti</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/linbowkerlonnecker/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Lin Bowker-Lonnecker</a><sup class="text-xs">2</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/will-saunter/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Will Saunter</a><sup class="text-xs">2</sup><span>,&nbsp;</span>
+            <a href="https://www.linkedin.com/in/dornfelix/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Félix Dorn</a><sup class="text-xs">2</sup>
+        </p>
+        <p class="mt-1 text-sm text-gray-500">
+            <sup>1</sup>Team, <sup>2</sup>Support
+        </p>
     </div>
 </footer>

@@ -24,7 +24,7 @@
         </h1>
 
         <ul
-            class="mx-auto mt-6 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
+            class="mx-auto mt-6 mb-24 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
         >
             <li>
                 <h2 class="font-display text-white lg:text-lg xl:text-2xl">Up-to-date</h2>
@@ -61,55 +61,17 @@
             </li>
         </ul>
     </header>
-    <section class="mx-auto w-full max-w-3xl px-6 pt-6 pb-4 lg:hidden">
-        <x-map-info id="map-info" :last-edited-at="$lastEditedAt" />
-    </section>
-    <!-- Legacy mobile overlay/checkbox removed; controlled via JS now -->
-    <div class="mx-auto flex h-screen w-full rounded-3xl shadow-lg duration-1000" id="map-wrapper">
+    <div class="-mt-32 mx-auto flex h-screen w-full shadow-lg duration-1000 lg:w-[80%] lg:rounded-3xl" id="map-wrapper">
         <aside
-            id="mobile-filters-drawer"
-            class="fixed inset-x-0 bottom-0 z-30 hidden max-h-14 w-full overflow-y-auto rounded-t-3xl border-t border-gray-200 bg-white transition-[max-height] duration-300 lg:static lg:z-auto lg:flex lg:h-full lg:max-h-none lg:w-full lg:max-w-md lg:flex-col lg:overflow-y-scroll lg:rounded-l-3xl lg:border-y lg:border-r lg:border-l"
+            id="filters-sidebar"
+            class="flex h-full w-full max-w-md flex-col overflow-y-scroll rounded-l-3xl border-y border-r border-l border-gray-200 bg-white"
         >
-            <div class="lg:hidden">
-                <div class="flex items-center justify-between px-4 py-3">
-                    <div class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
-                        <x-heroicon-o-funnel class="size-5 text-gray-600" />
-                        <span>Filters</span>
-                    </div>
-                    <button
-                        id="mobile-filters-expand"
-                        class="inline-flex items-center gap-2 text-sm font-medium text-gray-700"
-                    >
-                        <x-heroicon-o-chevron-up class="size-5 text-gray-600" />
-                        <span>Expand</span>
-                    </button>
-                </div>
-            </div>
-            <header class="hidden border-b border-gray-200 lg:block">
-                <div class="px-6 pt-4">
-                    <div class="flex items-center">
-                        <x-map-info id="map-info" :last-edited-at="$lastEditedAt" />
-                        <button
-                            title="Toggle fullscreen (shortcut: F)"
-                            id="toggle-fullscreen"
-                            class="-m-2 self-start rounded-full border border-transparent p-2 transition hover:border-gray-200 hover:bg-gray-100 hover:shadow-inner"
-                        >
-                            <span class="sr-only">Toggle fullscreen</span>
-                            <x-heroicon-o-arrows-pointing-out
-                                id="not-fullscreen"
-                                aria-hidden="true"
-                                class="size-5 text-gray-700"
-                            />
-                            <x-heroicon-o-arrows-pointing-in
-                                id="is-fullscreen"
-                                aria-hidden="true"
-                                class="hidden size-5 text-gray-700"
-                            />
-                        </button>
-                    </div>
+            <header class="border-b border-gray-200 bg-white rounded-tl-3xl">
+                <div class="px-6 py-4">
+                    <x-map-info id="map-info" :last-edited-at="$lastEditedAt" />
                 </div>
             </header>
-            <div class="h-full max-h-[calc(95vh-56px)] overflow-y-auto bg-gray-50 px-6 py-4 lg:max-h-none lg:flex-1">
+            <div class="h-full flex-1 overflow-y-auto bg-gray-50 px-6 py-4">
                 <h4 class="font-display flex-1 text-lg">Filters</h4>
 
                 <fieldset class="mt-2">
@@ -154,25 +116,17 @@
                 <div class="mt-6 flex items-center justify-between">
                     <span class="flex grow flex-col">
                         <span class="font-display leading-6 text-gray-900">
-                            Has focus on
-                            <abbr title="Global Catastrophic Biological Risks">GCBR</abbr>
-                            prevention
+                            Has focus on GCBR prevention
                         </span>
-                        <span class="">
-                            <a
-                                class="text-primary-700 hover:text-primary-900 inline underline"
+                        <span class="text-xs text-gray-500"><a
+                                class="text-gray-500 underline hover:text-gray-700"
                                 href="https://www.nti.org/about/programs-projects/project/global-catastrophic-biological-risks/"
                                 rel="noopener noreferrer nofollow"
-                            >
-                                GCBRs
-                            </a>
-                            <span class="inline text-sm text-gray-500">
-                                are biological risks that could lead to severe and potentially irreversible damage to
-                                human civilization on a global scale.
-                            </span>
+                            >GCBRs</a> are biological risks that could lead to severe and potentially irreversible damage to
+                            human civilization on a global scale.
                         </span>
                     </span>
-                    <x-big-toggle name="has_gcbr_focus" kind="has-gcbr-focus" />
+                    <x-big-toggle class="ml-4" name="has_gcbr_focus" kind="has-gcbr-focus" />
                 </div>
                 <fieldset class="mt-6">
                     <legend class="font-display inline leading-6 text-gray-900">Activities</legend>
@@ -252,7 +206,7 @@
             </div>
         </aside>
         <main
-            class="relative h-full w-full rounded-l-3xl rounded-r-3xl border-r border-b border-gray-200 bg-gray-100 lg:rounded-l-none"
+            class="relative h-full w-full border-b border-gray-200 bg-gray-100 rounded-r-3xl"
         >
             <section data-state="error" aria-hidden="true" class="app-state state-inactive">
                 <div class="text-center">
@@ -321,7 +275,7 @@
                     id="entry-wrapper"
                 ></div>
                 <div
-                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center rounded-r-3xl border-y border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity"
+                    class="pointer-events-none absolute inset-0 z-20 flex h-full w-full max-w-md justify-center border-y border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity rounded-r-3xl"
                     id="entry-loader"
                 >
                     <svg
@@ -348,184 +302,10 @@
                 <svg id="map" width="100%" height="100%" class="rounded-tr-3xl">
                     <!-- The map will be dynamically inserted here -->
                 </svg>
-
-                <!-- Mobile: default intro overlay with blur and central "Open the map" button -->
-                <div id="mobile-map-intro" class="absolute inset-0 z-30 flex items-center justify-center lg:hidden">
-                    <div
-                        class="flex h-[40vh] w-11/12 max-w-md items-center justify-center rounded-2xl bg-white/40 shadow-lg backdrop-blur-md"
-                    >
-                        <button
-                            id="open-map-mobile"
-                            class="bg-primary-600 hover:bg-primary-700 focus:ring-primary-600 inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
-                        >
-                            <span>Open the map</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Mobile: fullscreen UI (close button + bottom filters bar), shown when map is opened -->
-                <div id="mobile-map-fullscreen-ui" class="pointer-events-none absolute inset-0 z-50 hidden lg:hidden">
-                    <!-- Close button (top-right) -->
-                    <button
-                        id="close-map-mobile"
-                        class="pointer-events-auto absolute top-4 right-4 rounded-full bg-white p-2 shadow-md"
-                    >
-                        <span class="sr-only">Close the map</span>
-                        <x-heroicon-o-x-mark class="size-5 text-gray-700" />
-                    </button>
-                </div>
-                <div class="absolute right-6 bottom-6">
-                    <div class="flex flex-col divide-y rounded-lg bg-white shadow-sm">
-                        <button class="focusable rounded-t-lg p-2 hover:bg-gray-50" id="zoom-in">
-                            <x-heroicon-s-plus class="size-5 text-gray-700" />
-                        </button>
-                        <button class="focusable rounded-b-lg p-2 hover:bg-gray-50" id="zoom-out">
-                            <x-heroicon-s-minus class="size-5 text-gray-700" />
-                        </button>
-                    </div>
-                </div>
             </section>
         </main>
     </div>
-    <section id="faq" class="mx-auto mt-12 w-full max-w-3xl px-6 lg:mt-16 xl:px-0">
-        <h2 class="font-display text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
-
-        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Goals</h3>
-        <div class="mt-4 space-y-4">
-            <x-faq-item title="What is the purpose of this biosecurity landscape map?">
-                <p>
-                    This map provides a comprehensive overview of organizations working in the biosecurity field
-                    according to a specific set of criteria (see
-                    <a
-                        class="text-primary-700 hover:text-primary-900 underline"
-                        href="{{ route("inclusion-criteria") }}"
-                        rel="noopener noreferrer"
-                    >
-                        Inclusion criteria
-                    </a>
-                    ), allowing users to explore and understand the global biosecurity ecosystem.
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="What does GCBR stand for?">
-                <p>
-                    GCBR stands for
-                    <a
-                        class="text-primary-700 hover:text-primary-900 underline"
-                        href="https://www.nti.org/about/programs-projects/project/global-catastrophic-biological-risks/"
-                        rel="noopener noreferrer"
-                    >
-                        Global Catastrophic Biological Risks
-                    </a>
-                    . These are biological risks that could lead to severe and potentially irreversible damage to human
-                    civilization on a global scale.
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="How can I use this information?">
-                <p>
-                    We want users to use this database to better understand the field, and learn about the different
-                    actors.
-                </p>
-                <p class="mt-2">
-                    This map can be used for research, networking, identifying potential collaborations, or simply
-                    understanding the scope and diversity of work being done in biosecurity.
-                </p>
-            </x-faq-item>
-        </div>
-
-        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Content</h3>
-        <div class="mt-4 space-y-4">
-            <x-faq-item title="How often is the database updated?">
-                <p>
-                    We strive to keep the database as current as possible. Updates are made on a regular basis as we
-                    receive new information or as organizations change. If you notice something is outdated, please
-                    reach out via our
-                    <a
-                        class="text-primary-700 hover:text-primary-900 underline"
-                        href="{{ route("give-feedback") }}"
-                        rel="noopener noreferrer"
-                    >
-                        contact form
-                    </a>
-                    .
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="How can I contribute to the map?">
-                <p>
-                    You can contribute by using the
-                    <a
-                        class="text-primary-700 hover:text-primary-900 underline"
-                        href="{{ route("give-feedback") }}"
-                        rel="noopener noreferrer"
-                    >
-                        contact form
-                    </a>
-                    at the top of the page. We welcome feedback, suggestions, and information about organizations that
-                    should be included (or excluded).
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="What are the inclusion criteria for organizations?">
-                <p>
-                    We have a specific
-                    <a
-                        class="text-primary-700 hover:text-primary-900 underline"
-                        href="{{ route("inclusion-criteria") }}"
-                        rel="noopener noreferrer"
-                    >
-                        set of criteria
-                    </a>
-                    that determine whether an organization is included in our database.
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="Is this information publicly available?">
-                <p>
-                    Yes, this database is publicly accessible. Please share with anyone that could find it useful, or
-                    help us make it better.
-                </p>
-            </x-faq-item>
-        </div>
-
-        <h3 class="font-display mt-10 text-xl font-semibold text-gray-900">Properties &amp; Filters</h3>
-        <div class="mt-4 space-y-4">
-            <x-faq-item title="What do the different 'Organization Types' mean?">
-                <p>
-                    The organization types (such as Research institute, For-profit company, Think tank, etc.) categorize
-                    the primary nature of each entity. This helps users understand the diversity of organizations in the
-                    biosecurity landscape, and filter if they are looking for a specific type of organization. There is
-                    also a specific view where the organizations are sorted via this property.
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="How is the 'Activity Type' determined for each organization?">
-                <p>
-                    The Activity Type is based on the primary functions of each organization. An organization can have
-                    multiple activity types, reflecting the diverse nature of their work in biosecurity. Users can
-                    filter according to a specific type of activity. There is also a specific view where the
-                    organizations are sorted via this property.
-                </p>
-            </x-faq-item>
-
-            <x-faq-item title="What is the 'Intervention Focus' category?">
-                <p>
-                    The Intervention Focus category provides more specific information about the areas each organization
-                    works on, such as synthetic biology, lab biosafety, or crisis management.
-                </p>
-                <p class="mt-2">
-                    There is a higher-level focus type which is "Technical" or "Governance" which helps differentiate
-                    whether the organization is more focused on research ("Technical") or policymaking ("Governance").
-                </p>
-                <p class="mt-2">
-                    Sometimes an organization will not have any intervention focus: it usually means that they might
-                    touch on any of the topics, and their mission is more general.
-                </p>
-            </x-faq-item>
-        </div>
-    </section>
-    <div id="page-footer" class="hidden">
+    <div id="page-footer">
         <x-footer />
     </div>
 </x-layouts.default>

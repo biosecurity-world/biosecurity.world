@@ -1,5 +1,5 @@
 import {Selection} from "d3"
-import type {AppState, AppStateChange, AppStateParameters, ProcessedNode, Sector} from "@/types/index.d.ts"
+import type {AppState, AppStateChange, AppStateParameters, Sector} from "@/types/index.d.ts"
 
 export function changeAppState<T extends AppState>(state: T, params: AppStateParameters[T]) {
     window.dispatchEvent(
@@ -10,8 +10,7 @@ export function changeAppState<T extends AppState>(state: T, params: AppStatePar
     )
 }
 
-export const PI = Math.PI
-export const PIPI = PI * 2
+export const PIPI = Math.PI * 2
 
 let _debugInstance: Debug | null = null
 
@@ -94,57 +93,6 @@ class Debug {
     }
 }
 
-export function eq(a: number, b: number) {
-    if (a === b) {
-        return true
-    }
-
-    return Math.abs((a - b) / b) < 1e-6
-}
-
-export function gte(a: number, b: number) {
-    return a > b || eq(a, b)
-}
-
-export function lte(a: number, b: number) {
-    return a < b || eq(a, b)
-}
-
-export function gt(a: number, b: number) {
-    return a > b && !eq(a, b)
-}
-
-export function lt(a: number, b: number) {
-    return a < b && !eq(a, b)
-}
-
-export function inIE(x: number, fpA: number, fpB: number) {
-    return gte(x, fpA) && lt(x, fpB)
-}
-
-export function inEI(x: number, fpA: number, fpB: number) {
-    return gt(x, fpA) && lte(x, fpB)
-}
-export function getQuadrant(angle: number): number {
-    if (lt(angle, 0) || gt(angle, PIPI)) {
-        throw new Error(`Angle ${angle} is not in the range [0, 2*PI]`)
-    }
-
-    if (inIE(angle, 0, PI / 2)) {
-        return 1
-    }
-
-    if (inIE(angle, PI / 2, PI)) {
-        return 2
-    }
-
-    if (inIE(angle, PI, PI + PI / 2)) {
-        return 3
-    }
-
-    return 4
-}
-
 export function shortestDistanceBetweenRectangles(
     rect1: [number, number, number, number],
     rect2: [number, number, number, number],
@@ -167,14 +115,6 @@ export function shortestDistanceBetweenRectangles(
     const dy = Math.max(0, cdy - (h1 + h2) / 2)
 
     return Math.sqrt(dx * dx + dy * dy)
-}
-
-export function getDebugLabel(node: ProcessedNode): string {
-    if (node.el.querySelector(".entrygroup") !== null) {
-        return "Entrygroup"
-    }
-
-    return (node.el.querySelector("div > span") as HTMLSpanElement).innerText
 }
 
 export function trapClickAndDoubleClick(

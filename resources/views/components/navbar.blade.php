@@ -12,7 +12,6 @@
             <li class="block flex-1" aria-hidden="true"></li>
             @foreach ([
                     [route("inclusion-criteria", absolute: false), "Inclusion criteria"],
-                    [route("welcome", absolute: false) . "#faq", "FAQ"],
                     [route("give-feedback", absolute: false), "Give feedback"]
                 ]
                 as [$url, $label])

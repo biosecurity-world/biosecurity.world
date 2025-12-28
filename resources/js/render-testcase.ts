@@ -1,7 +1,6 @@
 import {D3ZoomEvent, select, zoom} from "d3"
 import {debug} from "@/utils"
 import {fitToSector} from "@/layout"
-import type {ProcessedNode} from "@/types/index.d.ts"
 
 declare global {
   interface Window {
