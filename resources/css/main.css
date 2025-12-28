@@ -80,22 +80,8 @@
   @apply border-primary-700;
 }
 
-/** Handle the hover logic on entries */
-#entrygroups.hovered [data-entry]:not(.active) {
-  opacity: 0.25;
-}
-
-#entrygroups.hovered [data-sum].active > .entry-logo {
-  @apply border-primary-600 border;
-}
-
-#entrygroups.hovered .org-type:not(:has(+ div > [data-sum].active)) {
-  opacity: 0.25;
-}
-
-.org-type:not(:has(+ div > .matches-filters)) {
+.org-type:not(:has(.matches-filters)) {
   display: none;
-  margin: 0 !important;
 }
 
 .big-toggle:not(:checked) + label {
@@ -121,10 +107,6 @@
 
 .entrygroup:not(:has(*.matches-filters)) {
   display: none;
-}
-
-.org-type:has(+ div > .matches-filters) {
-  @apply mt-2;
 }
 
 #entry-loader.loading-entry {

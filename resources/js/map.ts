@@ -268,33 +268,13 @@ filtersStore.onChange(
       openEntry(el)
     }
 
-    let elEntrygroupContainer = document.getElementById("entrygroups")!
     let elsEntryButtons = document.querySelectorAll("a[data-entry]") as NodeListOf<HTMLButtonElement>
 
-    let highlightEntries = (commonEntryId: number) => {
-      let instances = 0
-
-      elsEntryButtons.forEach((btn: HTMLButtonElement) => {
-        let isActive = btn.dataset.entry === commonEntryId.toString()
-        btn.classList.toggle("active", isActive)
-        instances += isActive ? 1 : 0
-      })
-
-      elEntrygroupContainer.classList.toggle("hovered", instances > 1)
-    }
-    let removeHighlight = () => elEntrygroupContainer.classList.remove("hovered")
-
     elsEntryButtons.forEach((el: HTMLButtonElement) => {
-      let entryId = parseInt(el.dataset.entry!, 10)
-
       el.addEventListener("click", (e) => {
         e.preventDefault()
         openEntry(el)
       })
-      el.addEventListener("mouseenter", () => highlightEntries(entryId))
-      el.addEventListener("mouseleave", () => removeHighlight())
-      el.addEventListener("focus", () => highlightEntries(entryId))
-      el.addEventListener("blur", () => removeHighlight())
     })
 
     let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")

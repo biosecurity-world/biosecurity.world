@@ -12,13 +12,7 @@
 
     @if ($lastEditedAt)
         <p class="mt-1 text-gray-700">
-            Last updated on
-            <time
-                datetime="{{ $lastEditedAt->toIso8601String() }}"
-                title="{{ $lastEditedAt->diffForHumans() }}"
-            >
-                {{ $lastEditedAt->format('F j, Y') }}
-            </time>.
+            Last updated on <time datetime="{{ $lastEditedAt->toIso8601String() }}" title="{{ $lastEditedAt->diffForHumans() }}">{{ $lastEditedAt->format('F j, Y') }}</time>.
         </p>
     @endif
 </div>

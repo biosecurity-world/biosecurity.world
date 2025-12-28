@@ -14,54 +14,53 @@
 
         @vite("resources/js/map.ts")
     </x-slot>
-    <header class="from-primary-600 to-primary-950 w-full bg-linear-to-tl pt-4 pb-24 lg:pt-8">
-        <x-navbar class="md:bg-white/20 md:shadow-inner md:shadow-white/30" invert />
+    <header class="w-full bg-white pt-4 pb-8 lg:pt-8">
+        <x-navbar class="mt-4" />
 
         <h1
-            class="font-display mx-auto mt-6 max-w-3xl px-6 text-3xl font-bold tracking-tight text-white sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
+            class="font-display text-primary-900 mx-auto mt-6 max-w-3xl px-6 text-3xl font-bold tracking-tight sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
         >
             Understand the biosecurity landscape.
         </h1>
 
         <ul
-            class="mx-auto mt-6 mb-24 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
+            class="mx-auto mt-6 mb-8 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
         >
             <li>
-                <h2 class="font-display text-white lg:text-lg xl:text-2xl">Up-to-date</h2>
-                <hr class="mt-1.5 hidden w-8 border-white/40 lg:block" />
+                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Up-to-date</h2>
+                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
 
-                <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
-                    Humans update regularly the map and our team monitors privileged channels for announcements about
+                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
+                    Humans regularly update the map and our team monitors privileged channels for announcements about
                     new organizations.
                 </p>
             </li>
             <li>
-                <h2 class="font-display text-white lg:text-lg xl:text-2xl">Crowd-sourced</h2>
-                <hr class="mt-1.5 hidden w-8 border-white/40 lg:block" />
+                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Crowd-sourced</h2>
+                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
 
-                <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
+                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
                     We encourage submissions and corrections, which are individually reviewed by researchers from
-                    <a href="https://www.ens.psl.eu" class="text-white underline hover:text-white/70">ENS</a>
+                    <a href="https://www.ens.psl.eu" class="text-primary-700 underline hover:text-primary-500">ENS</a>
                     and
-                    <a href="https://ox.ac.uk" class="text-white underline hover:text-white/70">Oxford University</a>
-                    .
+                    <a href="https://ox.ac.uk" class="text-primary-700 underline hover:text-primary-500">Oxford University</a>.
                 </p>
             </li>
             <li>
-                <h2 class="font-display text-white lg:text-lg xl:text-2xl">Transparent</h2>
-                <hr class="mt-1.5 hidden w-8 border-white/40 lg:block" />
+                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Transparent</h2>
+                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
 
-                <p class="mt-1 max-w-[65ch] text-white/95 lg:mt-2 xl:text-lg">
+                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
                     As an
-                    <a href="https://github.com/biosecurity-world/biosecurity.world" class="underline">open-source</a>
+                    <a href="https://github.com/biosecurity-world/biosecurity.world" class="text-primary-700 underline hover:text-primary-500">open-source</a>
                     and
-                    <a class="underline" href="{{ $databaseUrl }}">open-data</a>
+                    <a class="text-primary-700 underline hover:text-primary-500" href="{{ $databaseUrl }}">open-data</a>
                     scientific project, we keep a record of our inclusion decisions for people to challenge.
                 </p>
             </li>
         </ul>
     </header>
-    <div class="-mt-32 mx-auto flex h-screen w-full shadow-lg duration-1000 lg:w-[80%] lg:rounded-3xl" id="map-wrapper">
+    <div class="mx-auto flex h-screen w-full duration-1000 lg:w-[80%] lg:rounded-3xl" id="map-wrapper">
         <aside
             id="filters-sidebar"
             class="flex h-full w-full max-w-md flex-col overflow-y-scroll rounded-l-3xl border-y border-r border-l border-gray-200 bg-white"
