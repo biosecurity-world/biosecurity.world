@@ -1,4 +1,5 @@
-import {D3ZoomEvent, select, zoom} from "d3"
+import {select} from "d3"
+import Panzoom from "@panzoom/panzoom"
 import {changeAppState, debug, semanticBitFlip, trapClickAndDoubleClick} from "@/utils"
 import type {AppStateChangeEvent, Node, ProcessedNode} from "@/types/index.d.ts"
 import {updateMap} from "@/layout"
@@ -277,25 +278,35 @@ filtersStore.onChange(
       })
     })
 
-    let $zoomWrapper = select<SVGGElement, any>("#zoom-wrapper")
     let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
+    let zoomWrapperEl = document.getElementById("zoom-wrapper") as SVGGElement
 
     let mapWidth = $map.node()!.clientWidth
     let mapHeight = $map.node()!.clientHeight
 
     $centerWrapper.attr("transform", `translate(${mapWidth / 2}, ${mapHeight / 2})`)
 
-    let zoomHandler = zoom<SVGElement, unknown>()
-      .on("zoom", (e: D3ZoomEvent<SVGGElement, unknown>) => {
-        $zoomWrapper.attr("transform", e.transform.toString())
-      })
-      .scaleExtent([0.5, 2.5])
-      .translateExtent([
-        [-mapWidth * 1.5, -mapHeight * 1.5],
-        [mapWidth * 1.5, mapHeight * 1.5],
-      ])
+    // Initialize Panzoom on the zoom wrapper
+    const panzoom = Panzoom(zoomWrapperEl, {
+      maxScale: 2.5,
+      minScale: 0.5,
+      contain: "outside",
+      canvas: true,
+      startScale: 1,
+      startX: 0,
+      startY: 0,
+    })
 
-    $map.call(zoomHandler)
+    // Enable wheel zoom on the SVG element
+    $map.node()!.addEventListener("wheel", panzoom.zoomWithWheel, {passive: false})
+
+    // Handle window resize to re-center
+    const handleResize = () => {
+      const newWidth = $map.node()!.clientWidth
+      const newHeight = $map.node()!.clientHeight
+      $centerWrapper.attr("transform", `translate(${newWidth / 2}, ${newHeight / 2})`)
+    }
+    window.addEventListener("resize", handleResize)
 
     for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
       let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null
