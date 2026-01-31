@@ -1,4 +1,5 @@
 @use(App\Services\NotionData\Enums\OrganizationType)
+
 @props([
     "logo",
     "organizationType" => null,
@@ -8,13 +9,14 @@
     $color = $orgType?->color() ?? OrganizationType::defaultColor();
     $darkColor = $orgType?->darkColor() ?? OrganizationType::defaultDarkColor();
 @endphp
+
 <span
     {{
         $attributes->class([
             "entry-logo flex inline-block size-6 items-center justify-center overflow-hidden rounded-md border",
         ])
     }}
-    style="background-color: {{ $color->withAlpha(15) }}; border-color: {{ $darkColor }};"
+    style="background-color: {{ $color->withAlpha(15) }}; border-color: {{ $darkColor }}"
 >
     <img
         loading="lazy"

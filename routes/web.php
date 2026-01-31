@@ -7,7 +7,6 @@ use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowWelcomeController;
 use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
-use App\Services\NotionData\Tree\Tree;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', ShowWelcomeController::class)->name('welcome');
@@ -15,7 +14,7 @@ Route::redirect('/give-feedback', 'https://docs.google.com/forms/d/e/1FAIpQLSfJr
 Route::redirect('/inclusion-criteria', 'https://docs.google.com/document/d/12JhGqx5PaA_jD0UKPDfWX4dfDp1gBoxdVM5tDTykPCA/edit?tab=t.0')->name('inclusion-criteria');
 Route::get('/entry/{id}/{slug}', ShowEntryController::class)->name('entries.show');
 Route::get('/entry/{id}', function (NotionClient $notion, int $id) {
-    $tree = Tree::buildFromPages($notion->pages());
+    $tree = $notion->tree();
     abort_if(! isset($tree->lookup[$id]), 404);
     $entry = $tree->lookup[$id];
 
@@ -25,12 +24,12 @@ Route::get('/entry/{id}', function (NotionClient $notion, int $id) {
 Route::get('/partials/entries/{entryGroup}/{entryId}', ShowEntryPartialController::class)->name('partials.entry');
 Route::get('/partials/map-content', function (NotionClient $notion) {
     return view('partials.map', [
-        'tree' => Tree::buildFromPages($notion->pages()),
+        'tree' => $notion->tree(),
     ]);
 });
 
 Route::get('/_/entries', function (NotionClient $notion) {
-    $tree = Tree::buildFromPages($notion->pages());
+    $tree = $notion->tree();
 
     $links = $tree
         ->entrygroups()

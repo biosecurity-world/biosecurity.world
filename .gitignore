@@ -23,3 +23,6 @@ dist
 report.md
 .direnv
 .vite
+.claude
+CLAUDE.md
+package-lock.json

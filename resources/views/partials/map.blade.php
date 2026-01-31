@@ -8,7 +8,9 @@
             aria-hidden="true"
             data-node="{{ $tree->rootNodeId }}"
         >
-            <div class="flex w-fit flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-0.5 shadow-sm">
+            <div
+                class="flex w-fit flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-0.5 shadow-sm"
+            >
                 <span class="block font-semibold">Biosecurity</span>
             </div>
         </foreignObject>
@@ -37,7 +39,7 @@
                     data-node="{{ $entrygroup->id }}"
                 >
                     <x-entrygroup
-                        :entries="array_map(fn (string $id) => $tree->lookup[$id], $entrygroup->entries)"
+                        :entries="array_map(fn (int $id) => $tree->lookup[$id], $entrygroup->entries)"
                         :entrygroup="$entrygroup"
                     />
                 </foreignObject>

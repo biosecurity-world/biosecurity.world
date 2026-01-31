@@ -3,27 +3,27 @@
 @plugin '@tailwindcss/forms';
 
 @theme {
-  --color-technical: #b45309;
-  --color-governance: #2563eb;
+    --color-technical: #b45309;
+    --color-governance: #2563eb;
 
-  --color-primary-50: #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981;
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
-  --color-primary-950: #022c22;
+    --color-primary-50: #ecfdf5;
+    --color-primary-100: #d1fae5;
+    --color-primary-200: #a7f3d0;
+    --color-primary-300: #6ee7b7;
+    --color-primary-400: #34d399;
+    --color-primary-500: #10b981;
+    --color-primary-600: #059669;
+    --color-primary-700: #047857;
+    --color-primary-800: #065f46;
+    --color-primary-900: #064e3b;
+    --color-primary-950: #022c22;
 
-  --font-sans:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
-  --font-display:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
+    --font-sans:
+        ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+    --font-display:
+        ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 /*
@@ -35,81 +35,88 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  .off-screen {
-    transform: translate(-100000px, -100000px) !important;
-  }
+    .off-screen {
+        visibility: hidden !important;
+    }
 }
 
 /** Map */
+#map {
+    touch-action: none;
+}
+
+#map-wrapper main {
+    overscroll-behavior: contain;
+}
+
 .app-state {
-  @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
+    @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
 }
 
 .state-active {
-  @apply pointer-events-auto opacity-100;
+    @apply pointer-events-auto opacity-100;
 }
 
 .state-inactive {
-  @apply pointer-events-none opacity-0;
+    @apply pointer-events-none opacity-0;
 }
 
 #entry-wrapper:not(:has(> .entry)) {
-  display: none;
+    display: none;
 }
 
 #entry-wrapper:has(> .entry) {
-  display: block;
+    display: block;
 }
 
 /** Filters: Domain */
 .domain-checkbox:checked + label > .check {
-  opacity: 1;
+    opacity: 1;
 }
 
 .domain-checkbox:not(:checked) + label > .check {
-  opacity: 0;
+    opacity: 0;
 }
 
 .domain-checkbox:checked + label > .at-technical,
 .domain-checkbox:checked + label > .at-governance {
-  color: white;
+    color: white;
 }
 
 /** Filters: Focuses */
 .focuses-list:hover:not(:has(* :hover)) {
-  @apply border-primary-700;
+    @apply border-primary-700;
 }
 
 .org-type:not(:has(.matches-filters)) {
-  display: none;
+    display: none;
 }
 
 .big-toggle:not(:checked) + label {
-  @apply bg-gray-200;
+    @apply bg-gray-200;
 
-  & > span {
-    @apply translate-x-0;
-  }
+    & > span {
+        @apply translate-x-0;
+    }
 }
 
 .big-toggle:checked + label {
-  @apply bg-primary-600;
+    @apply bg-primary-600;
 
-  & > span {
-    @apply translate-x-full;
-  }
+    & > span {
+        @apply translate-x-full;
+    }
 }
 
 /** ...? */
 [data-entry]:not(.matches-filters) {
-  display: none;
+    display: none;
 }
 
 .entrygroup:not(:has(*.matches-filters)) {
-  display: none;
+    display: none;
 }
 
 #entry-loader.loading-entry {
-  opacity: 1;
+    opacity: 1;
 }
-

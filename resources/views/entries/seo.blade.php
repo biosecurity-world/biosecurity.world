@@ -43,6 +43,7 @@
                 <div class="flex items-center gap-3">
                     <x-entry-logo
                         :logo="$entry->logo"
+                        :organizationType="$entry->organizationType"
                         class="size-12 rounded-lg border border-gray-200 bg-white"
                         alt="{{ $entry->label }}'s logo"
                     />

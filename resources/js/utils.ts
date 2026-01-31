@@ -10,8 +10,6 @@ export function changeAppState<T extends AppState>(state: T, params: AppStatePar
     )
 }
 
-export const PIPI = Math.PI * 2
-
 let _debugInstance: Debug | null = null
 
 export function debug(): Debug {

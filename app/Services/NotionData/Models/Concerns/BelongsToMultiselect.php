@@ -21,6 +21,40 @@ trait BelongsToMultiselect
     /** @var array<int> */
     protected static array $countById = [];
 
+    /**
+     * Reset static state. Must be called before hydration to prevent
+     * state accumulation across requests in long-running processes.
+     */
+    public static function reset(): void
+    {
+        self::$seen = [];
+        self::$countById = [];
+    }
+
+    /**
+     * Get static state for caching.
+     *
+     * @return array{seen: array<int>, countById: array<int>}
+     */
+    public static function getState(): array
+    {
+        return [
+            'seen' => self::$seen,
+            'countById' => self::$countById,
+        ];
+    }
+
+    /**
+     * Restore static state from cache.
+     *
+     * @param  array{seen: array<int>, countById: array<int>}  $state
+     */
+    public static function restoreState(array $state): void
+    {
+        self::$seen = $state['seen'];
+        self::$countById = $state['countById'];
+    }
+
     public static function fromNotionOption(SelectOption $opt): self
     {
         if (is_null($opt->id) || is_null($opt->name)) {

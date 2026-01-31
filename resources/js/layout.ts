@@ -1,402 +1,594 @@
 import type {Node, ProcessedNode} from "@/types/index.d.ts"
-import {changeAppState, PIPI, shortestDistanceBetweenRectangles} from "@/utils"
+import {changeAppState} from "@/utils"
 import {FilterMetadata, Filters, shouldFilterEntry} from "@/filters"
 
-type PreparedNode = (typeof window.nodes)[number] & {el: SVGElement} & Partial<ProcessedNode>
+// Stub export for backwards compatibility with render-testcase.ts
+// The old radial/sector layout is no longer used but the test file still imports this
+export function fitToSector(
+    _params: {sector: [number, number]; size: [number, number]},
+    _others: unknown[],
+): [number, number] {
+    console.warn("fitToSector is deprecated - nested box layout does not use sectors")
+    return [0, 0]
+}
+
+// Layout mode - can be switched
+export type LayoutMode = "nested" | "branching"
+
+// High-level category mapping (using actual category labels from data)
+const HIGH_LEVEL_CATEGORIES: Record<string, {order: number; label: string; color: string; fullWidth?: boolean}> = {
+    Prevention: {order: 0, label: "Prevention", color: "#10b981"},
+    Detection: {order: 1, label: "Detection", color: "#3b82f6"},
+    Response: {order: 2, label: "Response", color: "#8b5cf6"},
+    Transversal: {order: 3, label: "Transversal", color: "#f59e0b", fullWidth: true},
+}
+
+// Darker shades for subcategory backgrounds (matching HIGH_LEVEL_CATEGORIES)
+const SUBCATEGORY_COLORS: Record<string, {bg: string; border: string}> = {
+    Prevention: {bg: "#10b98125", border: "#10b98150"},
+    Detection: {bg: "#3b82f625", border: "#3b82f650"},
+    Response: {bg: "#8b5cf625", border: "#8b5cf650"},
+    Transversal: {bg: "#f59e0b25", border: "#f59e0b50"},
+}
+
+type PreparedNode = (typeof window.nodes)[number] & {el: SVGElement} & Partial<ProcessedNode> & {
+        children?: PreparedNode[]
+        highLevelCategory?: string
+    }
 
 export function updateMap(state: Filters, metadata: FilterMetadata) {
-  let nodes: PreparedNode[] = []
-  let stack: PreparedNode[] = []
+    changeAppState("loading", {})
+    resetGlobalMapState()
 
-  changeAppState("loading", {})
-  resetGlobalMapState()
-  const background = document.getElementById("background") as SVGGElement | null
-  if (background) {
-    background.innerHTML = ""
-  }
-  const topPalette = [
-    "#e41a1c",
-    "#377eb8",
-    "#4daf4a",
-    "#984ea3",
-    "#ff7f00",
-    "#a65628",
-    "#f781bf",
-    "#999999",
-    "#66c2a5",
-    "#fc8d62",
-    "#8da0cb",
-    "#e78ac3",
-    "#a6d854",
-    "#ffd92f",
-    "#e5c494",
-    "#b3b3b3",
-  ]
-  const topColorById: Record<number, string> = {}
-  let topColorIndex = 0
-
-  let maxDepth = 0
-  let idToNode: Record<number, PreparedNode> = {}
-
-  for (let i = 0; i < window.nodes.length; i++) {
-    let node = window.nodes[i] as PreparedNode
-
-    idToNode[node.id] = node
-
-    if (node.depth >= maxDepth) {
-      maxDepth = node.depth
-    }
-
-    if (node.od === 0) {
-      let entryIds = node.entries!
-      let matchingEntries = []
-
-      for (const entryId of entryIds) {
-        let filterData = window.filterData[entryId]
-        let shouldFilter = shouldFilterEntry(
-          state,
-          {
-            activities: filterData[0],
-            focuses: filterData[1],
-            domains: filterData[2],
-            gcbrFocus: filterData[3],
-          },
-          metadata,
-        )
-
-        document
-          .querySelector(`a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!
-          .classList.toggle("matches-filters", !shouldFilter)
-
-        if (!shouldFilter) {
-          matchingEntries.push(entryId)
-        }
-      }
-
-      node.filtered = matchingEntries.length === 0
-    }
-
-    if (!(node.el instanceof SVGForeignObjectElement)) {
-      throw new Error(`Element for node ${node.id} is not a foreignObject, but a ${node.el.tagName}`)
-    }
-
-    // We set the <foreignObject> with a height of 100% and a w of 100%
-    // because we don't want to compute the size of the elements server-side
-    // but this means that we get the wrong bounds.
-    if (node.el.firstElementChild === null) {
-      throw new Error(
-        "It is expected that the foreignObject representing the node " +
-          "has a single child to compute its real bounding box, not " +
-          "the advertised (100%, 100%)",
-      )
-    }
-
-    node.size = [
-      // getBoundingClientRect() is transform-aware, so the zoom will mess everything up on subsequent renders.
-      // We need to use offsetWidth and offsetHeight instead.
-      (node.el.firstElementChild! as HTMLElement).offsetWidth,
-      (node.el.firstElementChild! as HTMLElement).offsetHeight,
-    ]
-    node.weight = node.size[0] * node.size[1]
-
-    if (node.od > 0) {
-      let children = []
-
-      for (let j = 0; j < node.od; j++) {
-        let child = stack.pop()!
-        if (child.filtered) {
-          continue
-        }
-
-        children.push(child)
-        node.weight += child.weight!
-      }
-
-      children.sort((a, b) => a.weight! - b.weight!)
-      for (const child of children) {
-        nodes.push(child)
-      }
-
-      node.filtered = children.length === 0
-    }
-
-    stack.push(node)
-  }
-
-  let root = stack.pop()!
-  root.sector = [0, PIPI]
-  root.position = fitToSector(root as Required<PreparedNode>, [{position: [0, 0], size: root.size!}])
-
-  if (nodes.length === 0) {
-    changeAppState("empty", {})
-    return
-  }
-
-  showNode(root)
-
-  const getRectCenter = (n: Required<PreparedNode>): [number, number] => [
-    n.position![0] + n.size![0] / 2,
-    n.position![1] + n.size![1] / 2,
-  ]
-  // Compute intersection point between a ray from the center of an axis-aligned
-  // rectangle and the rectangle's edge in the ray's direction.
-  function rectEdgeIntersection(
-    cx: number,
-    cy: number,
-    w: number,
-    h: number,
-    dx: number,
-    dy: number,
-  ): [number, number] {
-    const hw = w / 2
-    const hh = h / 2
-    // Normalize direction
-    const L = Math.hypot(dx, dy) || 1
-    const ux = dx / L
-    const uy = dy / L
-    // Candidate hit on vertical sides
-    let x: number, y: number
-    if (Math.abs(ux) > 1e-8) {
-      const tx = (ux > 0 ? hw : -hw) / ux
-      const yx = uy * tx
-      if (Math.abs(yx) <= hh + 1e-8) {
-        x = cx + (ux > 0 ? hw : -hw)
-        y = cy + yx
-        return [x, y]
-      }
-    }
-    // Otherwise hit on horizontal sides
-    const ty =
-      (uy > 0 ? hh : -hh) /
-      (Math.abs(uy) > 1e-8 ? uy
-      : uy >= 0 ? 1
-      : -1)
-    const xy = ux * ty
-    x = cx + xy
-    y = cy + (uy > 0 ? hh : -hh)
-    return [x, y]
-  }
-  const getTopAncestorId = (n: Required<PreparedNode>): number => {
-    let cur: Required<PreparedNode> = n
-    while (cur.depth > 1) {
-      cur = idToNode[cur.parent] as Required<PreparedNode>
-    }
-    return cur.id
-  }
-  let deltaFromSiblings: Record<number, number> = {}
-
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    let node = nodes[i] as Required<PreparedNode>
-    let parent = idToNode[node.parent] as Required<PreparedNode>
-
-    if (!deltaFromSiblings[node.parent]) {
-      deltaFromSiblings[node.parent] = parent.sector[0]
-    }
-
-    let delta = deltaFromSiblings[node.parent]
-    let theta = delta + (node.weight / parent.weight) * (parent.sector[1] - parent.sector[0])
-
-    node.sector = [delta, theta]
-    node.position = fitToSector(
-      node as Required<PreparedNode>,
-      node.trail.map((id: number) => idToNode[id] as Required<PreparedNode>),
-    )
-
-    deltaFromSiblings[node.parent] = theta
-
-    showNode(node)
-
+    const background = document.getElementById("background") as SVGGElement | null
     if (background) {
-      const p = parent as Required<PreparedNode>
-
-      const [pcx, pcy] = getRectCenter(p)
-      const [ccx, ccy] = getRectCenter(node)
-
-      // Direction from parent to child
-      const dx = ccx - pcx
-      const dy = ccy - pcy
-      const len = Math.hypot(dx, dy) || 1
-      const ux = dx / len
-      const uy = dy / len
-
-      // Attach precisely to rectangle edges along the segment direction
-      const start = rectEdgeIntersection(pcx, pcy, p.size![0], p.size![1], ux, uy)
-      const end = rectEdgeIntersection(ccx, ccy, node.size![0], node.size![1], -ux, -uy)
-
-      // Control point for curvature
-      const mx = (start[0] + end[0]) / 2
-      const my = (start[1] + end[1]) / 2
-      const nx = -uy
-      const ny = ux
-      const segLen = Math.hypot(end[0] - start[0], end[1] - start[1])
-      const ctrlX = mx + nx * segLen * 0.25
-      const ctrlY = my + ny * segLen * 0.25
-
-      const topId = getTopAncestorId(node)
-      if (!topColorById[topId]) {
-        topColorById[topId] = topPalette[topColorIndex++ % topPalette.length]
-      }
-
-      const alpha = Math.max(0, 1 - 0.05 * (node.depth - 1))
-      const thickness = Math.max(2, 40 * Math.sqrt((node.weight as number) / (root.weight as number)))
-
-      // Band offsets using normals to the curve at endpoints
-      const t0x = ctrlX - start[0]
-      const t0y = ctrlY - start[1]
-      const t0l = Math.hypot(t0x, t0y) || 1
-      const n0x = -t0y / t0l
-      const n0y = t0x / t0l
-
-      const t1x = end[0] - ctrlX
-      const t1y = end[1] - ctrlY
-      const t1l = Math.hypot(t1x, t1y) || 1
-      const n1x = -t1y / t1l
-      const n1y = t1x / t1l
-
-      const half = thickness / 2
-
-      const startLeftX = start[0] + n0x * half
-      const startLeftY = start[1] + n0y * half
-      const startRightX = start[0] - n0x * half
-      const startRightY = start[1] - n0y * half
-
-      const endLeftX = end[0] + n1x * half
-      const endLeftY = end[1] + n1y * half
-      const endRightX = end[0] - n1x * half
-      const endRightY = end[1] - n1y * half
-
-      // Approximate offset for control point using averaged normals
-      const avgNx = n0x + n1x
-      const avgNy = n0y + n1y
-      const avgNl = Math.hypot(avgNx, avgNy) || 1
-      const offX = (avgNx / avgNl) * half
-      const offY = (avgNy / avgNl) * half
-
-      const ctrlLeftX = ctrlX + offX
-      const ctrlLeftY = ctrlY + offY
-      const ctrlRightX = ctrlX - offX
-      const ctrlRightY = ctrlY - offY
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-      const d =
-        `M ${startLeftX} ${startLeftY} ` +
-        `Q ${ctrlLeftX} ${ctrlLeftY} ${endLeftX} ${endLeftY} ` +
-        `L ${endRightX} ${endRightY} ` +
-        `Q ${ctrlRightX} ${ctrlRightY} ${startRightX} ${startRightY} Z`
-      path.setAttribute("d", d)
-      path.setAttribute("fill", topColorById[topId])
-      path.setAttribute("fill-opacity", alpha.toString())
-      path.setAttribute("class", "connector")
-      background.appendChild(path)
+        background.innerHTML = ""
     }
-  }
 
-  changeAppState("success", {})
+    // Build node lookup and filter entries
+    const idToNode: Record<number, PreparedNode> = {}
+
+    for (let i = 0; i < window.nodes.length; i++) {
+        const node = window.nodes[i] as PreparedNode
+        idToNode[node.id] = node
+
+        // Reset tree state from previous runs to prevent accumulation
+        node.children = undefined
+        node.filtered = undefined
+        node.highLevelCategory = undefined
+
+        // Filter leaf nodes (entrygroups)
+        if (node.od === 0) {
+            const entryIds = node.entries!
+            let matchingEntries = []
+
+            for (const entryId of entryIds) {
+                const filterData = window.filterData[entryId]
+                const shouldFilter = shouldFilterEntry(
+                    state,
+                    {
+                        activities: filterData[0],
+                        focuses: filterData[1],
+                        domains: filterData[2],
+                        gcbrFocus: filterData[3],
+                    },
+                    metadata,
+                )
+
+                document
+                    .querySelector(`a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)!
+                    .classList.toggle("matches-filters", !shouldFilter)
+
+                if (!shouldFilter) {
+                    matchingEntries.push(entryId)
+                }
+            }
+
+            node.filtered = matchingEntries.length === 0
+        }
+    }
+
+    // Build tree structure
+    let root: PreparedNode | null = null
+
+    for (const node of Object.values(idToNode)) {
+        if (node.id === node.parent) {
+            root = node
+        } else {
+            const parent = idToNode[node.parent]
+            if (parent) {
+                if (!parent.children) parent.children = []
+                parent.children.push(node)
+            }
+        }
+    }
+
+    if (!root) {
+        changeAppState("error", {error: new Error("No root node"), message: "Could not find root node"})
+        return
+    }
+
+    // Propagate filtered status
+    function propagateFiltered(node: PreparedNode): boolean {
+        if (!node.children || node.children.length === 0) {
+            return node.filtered || false
+        }
+        node.children = node.children.filter((child) => !propagateFiltered(child))
+        node.filtered = node.children.length === 0
+        return node.filtered || false
+    }
+
+    propagateFiltered(root)
+
+    if (root.filtered || !root.children || root.children.length === 0) {
+        changeAppState("empty", {})
+        return
+    }
+
+    // Create the nested box layout
+    renderNestedBoxes(root, idToNode)
+
+    changeAppState("success", {})
 }
 
-export function fitToSector(
-  node: Pick<ProcessedNode, "position" | "size" | "sector">,
-  trail: Pick<ProcessedNode, "position" | "size">[],
-): [number, number] {
-  // Radial placement along the sector bisector with clearance from trail rectangles.
-  const [w, h] = node.size!
-  const [a, b] = node.sector
-  const angle = (a + b) / 2
-  const ux = Math.cos(angle)
-  const uy = Math.sin(angle)
+function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, PreparedNode>) {
+    const centerWrapper = document.getElementById("center-wrapper")
+    if (!centerWrapper) return
 
-  // Special case root centered at origin (full circle, trail with origin sentinel)
-  if (
-    trail.length === 1 &&
-    Array.isArray(trail[0].position) &&
-    trail[0].position![0] === 0 &&
-    trail[0].position![1] === 0
-  ) {
-    return [-w / 2, -h / 2]
-  }
-
-  // Compute an automatic spacing based on ancestor average size and local size
-  const ancAvg =
-    trail.length ? trail.reduce((sum, anc) => sum + Math.min(anc.size![0], anc.size![1]), 0) / trail.length : 0
-  const s = Math.max(64, 0.08 * ancAvg + 0.12 * Math.min(w, h))
-  const rNode = Math.sqrt(w * w + h * h) / 2
-
-  // Initial radius guess using circle-approx clearance from all ancestors
-  let r = 0
-  for (const anc of trail) {
-    const ax = anc.position![0]
-    const ay = anc.position![1]
-    const aw = anc.size![0]
-    const ah = anc.size![1]
-    const acx = ax + aw / 2
-    const acy = ay + ah / 2
-    const RA = Math.hypot(acx, acy)
-    const rA = Math.sqrt(aw * aw + ah * ah) / 2
-    r = Math.max(r, RA + rA + rNode + s)
-  }
-
-  const candidateRect = (rv: number): [number, number, number, number] => {
-    const cx = ux * rv
-    const cy = uy * rv
-    return [cx - w / 2, cy - h / 2, w, h]
-  }
-
-  const getMinDist = (rect: [number, number, number, number]) => {
-    let min = Infinity
-    for (const anc of trail) {
-      const rectA: [number, number, number, number] = [anc.position![0], anc.position![1], anc.size![0], anc.size![1]]
-      const d = shortestDistanceBetweenRectangles(rect, rectA)
-      if (d < min) min = d
+    // Clear existing content and create HTML container
+    const existingFo = document.getElementById("nested-layout-fo")
+    if (existingFo) {
+        existingFo.remove()
     }
-    return min
-  }
 
-  let rect = candidateRect(r)
-  let minDist = getMinDist(rect)
-  if (!isFinite(minDist)) {
-    minDist = s
-  }
+    // Get the map container dimensions to make layout responsive
+    const mapEl = document.getElementById("map")
+    const containerWidth = mapEl ? mapEl.clientWidth : 1400
 
-  let iterations = 0
-  while (minDist < s && iterations < 1000) {
-    const deficit = s - minDist
-    r += Math.max(1, deficit * 1.1)
-    rect = candidateRect(r)
-    minDist = getMinDist(rect)
-    iterations++
-  }
+    // Create main container as foreignObject - use full width for centering
+    const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject")
+    fo.setAttribute("x", "0")
+    fo.setAttribute("y", "0")
+    fo.setAttribute("width", "100%")
+    fo.setAttribute("height", "3000") // Will be adjusted after render
+    fo.id = "nested-layout-fo"
 
-  // Enforce angular sector boundaries so the rectangle stays within [a, b]
-  const phi = Math.max(1e-3, (b - a) / 2)
-  const nx = -uy
-  const ny = ux
-  const extentPerp = 0.5 * (Math.abs(nx) * w + Math.abs(ny) * h)
-  const requiredR = extentPerp / Math.tan(phi)
-  if (isFinite(requiredR)) {
-    r = Math.max(r, requiredR + s)
-  }
+    // Wrapper div for centering
+    const wrapper = document.createElement("div")
+    wrapper.id = "nested-layout-wrapper"
+    wrapper.style.cssText = `
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+    `
 
-  const cx = ux * r
-  const cy = uy * r
-  return [cx - w / 2, cy - h / 2]
+    const layoutWidth = Math.min(Math.max(containerWidth - 60, 800), 1800)
+    const container = document.createElement("div")
+    container.id = "nested-layout-container"
+    container.className = "nested-layout"
+    container.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: ${layoutWidth}px;
+        max-width: 100%;
+    `
+
+    // Top row: Prevention, Detection, Response - width proportional to content, stretch to equal heights
+    const topRow = document.createElement("div")
+    topRow.className = "top-row"
+    topRow.style.cssText = `
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+    `
+
+    // Categorize children into high-level categories
+    const categorizedChildren: Record<string, PreparedNode[]> = {
+        Prevention: [],
+        Detection: [],
+        Response: [],
+        Transversal: [],
+    }
+
+    // Helper function to get label from node
+    function getNodeLabel(node: PreparedNode): string {
+        if (node.el && node.el.querySelector) {
+            const labelEl = node.el.querySelector("span")
+            return labelEl?.textContent?.trim() || ""
+        }
+        return ""
+    }
+
+    // Get labels from lookup to categorize
+    for (const child of root.children || []) {
+        const label = getNodeLabel(child)
+
+        // Match to high-level category by exact name
+        if (categorizedChildren[label] !== undefined) {
+            categorizedChildren[label].push(child)
+            child.highLevelCategory = label
+        } else {
+            // Default to Transversal if no exact match
+            categorizedChildren["Transversal"].push(child)
+            child.highLevelCategory = "Transversal"
+        }
+    }
+
+    // Render top 3 categories
+    const topCategories = ["Prevention", "Detection", "Response"]
+
+    for (const catName of topCategories) {
+        const catConfig = HIGH_LEVEL_CATEGORIES[catName]
+        const children = categorizedChildren[catName]
+
+        const box = createHighLevelBox(catConfig.label, catConfig.color, children, idToNode)
+        topRow.appendChild(box)
+    }
+
+    container.appendChild(topRow)
+
+    // Bottom row: Transversal (full width)
+    const transversalConfig = HIGH_LEVEL_CATEGORIES["Transversal"]
+    const transversalChildren = categorizedChildren["Transversal"]
+
+    if (transversalChildren.length > 0) {
+        const transversalBox = createHighLevelBox(
+            transversalConfig.label,
+            transversalConfig.color,
+            transversalChildren,
+            idToNode,
+            true,
+        )
+        container.appendChild(transversalBox)
+    }
+
+    wrapper.appendChild(container)
+    fo.appendChild(wrapper)
+    centerWrapper.appendChild(fo)
+
+    // Hide all the original SVG foreignObjects (categories and entrygroups)
+    hideOriginalElements()
 }
 
-function showNode(node: Pick<ProcessedNode, "el" | "id" | "parent" | "position">) {
-  node.el.classList.remove("off-screen")
-  node.el.ariaHidden = "false"
-  node.el.style.transform = `translate(${node.position![0]}px, ${node.position![1]}px)`
+// Count total entries in children recursively
+function countEntriesInChildren(children: PreparedNode[]): number {
+    let total = 0
+    for (const child of children) {
+        if (child.filtered) continue
+        total += countEntries(child)
+    }
+    return total
+}
 
-  if (node.id === node.parent) {
-    return
-  }
+function createHighLevelBox(
+    label: string,
+    color: string,
+    children: PreparedNode[],
+    idToNode: Record<number, PreparedNode>,
+    fullWidth = false,
+): HTMLElement {
+    // Count entries to determine flex-grow (more content = more width = similar height)
+    const totalEntries = countEntriesInChildren(children)
+    const flexGrow = Math.max(1, totalEntries)
+
+    const box = document.createElement("div")
+    box.className = "high-level-box"
+    box.style.cssText = `
+        background: linear-gradient(135deg, ${color}15 0%, ${color}08 100%);
+        border: 2px solid ${color};
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 0;
+        ${fullWidth ? "width: 100%;" : `flex: ${flexGrow} 1 0%;`}
+    `
+
+    // Header
+    const header = document.createElement("div")
+    header.className = "box-header"
+    header.style.cssText = `
+        font-size: 15px;
+        font-weight: 700;
+        color: ${color};
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid ${color}40;
+    `
+    header.textContent = label
+    box.appendChild(header)
+
+    // Content area for subcategories - single row flexbox, equal heights, width proportional to org count
+    const content = document.createElement("div")
+    content.className = "box-content"
+    content.style.cssText = `
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+        overflow: hidden;
+        flex: 1;
+    `
+
+    // Flatten children - if a child has the same label as parent, use its children directly
+    const flattenedChildren: PreparedNode[] = []
+    for (const child of children) {
+        if (child.filtered) continue
+
+        // Get child's label
+        let childLabel = ""
+        if (child.el) {
+            const labelEl = child.el.querySelector("span")
+            childLabel = labelEl?.textContent?.trim() || ""
+        }
+
+        // If child has same name as parent box, flatten its children
+        if (childLabel === label && child.children) {
+            flattenedChildren.push(...child.children.filter((c) => !c.filtered))
+        } else {
+            flattenedChildren.push(child)
+        }
+    }
+
+    // Separate subcategories from direct entries
+    const subcategories: PreparedNode[] = []
+    const directEntrygroups: PreparedNode[] = []
+
+    for (const child of flattenedChildren) {
+        if (child.filtered) continue
+        if (child.children && child.children.length > 0) {
+            subcategories.push(child)
+        } else if (child.od === 0) {
+            directEntrygroups.push(child)
+        }
+    }
+
+    // Render subcategories as boxes
+    for (const subcat of subcategories) {
+        const subBox = createSubcategoryBox(subcat, label, idToNode)
+        content.appendChild(subBox)
+    }
+
+    box.appendChild(content)
+
+    // Render direct entries in a simple flex row at the bottom (no boxes)
+    if (directEntrygroups.length > 0) {
+        const directEntriesRow = document.createElement("div")
+        directEntriesRow.className = "direct-entries"
+        directEntriesRow.style.cssText = `
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed ${color}40;
+        `
+        for (const eg of directEntrygroups) {
+            renderEntriesInContainer(eg, directEntriesRow, true)
+        }
+        box.appendChild(directEntriesRow)
+    }
+
+    return box
+}
+
+// Count total entries in a node (recursively)
+function countEntries(node: PreparedNode): number {
+    if (node.od === 0) {
+        // Entrygroup - count matching entries
+        const entryIds = node.entries || []
+        let count = 0
+        for (const entryId of entryIds) {
+            const entryLink = document.querySelector(
+                `a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`,
+            ) as HTMLElement
+            if (entryLink?.classList.contains("matches-filters")) {
+                count++
+            }
+        }
+        return count
+    }
+    // Category - sum children
+    let total = 0
+    for (const child of node.children || []) {
+        if (!child.filtered) {
+            total += countEntries(child)
+        }
+    }
+    return total
+}
+
+function createSubcategoryBox(
+    node: PreparedNode,
+    parentCategory: string,
+    idToNode: Record<number, PreparedNode>,
+): HTMLElement {
+    // Get colors from parent category
+    const categoryColors = SUBCATEGORY_COLORS[parentCategory] || SUBCATEGORY_COLORS["Transversal"]
+
+    // Count entries to determine flex-grow (width proportional to org count)
+    const entryCount = countEntries(node)
+    const flexGrow = Math.max(1, entryCount) // More entries = proportionally wider
+
+    const box = document.createElement("div")
+    box.className = "subcategory-box"
+    box.style.cssText = `
+        background: ${categoryColors.bg};
+        border: 1px solid ${categoryColors.border};
+        border-radius: 6px;
+        padding: 8px;
+        min-width: 100px;
+        display: flex;
+        flex-direction: column;
+        flex: ${flexGrow} 1 0%;
+        overflow: hidden;
+    `
+
+    // Get label from the node's element
+    let label = "Subcategory"
+    if (node.el) {
+        const labelEl = node.el.querySelector("span")
+        if (labelEl) {
+            label = labelEl.textContent?.trim() || label
+        }
+    }
+
+    // Header
+    const header = document.createElement("div")
+    header.className = "subbox-header"
+    header.style.cssText = `
+        font-size: 11px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 5px;
+        border-bottom: 1px solid ${categoryColors.border};
+        padding-bottom: 3px;
+    `
+    header.textContent = label
+    box.appendChild(header)
+
+    // Content - horizontal wrap for entries
+    const content = document.createElement("div")
+    content.className = "subbox-content"
+    content.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: flex-start;
+        align-content: flex-start;
+        flex: 1;
+    `
+
+    // Render children (could be more subcategories or entrygroups)
+    for (const child of node.children || []) {
+        if (child.filtered) continue
+
+        if (child.od === 0) {
+            // Entrygroup - render entries
+            renderEntriesInContainer(child, content, true)
+        } else if (child.children) {
+            // Deeper subcategory - render recursively
+            const deeperBox = createSubcategoryBox(child, parentCategory, idToNode)
+            deeperBox.style.flex = "1 1 100%"
+            content.appendChild(deeperBox)
+        }
+    }
+
+    box.appendChild(content)
+    return box
+}
+
+function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElement, horizontal = false) {
+    const entryIds = entryNode.entries || []
+
+    for (const entryId of entryIds) {
+        // Find the entry link element
+        const entryLink = document.querySelector(
+            `a[data-entrygroup="${entryNode.id}"][data-entry="${entryId}"]`,
+        ) as HTMLElement
+
+        if (!entryLink || !entryLink.classList.contains("matches-filters")) continue
+
+        // Clone the entry for display in nested layout
+        const entryClone = document.createElement("div")
+        entryClone.className = "nested-entry"
+        entryClone.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 5px;
+            background: #f9fafb;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            max-width: 100%;
+            min-width: 0;
+        `
+        entryClone.onmouseenter = () => (entryClone.style.background = "#e5e7eb")
+        entryClone.onmouseleave = () => (entryClone.style.background = "#f9fafb")
+
+        // Copy logo if exists (it's in a span.entry-logo, may contain img or svg)
+        const logoSpan = entryLink.querySelector(".entry-logo")
+        if (logoSpan) {
+            const logoClone = logoSpan.cloneNode(true) as HTMLElement
+            logoClone.style.cssText =
+                "width: 16px; height: 16px; min-width: 16px; border-radius: 2px; overflow: hidden; flex-shrink: 0;"
+            entryClone.appendChild(logoClone)
+        }
+
+        // Copy label (second span with text-sm class)
+        const labelSpan = entryLink.querySelector("span.text-sm")
+        if (labelSpan && labelSpan.textContent?.trim()) {
+            const labelClone = document.createElement("span")
+            labelClone.style.cssText =
+                "font-size: 10px; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"
+            labelClone.textContent = labelSpan.textContent.trim()
+            entryClone.appendChild(labelClone)
+        }
+
+        // Set title for tooltip on hover
+        entryClone.title = labelSpan?.textContent?.trim() || ""
+
+        // Make clickable
+        entryClone.onclick = () => entryLink.click()
+
+        container.appendChild(entryClone)
+    }
+}
+
+function hideOriginalElements() {
+    // The SVG structure is:
+    // #zoom-wrapper > #center-wrapper > #background, foreignObjects, <g> with categories/entrygroups
+    // We need to hide everything inside #center-wrapper EXCEPT our nested layout foreignObject
+
+    const centerWrapper = document.getElementById("center-wrapper")
+    if (!centerWrapper) return
+
+    // Hide all children of center-wrapper except background and our nested layout
+    Array.from(centerWrapper.children).forEach((child) => {
+        const el = child as SVGElement
+        if (el.id === "background") {
+            // Clear background but keep it
+            el.innerHTML = ""
+        } else if (el.id === "nested-layout-fo") {
+            // Keep our nested layout visible
+        } else if (el.tagName.toLowerCase() === "g") {
+            // Hide the entire group containing categories/entrygroups
+            el.style.display = "none"
+            el.style.visibility = "hidden"
+        } else if (el.tagName.toLowerCase() === "foreignobject") {
+            // Hide individual foreignObjects (root node, etc)
+            el.setAttribute("x", "-99999")
+            el.setAttribute("y", "-99999")
+            el.setAttribute("width", "0")
+            el.setAttribute("height", "0")
+            el.style.display = "none"
+        }
+    })
 }
 
 function resetGlobalMapState() {
-  for (let i = 0; i < window.nodes.length; i++) {
-    let node = window.nodes[i] as Node & Partial<ProcessedNode> & {el: SVGElement}
+    document.querySelectorAll(".debug-rect").forEach((el) => el.remove())
 
-    node.el.classList.add("off-screen")
-    node.el.ariaHidden = "true"
-    node.el.style.transform = ""
-  }
+    // Remove nested layout if exists
+    const nestedContainer = document.getElementById("nested-layout-fo")
+    if (nestedContainer) {
+        nestedContainer.remove()
+    }
+
+    for (let i = 0; i < window.nodes.length; i++) {
+        const node = window.nodes[i] as Node & Partial<ProcessedNode> & {el: SVGElement}
+
+        node.el.style.display = ""
+        node.el.classList.add("off-screen")
+        node.el.ariaHidden = "true"
+        node.el.removeAttribute("transform")
+        node.el.removeAttribute("x")
+        node.el.removeAttribute("y")
+        node.el.setAttribute("width", "100%")
+        node.el.setAttribute("height", "100%")
+    }
 }

@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\NotionData\NotionClient;
-use App\Services\NotionData\Tree\Tree;
 
 class ShowEntryController
 {
     public function __invoke(NotionClient $notion, int $id, string $slug)
     {
-        $tree = Tree::buildFromPages($notion->pages());
+        $tree = $notion->tree();
 
         abort_if(! isset($tree->lookup[$id]), 404);
 

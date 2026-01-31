@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\NotionData\NotionClient;
-use App\Services\NotionData\Tree\Tree;
 use Illuminate\Contracts\View\View;
 
 class ShowEntryPartialController
 {
     public function __invoke(NotionClient $notion, int $entryGroup, int $entryId): View
     {
-        $tree = Tree::buildFromPages($notion->pages());
+        $tree = $notion->tree();
 
         abort_if(! isset($tree->lookup[$entryGroup]) || ! isset($tree->lookup[$entryId]), 404);
 

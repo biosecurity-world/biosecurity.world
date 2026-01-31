@@ -110,16 +110,81 @@
         </div>
 
         <p class="mt-4 flex max-w-lg flex-wrap text-gray-700">
-            <a href="https://www.linkedin.com/in/alix-pham/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Alix Pham</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/sofyalebedeva/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Sofya Lebedeva</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/johantang/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Johan Täng</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/jeremy-andreoletti-330445216/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Jérémy Andréoletti</a><sup class="text-xs">1</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/linbowkerlonnecker/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Lin Bowker-Lonnecker</a><sup class="text-xs">2</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/will-saunter/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Will Saunter</a><sup class="text-xs">2</sup><span>,&nbsp;</span>
-            <a href="https://www.linkedin.com/in/dornfelix/" class="underline" target="_blank" rel="noopener noreferrer nofollow">Félix Dorn</a><sup class="text-xs">2</sup>
+            <a
+                href="https://www.linkedin.com/in/alix-pham/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Alix Pham
+            </a>
+            <sup class="text-xs">1</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/sofyalebedeva/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Sofya Lebedeva
+            </a>
+            <sup class="text-xs">1</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/johantang/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Johan Täng
+            </a>
+            <sup class="text-xs">1</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/jeremy-andreoletti-330445216/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Jérémy Andréoletti
+            </a>
+            <sup class="text-xs">1</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/linbowkerlonnecker/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Lin Bowker-Lonnecker
+            </a>
+            <sup class="text-xs">2</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/will-saunter/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Will Saunter
+            </a>
+            <sup class="text-xs">2</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/dornfelix/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Félix Dorn
+            </a>
+            <sup class="text-xs">2</sup>
         </p>
         <p class="mt-1 text-sm text-gray-500">
-            <sup>1</sup>Team, <sup>2</sup>Support
+            <sup>1</sup>
+            Team,
+            <sup>2</sup>
+            Support
         </p>
     </div>
 </footer>
