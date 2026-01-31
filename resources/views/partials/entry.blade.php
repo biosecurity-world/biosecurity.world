@@ -24,7 +24,11 @@
                 @endforeach
 
                 <li class="flex items-center bg-white">
-                    <x-entry-logo :logo="$entry->logo" alt="{{ $entry->label }}'s logo" />
+                    <x-entry-logo
+                        :logo="$entry->logo"
+                        :organizationType="$entry->organizationType"
+                        alt="{{ $entry->label }}'s logo"
+                    />
                 </li>
             </ol>
 

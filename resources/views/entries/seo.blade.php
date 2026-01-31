@@ -1,6 +1,6 @@
 <x-layouts.default :title="$entry->label" class="bg-white text-gray-900">
     <header class="sticky top-0 z-40 bg-white/80 backdrop-blur">
-        <x-navbar border class="mt-4" />
+        <x-navbar class="mt-4" />
     </header>
 
     <main class="mx-auto mt-8 w-full max-w-5xl px-6 xl:px-0">
@@ -43,6 +43,7 @@
                 <div class="flex items-center gap-3">
                     <x-entry-logo
                         :logo="$entry->logo"
+                        :organizationType="$entry->organizationType"
                         class="size-12 rounded-lg border border-gray-200 bg-white"
                         alt="{{ $entry->label }}'s logo"
                     />

@@ -7,7 +7,6 @@ use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\Models\InterventionFocus;
 use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Node;
-use App\Services\NotionData\Tree\Tree;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 
@@ -15,7 +14,7 @@ class ShowWelcomeController
 {
     public function __invoke(NotionClient $notion): View
     {
-        $tree = Tree::buildFromPages($notion->pages());
+        $tree = $notion->tree();
 
         $nodes = collect($tree->nodes)->map(function (Node $node) use ($tree) {
             $nodeData = $tree->lookup[$node->id];

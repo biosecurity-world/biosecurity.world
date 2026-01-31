@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Services\NotionData;
 
 use App\Rules\OkStatusRule;
-use App\Services\Logosnatch\Logosnatch;
 use App\Services\NotionData\Enums\DomainEnum;
 use App\Services\NotionData\Models\Activity;
 use App\Services\NotionData\Models\Category;
 use App\Services\NotionData\Models\Entry;
 use App\Services\NotionData\Models\InterventionFocus;
 use App\Services\NotionData\Models\LocationHint;
+use App\Services\NotionData\Models\Logo;
 use App\Support\IdMap;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -39,46 +39,32 @@ class Hydrator
      * even if the database is duplicated or the column changes, so they are _very_ stable.
      */
     public const array SCHEMA = [
-    'organizationType' => '%3EfkD',
-    'link' => 'BEe%7D',
-    'description' => 'C%3Fc%3A',
-    'interventionFocuses' => 'L%3FRx',
-    'parent' => 'QTQ%5D',
-    'locationHints' => 'VQ%5B%7D',
-    'activityTypes' => 'Wmi~',
-    'gcbrFocus' => 'kC%5Cr',
-    'name' => 'title',
-    'isCategory' => 'uR%3DA',
-
-    /*
-    // My dev org
-        'organizationType' => '%3C%5Ce%7D',
-        // 'Notes' => '%40HC%3F',
-        'parent' => 'NIbg',
-        'interventionFocuses' => 'NpsX',
-        // 'Label' => 'Q%7C~I',
-        'link' => 'S%3CY%5C',
-        'gcbrFocus' => 'TMZQ',
-        'isCategory' => 'VOtz',
-        'activityTypes' => 'Vbs%5D',
-        // 'Children' => 'gOgj',
-        'description' => 'hR%3E%3D',
-        'locationHints' => 'wYKB',
+        'organizationType' => '%3EfkD',
+        'link' => 'BEe%7D',
+        'description' => 'C%3Fc%3A',
+        'interventionFocuses' => 'L%3FRx',
+        'parent' => 'QTQ%5D',
+        'locationHints' => 'VQ%5B%7D',
+        'activityTypes' => 'Wmi~',
+        'gcbrFocus' => 'kC%5Cr',
         'name' => 'title',
-        */
+        'isCategory' => 'uR%3DA',
     ];
 
     public const TECHNICAL_DOMAIN = '|tSq';
-    public const GOVERNANCE_DOMAIN =  'rBTY';
-    // dev
-    //    public const TECHNICAL_DOMAIN = 'fec88d1b-3a2c-4c60-9166-9d7107ec8005';
-//  public const GOVERNANCE_DOMAIN = '3fda0bd6-f188-4363-b21b-c7b330e8844b';
+
+    public const GOVERNANCE_DOMAIN = 'rBTY';
 
     public function __construct(protected Database $database) {}
 
     /** @param  Page[]  $pages */
     public function hydrate(array $pages): HydratedPages
     {
+        // Reset static state to prevent accumulation across requests
+        Activity::reset();
+        InterventionFocus::reset();
+        LocationHint::reset();
+
         usort($pages, fn (Page $a, Page $b) => $a->createdTime <=> $b->createdTime);
 
         $hydrated = [];
@@ -251,7 +237,9 @@ class Hydrator
         $data['activities'] = collect($data['activities']);
         /** @phpstan-ignore-next-line  */
         $data['locationHints'] = collect($data['locationHints']);
-        $data['logo'] = Logosnatch::retrieve($data['link'], targetSize: 64);
+        $domain = parse_url($data['link'], PHP_URL_HOST);
+        $token = env('LOGO_DEV_TOKEN');
+        $data['logo'] = new Logo("https://img.logo.dev/{$domain}?token={$token}&size=128&format=png");
 
         return new Entry(...$data);
     }
