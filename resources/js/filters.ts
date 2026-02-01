@@ -3,6 +3,7 @@ export type Filters = {
     domains: number
     focuses: number
     gcbrFocus: boolean
+    showNoFocus: boolean
 }
 
 export type FilterMetadata = {
@@ -29,6 +30,11 @@ export function shouldFilterEntry(state: Filters, entry: Filters, meta: FilterMe
     let hasSharedActivities = (state.activities & entry.activities) !== 0
     if (!hasSharedActivities) {
         return true
+    }
+
+    // Entries without any focuses (e.g. newsletters) are controlled by showNoFocus toggle
+    if (entry.focuses === 0) {
+        return !state.showNoFocus
     }
 
     let hasSharedFocuses = (state.focuses & entry.focuses) !== 0

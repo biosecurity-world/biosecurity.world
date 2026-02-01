@@ -516,6 +516,10 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
             const logoClone = logoSpan.cloneNode(true) as HTMLElement
             logoClone.style.cssText =
                 "width: 16px; height: 16px; min-width: 16px; border-radius: 2px; overflow: hidden; flex-shrink: 0;"
+            const imgInClone = logoClone.querySelector("img")
+            if (imgInClone) {
+                imgInClone.style.cssText = "width: 100%; height: 100%; object-fit: contain;"
+            }
             entryClone.appendChild(logoClone)
         }
 

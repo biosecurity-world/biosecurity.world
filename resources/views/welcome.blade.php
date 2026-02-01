@@ -95,7 +95,7 @@
                 type="button"
                 id="filters-toggle"
                 class="bg-primary-900 hover:bg-primary-800 flex w-full cursor-pointer items-center justify-between px-6 py-3 text-left transition"
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-controls="filters-content"
             >
                 <div class="flex items-center gap-3">
@@ -112,7 +112,7 @@
                         />
                     </svg>
                     <span class="font-display text-base font-semibold text-white">Filter organizations</span>
-                    <span id="filters-hint" class="text-sm text-white/70">(click to expand)</span>
+                    <span id="filters-hint" class="text-sm text-white/70">(click to collapse)</span>
                 </div>
                 <svg
                     id="filters-chevron"
@@ -120,6 +120,7 @@
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     class="size-5 text-white/70 transition-transform duration-200"
+                    style="transform: rotate(180deg)"
                 >
                     <path
                         fill-rule="evenodd"
@@ -129,7 +130,7 @@
                 </svg>
             </button>
 
-            <div id="filters-content" class="hidden overflow-hidden border-t border-gray-200 bg-gray-50 px-6 py-5">
+            <div id="filters-content" class="overflow-hidden border-t border-gray-200 bg-gray-50 px-6 py-5">
                 <div class="mx-auto max-w-7xl space-y-5">
                     <!-- Row 1: High-level focus + GCBR toggle + Activities -->
                     <div class="flex flex-wrap items-center gap-x-10 gap-y-4">
@@ -216,7 +217,17 @@
                     <!-- Row 2: Intervention focuses -->
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="mb-3 flex items-center justify-between">
-                            <h4 class="text-sm font-semibold text-gray-700">Intervention focuses</h4>
+                            <div class="flex items-center gap-3">
+                                <h4 class="text-sm font-semibold text-gray-700">Intervention focuses</h4>
+                                <x-checkbox-as-pill
+                                    name="show_no_focus"
+                                    value="1"
+                                    kind="no-focus-checkbox"
+                                    class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
+                                >
+                                    <span class="leading-none select-none">No specific focus</span>
+                                </x-checkbox-as-pill>
+                            </div>
                             <button
                                 class="resets-filters focusable flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                             >

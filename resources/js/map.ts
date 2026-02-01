@@ -1,6 +1,6 @@
 import {select} from "d3"
 import Panzoom from "@panzoom/panzoom"
-import {changeAppState, debug, semanticBitFlip, trapClickAndDoubleClick} from "@/utils"
+import {changeAppState, debug} from "@/utils"
 import type {AppStateChangeEvent, Node, ProcessedNode} from "@/types/index.d.ts"
 import {updateMap} from "@/layout"
 import FiltersStore, {Filters} from "@/filters"
@@ -74,6 +74,7 @@ let focusInputs = document.querySelectorAll(`.focus-checkbox`) as NodeListOf<HTM
 let focusesWrapper = document.querySelectorAll("[id^='focuses_wrapper_']") as NodeListOf<HTMLElement>
 
 let gcbrFocus = document.querySelector(".has-gcbr-focus") as HTMLInputElement
+let noFocusCheckbox = document.querySelector(".no-focus-checkbox") as HTMLInputElement
 const filtersStore = new FiltersStore<Filters>({
     activities: [
         () => Array.from(activityInputs).reduce((mask, el, k: number) => mask | (+el.checked << k), 0),
@@ -99,6 +100,7 @@ const filtersStore = new FiltersStore<Filters>({
             }),
     ],
     gcbrFocus: [() => gcbrFocus.checked, (checked: boolean) => (gcbrFocus.checked = checked)],
+    showNoFocus: [() => noFocusCheckbox.checked, (checked: boolean) => (noFocusCheckbox.checked = checked)],
 })
 
 for (const el of document.querySelectorAll("button.resets-filters")) {
@@ -110,30 +112,30 @@ for (const el of document.querySelectorAll("button.resets-filters")) {
 for (const el of activityInputs) {
     let label = document.querySelector(`label[for="${el.id}"]`)! as HTMLLabelElement
 
-    label.addEventListener(
-        "click",
-        trapClickAndDoubleClick(
-            () => {
-                el.checked = !el.checked
-                filtersStore.syncFilter("activities")
-            },
-            () => {
-                let mask = 1 << Array.from(activityInputs).indexOf(el)
+    label.addEventListener("click", (e) => {
+        e.preventDefault()
+        let mask = 1 << Array.from(activityInputs).indexOf(el)
+        const allMask = (1 << activityInputs.length) - 1
 
-                // The double-clicked activity is already the only one active, so we semanticBitFlip all of them
-                if (filtersStore.getState("activities") === mask) {
-                    mask = semanticBitFlip(mask, activityInputs.length)
-                }
+        // If this activity is already the only one active, re-enable all
+        if (filtersStore.getState("activities") === mask) {
+            mask = allMask
+        }
 
-                filtersStore.setState("activities", mask)
-            },
-        ),
-    )
+        filtersStore.setState("activities", mask)
+    })
 }
 for (const el of domainInputs) {
     el.addEventListener("change", () => filtersStore.syncFilter("domains"))
 }
 gcbrFocus.addEventListener("change", () => filtersStore.syncFilter("gcbrFocus"))
+
+// The no-focus checkbox label uses exclusive click like other pills
+const noFocusLabel = document.querySelector(`label[for="${noFocusCheckbox.id}"]`) as HTMLLabelElement
+noFocusLabel.addEventListener("click", (e) => {
+    e.preventDefault()
+    filtersStore.setState("showNoFocus", !filtersStore.getState("showNoFocus"))
+})
 
 let groupedFocuses: Map<HTMLElement, NodeListOf<HTMLInputElement>> = new Map()
 let masterCheckboxes: Record<string, HTMLInputElement> = {}
@@ -177,10 +179,29 @@ function getGroupOffsets(focuses: NodeListOf<HTMLInputElement>): number[] {
     return offsets
 }
 
-// Use change events on checkboxes for reliable single-click handling
+// Exclusive focus selection: clicking a focus pill selects only that one
 for (const focus of focusInputs) {
-    focus.addEventListener("change", () => {
-        filtersStore.syncFilter("focuses")
+    const focusLabel = document.querySelector(`label[for="${focus.id}"]`) as HTMLLabelElement
+    if (!focusLabel) continue
+
+    focusLabel.addEventListener("click", (e) => {
+        e.preventDefault()
+        const k = parseInt(focus.dataset.globalOffset!, 10)
+        const thisMask = 1 << k
+        const currentMask = filtersStore.getState("focuses")
+
+        // If already the only one selected (and no-focus hidden), re-enable all
+        if (currentMask === thisMask && !filtersStore.getState("showNoFocus")) {
+            const allMask = Array.from(focusInputs).reduce((mask, el) => {
+                const offset = parseInt(el.dataset.globalOffset!, 10)
+                return mask | (1 << offset)
+            }, 0)
+            filtersStore.setState("showNoFocus", true)
+            filtersStore.setState("focuses", allMask)
+        } else {
+            filtersStore.setState("showNoFocus", false)
+            filtersStore.setState("focuses", thisMask)
+        }
     })
 }
 
@@ -257,6 +278,16 @@ filtersStore.onChange(
                 e.preventDefault()
                 openEntry(el)
             })
+        })
+
+        // Close entry panel when clicking outside of it
+        document.addEventListener("click", (e) => {
+            if (!elEntryWrapper.innerHTML.trim()) return
+            const target = e.target as HTMLElement
+            if (target.closest("#entry-wrapper")) return
+            if (target.closest("a[data-entry]")) return
+            if (target.closest(".nested-entry")) return
+            closeEntry()
         })
 
         let $centerWrapper = select<SVGGElement, any>("#center-wrapper")

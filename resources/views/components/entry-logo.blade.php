@@ -22,7 +22,7 @@
         loading="lazy"
         decoding="async"
         src="{{ $logo->url }}"
-        class="size-6 grayscale transition-[filter] duration-200 hover:grayscale-0"
+        class="size-6 object-contain"
         width="128"
         height="128"
         {{ $attributes->get("alt") }}
