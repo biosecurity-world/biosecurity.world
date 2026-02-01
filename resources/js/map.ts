@@ -21,12 +21,21 @@ async function openEntry(entry: HTMLElement): Promise<void> {
             headers: {"X-Requested-With": "XMLHttpRequest"},
         })
 
+        if (!entryResponse.ok) {
+            throw new Error(`Failed to load entry: ${entryResponse.status}`)
+        }
+
         let content = await entryResponse.text()
         elEntryWrapper.innerHTML = content
 
+        let closeButton = elEntryWrapper.querySelector("button.close-entry")
+        if (!closeButton) {
+            throw new Error("Entry response did not contain expected content")
+        }
+
         setLastFocusedEntry([entrygroup, entryId])
 
-        elEntryWrapper.querySelector("button.close-entry")!.addEventListener("click", () => closeEntry())
+        closeButton.addEventListener("click", () => closeEntry())
     } catch (err: unknown) {
         changeAppState("error", {
             error: err,

@@ -8,6 +8,6 @@ wait_for = 2000
 flags = ["--no-sandbox"]
 
 [pages]
-entrypoints = ['/']
+entrypoints = ['/', '/_/entries']
 extract_only = ['/_/entries']
 exclude = []
