@@ -132,27 +132,23 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
 }
 
 function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, PreparedNode>) {
+    const isMobile = window.matchMedia("(max-width: 1024px)").matches
     const centerWrapper = document.getElementById("center-wrapper")
     if (!centerWrapper) return
 
-    // Clear existing content and create HTML container
+    // Clear existing content
     const existingFo = document.getElementById("nested-layout-fo")
-    if (existingFo) {
-        existingFo.remove()
-    }
+    if (existingFo) existingFo.remove()
+    const aboveMap = document.getElementById("above-map")
+    if (aboveMap) aboveMap.innerHTML = ""
 
     // Get the map container dimensions to make layout responsive
     const mapEl = document.getElementById("map")
-    const containerWidth = mapEl ? mapEl.clientWidth : 1400
-
-    // Create main container as foreignObject - use full width for centering
-    const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject")
-    fo.setAttribute("x", "0")
-    fo.setAttribute("y", "0")
-    fo.setAttribute("width", "100%")
-    fo.setAttribute("height", "3000") // Will be adjusted after render
-    fo.id = "nested-layout-fo"
-    fo.style.pointerEvents = "auto"
+    const sectionEl = mapEl?.parentElement as HTMLElement | null
+    const containerWidth =
+        sectionEl ? sectionEl.clientWidth
+        : mapEl ? mapEl.clientWidth
+        : 1400
 
     // Wrapper div for centering
     const wrapper = document.createElement("div")
@@ -247,8 +243,24 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
     }
 
     wrapper.appendChild(container)
-    fo.appendChild(wrapper)
-    centerWrapper.appendChild(fo)
+
+    if (isMobile && aboveMap) {
+        // Mobile: render as plain HTML outside SVG for native scrolling
+        aboveMap.appendChild(wrapper)
+        if (mapEl) mapEl.style.display = "none"
+    } else {
+        // Desktop: wrap in foreignObject inside SVG for panzoom support
+        const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject")
+        fo.setAttribute("x", "0")
+        fo.setAttribute("y", "0")
+        fo.setAttribute("width", "100%")
+        fo.setAttribute("height", "3000") // Will be adjusted after render
+        fo.id = "nested-layout-fo"
+        fo.style.pointerEvents = "auto"
+        fo.appendChild(wrapper)
+        centerWrapper.appendChild(fo)
+        if (mapEl) mapEl.style.display = ""
+    }
 
     // Hide all the original SVG foreignObjects (categories and entrygroups)
     hideOriginalElements()
@@ -578,10 +590,14 @@ function hideOriginalElements() {
 function resetGlobalMapState() {
     document.querySelectorAll(".debug-rect").forEach((el) => el.remove())
 
-    // Remove nested layout if exists
+    // Remove nested layout if exists (desktop: foreignObject, mobile: above-map)
     const nestedContainer = document.getElementById("nested-layout-fo")
     if (nestedContainer) {
         nestedContainer.remove()
+    }
+    const aboveMap = document.getElementById("above-map")
+    if (aboveMap) {
+        aboveMap.innerHTML = ""
     }
 
     for (let i = 0; i < window.nodes.length; i++) {
