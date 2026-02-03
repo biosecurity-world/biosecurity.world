@@ -116,25 +116,23 @@
 
 /** Responsive: stack categories and subcategories vertically on small screens */
 @media (max-width: 1024px) {
-    /* Allow page scrolling over the map area on mobile */
+    /* Mobile: make the map section flow naturally for native scrolling */
     main:has(#map) {
         overflow: visible !important;
+        height: auto !important;
+        min-height: 0 !important;
     }
 
-    #map {
-        touch-action: auto;
+    .app-state[data-state="success"].state-active {
+        position: relative !important;
+        inset: auto !important;
+        height: auto !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
     }
 
     #zoom-controls {
         display: none;
-    }
-
-    #zoom-wrapper {
-        pointer-events: none !important;
-    }
-
-    #nested-layout-fo {
-        pointer-events: auto !important;
     }
 
     .top-row {

@@ -471,36 +471,35 @@ filtersStore.onChange(
                 // Use requestAnimationFrame chain to ensure layout is fully computed
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        const nestedLayoutFo = document.getElementById("nested-layout-fo")
-                        const nestedLayoutContainer = document.getElementById("nested-layout-container")
                         const mapSvg = $map.node()
                         const sectionEl = mapSvg?.parentElement as HTMLElement
                         const mainEl = sectionEl?.parentElement as HTMLElement
 
-                        if (nestedLayoutContainer && mainEl) {
-                            // Measure the actual content container and add padding (20px top + 20px bottom)
-                            const contentHeight = nestedLayoutContainer.offsetHeight + 40 // 20px padding top + bottom
-                            const minHeight = 300
+                        if (desktopQuery.matches) {
+                            // Desktop: set explicit heights for the SVG foreignObject layout
+                            const nestedLayoutFo = document.getElementById("nested-layout-fo")
+                            const nestedLayoutContainer = document.getElementById("nested-layout-container")
 
-                            // Set container height to exactly fit content
-                            const newHeight = Math.max(minHeight, contentHeight)
+                            if (nestedLayoutContainer && mainEl) {
+                                const contentHeight = nestedLayoutContainer.offsetHeight + 40
+                                const newHeight = Math.max(300, contentHeight)
 
-                            // Set height on both the section and the main element
-                            if (sectionEl) {
-                                sectionEl.style.height = `${newHeight}px`
+                                if (sectionEl) sectionEl.style.height = `${newHeight}px`
+                                mainEl.style.height = `${newHeight}px`
+
+                                if (nestedLayoutFo) {
+                                    nestedLayoutFo.setAttribute("height", String(newHeight))
+                                }
                             }
-                            mainEl.style.height = `${newHeight}px`
 
-                            // Also set the foreignObject height to match
-                            if (nestedLayoutFo) {
-                                nestedLayoutFo.setAttribute("height", String(newHeight))
-                            }
+                            panzoom.zoom(1, {animate: false})
+                            panzoom.pan(0, 0, {animate: false})
+                        } else {
+                            // Mobile: content is plain HTML, let it flow naturally
+                            if (sectionEl) sectionEl.style.height = ""
+                            if (mainEl) mainEl.style.height = ""
                         }
 
-                        // For nested layout, reset panzoom to identity (no transform)
-                        // The layout is static HTML and doesn't need zoom/pan
-                        panzoom.zoom(1, {animate: false})
-                        panzoom.pan(0, 0, {animate: false})
                         isInitialLoad = false
                     })
                 })
