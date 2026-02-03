@@ -379,27 +379,31 @@ filtersStore.onChange(
         // Use parent SVG as event source so users can drag from anywhere on the map
         const parent = $map.node()!
         parent.addEventListener("pointerdown", panzoom.handleDown)
-        parent.addEventListener(
-            "wheel",
-            (e: WheelEvent) => {
-                e.preventDefault()
-                panzoom.zoomWithWheel(e, {step: 0.1})
-            },
-            {passive: false},
-        )
 
-        // Handle window resize - recalculate fit scale and recenter if needed
-        const handleResize = () => {
-            const minScale = calculateFitScale()
-            panzoom.setOptions({minScale})
-
-            const currentScale = panzoom.getScale()
-            if (currentScale < minScale) {
-                panzoom.zoom(minScale, {animate: true})
-                centerContent(minScale)
-            }
+        // Zoom buttons (replace scroll zoom)
+        const zoomInBtn = document.getElementById("zoom-in")
+        const zoomOutBtn = document.getElementById("zoom-out")
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener("click", (e) => {
+                e.stopPropagation()
+                panzoom.zoomIn({step: 0.2, animate: true})
+            })
         }
-        window.addEventListener("resize", handleResize)
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener("click", (e) => {
+                e.stopPropagation()
+                panzoom.zoomOut({step: 0.2, animate: true})
+            })
+        }
+
+        // Handle window resize - re-render layout to fit new dimensions
+        let resizeTimer: number
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimer)
+            resizeTimer = window.setTimeout(() => {
+                filtersStore.syncFilter("activities")
+            }, 150)
+        })
 
         for (const node of window.nodes as (Node & Partial<ProcessedNode>)[]) {
             let el = document.querySelector(`[data-node="${node.id}"]`) as SVGElement | null

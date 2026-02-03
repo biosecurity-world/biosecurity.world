@@ -164,7 +164,7 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
         box-sizing: border-box;
     `
 
-    const layoutWidth = Math.min(Math.max(containerWidth - 60, 800), 1800)
+    const layoutWidth = Math.min(Math.max(containerWidth - 40, 300), 1800)
     const container = document.createElement("div")
     container.id = "nested-layout-container"
     container.className = "nested-layout"
