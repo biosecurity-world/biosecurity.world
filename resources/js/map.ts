@@ -338,9 +338,6 @@ filtersStore.onChange(
             startY: 0,
         })
 
-        // Ensure the zoom wrapper can receive pointer events
-        zoomWrapperEl.style.pointerEvents = "all"
-
         // Expose panzoom for debugging
         ;(window as any).__panzoom = panzoom
 
@@ -384,12 +381,14 @@ filtersStore.onChange(
                 parent.addEventListener("pointerdown", panzoom.handleDown)
                 panzoom.setOptions({disablePan: false, disableZoom: false})
                 zoomWrapperEl.style.touchAction = "none"
+                zoomWrapperEl.style.pointerEvents = "all"
             } else {
                 parent.removeEventListener("pointerdown", panzoom.handleDown)
                 panzoom.setOptions({disablePan: true, disableZoom: true})
                 panzoom.zoom(1, {animate: false})
                 panzoom.pan(0, 0, {animate: false})
                 zoomWrapperEl.style.touchAction = ""
+                zoomWrapperEl.style.pointerEvents = "none"
             }
         }
 
