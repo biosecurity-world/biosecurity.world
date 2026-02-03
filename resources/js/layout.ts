@@ -152,6 +152,7 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
     fo.setAttribute("width", "100%")
     fo.setAttribute("height", "3000") // Will be adjusted after render
     fo.id = "nested-layout-fo"
+    fo.style.pointerEvents = "auto"
 
     // Wrapper div for centering
     const wrapper = document.createElement("div")
