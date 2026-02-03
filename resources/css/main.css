@@ -120,6 +120,10 @@
         touch-action: auto;
     }
 
+    #zoom-controls {
+        display: none;
+    }
+
     .top-row {
         flex-direction: column !important;
     }

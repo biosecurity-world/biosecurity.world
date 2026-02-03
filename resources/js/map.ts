@@ -375,12 +375,24 @@ filtersStore.onChange(
             }
         })
 
-        // Bind panzoom event handlers
-        // Use parent SVG as event source so users can drag from anywhere on the map
+        // Bind panzoom event handlers only on desktop (mobile gets plain scrolling)
         const parent = $map.node()!
-        parent.addEventListener("pointerdown", panzoom.handleDown)
+        const desktopQuery = window.matchMedia("(min-width: 1025px)")
 
-        // Zoom buttons (replace scroll zoom)
+        function togglePanzoom(enabled: boolean) {
+            if (enabled) {
+                parent.addEventListener("pointerdown", panzoom.handleDown)
+            } else {
+                parent.removeEventListener("pointerdown", panzoom.handleDown)
+                panzoom.zoom(1, {animate: false})
+                panzoom.pan(0, 0, {animate: false})
+            }
+        }
+
+        togglePanzoom(desktopQuery.matches)
+        desktopQuery.addEventListener("change", (e) => togglePanzoom(e.matches))
+
+        // Zoom buttons (desktop only, hidden on mobile via CSS)
         const zoomInBtn = document.getElementById("zoom-in")
         const zoomOutBtn = document.getElementById("zoom-out")
         if (zoomInBtn) {
