@@ -116,6 +116,11 @@
 
 /** Responsive: stack categories and subcategories vertically on small screens */
 @media (max-width: 1024px) {
+    /* Allow page scrolling over the map area on mobile */
+    main:has(#map) {
+        overflow: visible !important;
+    }
+
     #map {
         touch-action: auto;
     }
