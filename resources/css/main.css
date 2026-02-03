@@ -41,13 +41,6 @@
 }
 
 /** Map */
-#map {
-    touch-action: none;
-}
-
-#map-wrapper main {
-    overscroll-behavior: contain;
-}
 
 .app-state {
     @apply absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-300;
@@ -119,4 +112,30 @@
 
 #entry-loader.loading-entry {
     opacity: 1;
+}
+
+/** Responsive: stack categories and subcategories vertically on small screens */
+@media (max-width: 1024px) {
+    #map {
+        touch-action: auto;
+    }
+
+    .top-row {
+        flex-direction: column !important;
+    }
+
+    .top-row > .high-level-box {
+        flex: none !important;
+        width: 100% !important;
+    }
+
+    .box-content {
+        flex-direction: column !important;
+    }
+
+    .box-content > .subcategory-box {
+        flex: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
 }

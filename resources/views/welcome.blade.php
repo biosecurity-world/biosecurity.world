@@ -379,6 +379,33 @@
 
                 <div id="above-map"></div>
 
+                <div id="zoom-controls" class="absolute top-3 right-3 z-10 flex flex-col gap-1">
+                    <button
+                        id="zoom-in"
+                        class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50"
+                        title="Zoom in"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                            <path
+                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
+                            />
+                        </svg>
+                    </button>
+                    <button
+                        id="zoom-out"
+                        class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50"
+                        title="Zoom out"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                            <path
+                                fill-rule="evenodd"
+                                d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
                 <svg id="map" width="100%" height="100%">
                     <!-- The map will be dynamically inserted here -->
                 </svg>
