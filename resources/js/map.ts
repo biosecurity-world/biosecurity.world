@@ -382,10 +382,14 @@ filtersStore.onChange(
         function togglePanzoom(enabled: boolean) {
             if (enabled) {
                 parent.addEventListener("pointerdown", panzoom.handleDown)
+                panzoom.setOptions({disablePan: false, disableZoom: false})
+                zoomWrapperEl.style.touchAction = "none"
             } else {
                 parent.removeEventListener("pointerdown", panzoom.handleDown)
+                panzoom.setOptions({disablePan: true, disableZoom: true})
                 panzoom.zoom(1, {animate: false})
                 panzoom.pan(0, 0, {animate: false})
+                zoomWrapperEl.style.touchAction = ""
             }
         }
 
