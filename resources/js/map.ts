@@ -329,13 +329,19 @@ filtersStore.onChange(
             return 0.3
         }
 
+        // Check if desktop before initializing panzoom
+        const desktopQuery = window.matchMedia("(min-width: 1025px)")
+
         // Initialize Panzoom on the zoom wrapper
+        // On mobile, use noBind to prevent internal handlers that call preventDefault()
         const panzoom = Panzoom(zoomWrapperEl, {
             maxScale: 2,
             minScale: 0.3, // Will be updated dynamically
             startScale: 1,
             startX: 0,
             startY: 0,
+            noBind: !desktopQuery.matches,
+            touchAction: desktopQuery.matches ? "none" : "auto",
         })
 
         // Expose panzoom for debugging
@@ -374,25 +380,28 @@ filtersStore.onChange(
 
         // Bind panzoom event handlers only on desktop (mobile gets plain scrolling)
         const parent = $map.node()!
-        const desktopQuery = window.matchMedia("(min-width: 1025px)")
 
         function togglePanzoom(enabled: boolean) {
             if (enabled) {
+                panzoom.bind()
                 parent.addEventListener("pointerdown", panzoom.handleDown)
-                panzoom.setOptions({disablePan: false, disableZoom: false})
-                zoomWrapperEl.style.touchAction = "none"
+                panzoom.setOptions({disablePan: false, disableZoom: false, touchAction: "none"})
                 zoomWrapperEl.style.pointerEvents = "all"
             } else {
+                panzoom.destroy()
                 parent.removeEventListener("pointerdown", panzoom.handleDown)
-                panzoom.setOptions({disablePan: true, disableZoom: true})
+                // setOptions({touchAction}) clears touch-action on both elem AND parent
+                panzoom.setOptions({disablePan: true, disableZoom: true, touchAction: "auto"})
                 panzoom.zoom(1, {animate: false})
                 panzoom.pan(0, 0, {animate: false})
-                zoomWrapperEl.style.touchAction = ""
                 zoomWrapperEl.style.pointerEvents = "none"
             }
         }
 
-        togglePanzoom(desktopQuery.matches)
+        if (desktopQuery.matches) {
+            // On desktop, bind the parent SVG handler (internal handlers already bound at init)
+            parent.addEventListener("pointerdown", panzoom.handleDown)
+        }
         desktopQuery.addEventListener("change", (e) => togglePanzoom(e.matches))
 
         // Zoom buttons (desktop only, hidden on mobile via CSS)
