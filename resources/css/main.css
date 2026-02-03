@@ -124,6 +124,14 @@
         display: none;
     }
 
+    #zoom-wrapper {
+        pointer-events: none !important;
+    }
+
+    #nested-layout-fo {
+        pointer-events: auto !important;
+    }
+
     .top-row {
         flex-direction: column !important;
     }
