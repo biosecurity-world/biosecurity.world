@@ -10,8 +10,25 @@ let $map = select<SVGElement, any>("#map")
 /* Open and close a specific entry  */
 let elEntryLoader = document.getElementById("entry-loader")!
 let elEntryWrapper = document.getElementById("entry-wrapper")!
+
+/* Position the entry panel as a fixed overlay aligned with the map */
+function updateEntryPanelPosition() {
+    const mainEl = document.querySelector("#map-wrapper > main") as HTMLElement
+    if (!mainEl) return
+    const mainRect = mainEl.getBoundingClientRect()
+    const top = Math.max(0, mainRect.top) + "px"
+    const left = mainRect.left + "px"
+
+    elEntryWrapper.style.top = top
+    elEntryWrapper.style.left = left
+    elEntryLoader.style.top = top
+    elEntryLoader.style.left = left
+}
+window.addEventListener("scroll", updateEntryPanelPosition, {passive: true})
+
 async function openEntry(entry: HTMLElement): Promise<void> {
     elEntryLoader.classList.add("loading-entry")
+    updateEntryPanelPosition()
 
     let entrygroup = parseInt(entry.dataset.entrygroup!, 10)
     let entryId = parseInt(entry.dataset.entry!, 10)
@@ -27,6 +44,7 @@ async function openEntry(entry: HTMLElement): Promise<void> {
 
         let content = await entryResponse.text()
         elEntryWrapper.innerHTML = content
+        updateEntryPanelPosition()
 
         let closeButton = elEntryWrapper.querySelector("button.close-entry")
         if (!closeButton) {
@@ -47,6 +65,8 @@ async function openEntry(entry: HTMLElement): Promise<void> {
 }
 function closeEntry(): void {
     elEntryWrapper.innerHTML = ""
+    elEntryWrapper.style.top = ""
+    elEntryWrapper.style.left = ""
     setLastFocusedEntry(null)
 }
 
@@ -423,6 +443,7 @@ filtersStore.onChange(
         // Handle window resize - re-render layout to fit new dimensions
         let resizeTimer: number
         window.addEventListener("resize", () => {
+            updateEntryPanelPosition()
             clearTimeout(resizeTimer)
             resizeTimer = window.setTimeout(() => {
                 filtersStore.syncFilter("activities")

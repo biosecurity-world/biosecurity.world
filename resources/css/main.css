@@ -60,6 +60,9 @@
 
 #entry-wrapper:has(> .entry) {
     display: block;
+    position: fixed;
+    bottom: 0;
+    overflow-y: auto;
 }
 
 /** Filters: Domain */
@@ -110,7 +113,14 @@
     display: none;
 }
 
+#entry-loader {
+    display: none;
+}
+
 #entry-loader.loading-entry {
+    display: flex;
+    position: fixed;
+    bottom: 0;
     opacity: 1;
 }
 
