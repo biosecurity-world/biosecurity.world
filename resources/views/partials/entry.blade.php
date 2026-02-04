@@ -98,6 +98,7 @@
                 <li class="flex justify-center space-x-1.5">
                     @foreach ($entry->activities as $activity)
                         <span
+                            data-activity-label="{{ $activity->label }}"
                             style="background-color: {{ $activity->color->foreground() }}"
                             class="inline-block rounded-full px-2.5 py-1.5"
                         >

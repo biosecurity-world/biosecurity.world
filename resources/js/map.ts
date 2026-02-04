@@ -11,6 +11,41 @@ let $map = select<SVGElement, any>("#map")
 let elEntryLoader = document.getElementById("entry-loader")!
 let elEntryWrapper = document.getElementById("entry-wrapper")!
 
+/* Activity icon tooltip (appended to body to avoid overflow clipping) */
+let tooltip: HTMLDivElement | null = null
+function getTooltip(): HTMLDivElement {
+    if (!tooltip) {
+        tooltip = document.createElement("div")
+        tooltip.style.cssText =
+            "position:fixed;padding:2px 8px;border-radius:6px;background:#1f2937;color:white;font-size:0.75rem;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:50"
+        document.body.appendChild(tooltip)
+    }
+    return tooltip
+}
+function setupActivityTooltips() {
+    const pills = elEntryWrapper.querySelectorAll<HTMLElement>("[data-activity-label]")
+    pills.forEach((pill) => {
+        pill.addEventListener("mouseenter", () => {
+            const tip = getTooltip()
+            tip.textContent = pill.dataset.activityLabel!
+            tip.style.opacity = "0"
+            tip.style.transform = "translateY(-100%)"
+            tip.style.left = "0"
+            // Measure tooltip width, then position centered but clamped to viewport
+            const rect = pill.getBoundingClientRect()
+            const tipWidth = tip.offsetWidth
+            const centered = rect.left + rect.width / 2 - tipWidth / 2
+            tip.style.left = Math.max(4, centered) + "px"
+            tip.style.top = rect.top - 4 + "px"
+            tip.style.opacity = "1"
+        })
+        pill.addEventListener("mouseleave", () => {
+            const tip = getTooltip()
+            tip.style.opacity = "0"
+        })
+    })
+}
+
 /* Position the entry panel as a fixed overlay aligned with the map */
 function updateEntryPanelPosition() {
     const mainEl = document.querySelector("#map-wrapper > main") as HTMLElement
@@ -45,6 +80,7 @@ async function openEntry(entry: HTMLElement): Promise<void> {
         let content = await entryResponse.text()
         elEntryWrapper.innerHTML = content
         updateEntryPanelPosition()
+        setupActivityTooltips()
 
         let closeButton = elEntryWrapper.querySelector("button.close-entry")
         if (!closeButton) {
