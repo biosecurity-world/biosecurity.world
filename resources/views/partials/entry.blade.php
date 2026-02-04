@@ -66,7 +66,7 @@
 
                     <span class="text-primary-700 ml-1 text-xs">
                         This {{ $entry->nounForOrganizationType() }} focuses on
-                        <abbr title="Global Catastrophic Biological Risks">GCBRs</abbr>
+                        <abbr data-tooltip-text="Global Catastrophic Biological Risks">GCBRs</abbr>
                         .
                     </span>
                 </p>

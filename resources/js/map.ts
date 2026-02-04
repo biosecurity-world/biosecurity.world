@@ -11,7 +11,7 @@ let $map = select<SVGElement, any>("#map")
 let elEntryLoader = document.getElementById("entry-loader")!
 let elEntryWrapper = document.getElementById("entry-wrapper")!
 
-/* Activity icon tooltip (appended to body to avoid overflow clipping) */
+/* Tooltip (appended to body to avoid overflow clipping from scrollable entry panel) */
 let tooltip: HTMLDivElement | null = null
 function getTooltip(): HTMLDivElement {
     if (!tooltip) {
@@ -22,27 +22,30 @@ function getTooltip(): HTMLDivElement {
     }
     return tooltip
 }
-function setupActivityTooltips() {
-    const pills = elEntryWrapper.querySelectorAll<HTMLElement>("[data-activity-label]")
-    pills.forEach((pill) => {
-        pill.addEventListener("mouseenter", () => {
-            const tip = getTooltip()
-            tip.textContent = pill.dataset.activityLabel!
-            tip.style.opacity = "0"
-            tip.style.transform = "translateY(-100%)"
-            tip.style.left = "0"
-            // Measure tooltip width, then position centered but clamped to viewport
-            const rect = pill.getBoundingClientRect()
-            const tipWidth = tip.offsetWidth
-            const centered = rect.left + rect.width / 2 - tipWidth / 2
-            tip.style.left = Math.max(4, centered) + "px"
-            tip.style.top = rect.top - 4 + "px"
-            tip.style.opacity = "1"
-        })
-        pill.addEventListener("mouseleave", () => {
-            const tip = getTooltip()
-            tip.style.opacity = "0"
-        })
+function attachTooltip(el: HTMLElement, text: string) {
+    el.addEventListener("mouseenter", () => {
+        const tip = getTooltip()
+        tip.textContent = text
+        tip.style.opacity = "0"
+        tip.style.transform = "translateY(-100%)"
+        tip.style.left = "0"
+        const rect = el.getBoundingClientRect()
+        const tipWidth = tip.offsetWidth
+        const centered = rect.left + rect.width / 2 - tipWidth / 2
+        tip.style.left = Math.max(4, centered) + "px"
+        tip.style.top = rect.top - 4 + "px"
+        tip.style.opacity = "1"
+    })
+    el.addEventListener("mouseleave", () => {
+        getTooltip().style.opacity = "0"
+    })
+}
+function setupEntryTooltips() {
+    elEntryWrapper.querySelectorAll<HTMLElement>("[data-activity-label]").forEach((el) => {
+        attachTooltip(el, el.dataset.activityLabel!)
+    })
+    elEntryWrapper.querySelectorAll<HTMLElement>("[data-tooltip-text]").forEach((el) => {
+        attachTooltip(el, el.dataset.tooltipText!)
     })
 }
 
@@ -80,7 +83,7 @@ async function openEntry(entry: HTMLElement): Promise<void> {
         let content = await entryResponse.text()
         elEntryWrapper.innerHTML = content
         updateEntryPanelPosition()
-        setupActivityTooltips()
+        setupEntryTooltips()
 
         let closeButton = elEntryWrapper.querySelector("button.close-entry")
         if (!closeButton) {
