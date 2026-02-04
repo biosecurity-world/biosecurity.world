@@ -66,7 +66,9 @@
 
                     <span class="text-primary-700 ml-1 text-xs">
                         This {{ $entry->nounForOrganizationType() }} focuses on
-                        <abbr data-tooltip-text="Global Catastrophic Biological Risks">GCBRs</abbr>
+                        <abbr class="underline decoration-dotted" data-tooltip-text="Global Catastrophic Biological Risks">
+                            GCBRs
+                        </abbr>
                         .
                     </span>
                 </p>
@@ -131,7 +133,7 @@
                 <ul class="list-inside list-disc">
                     @foreach ($entry->interventionFocuses as $focus)
                         <li>
-                            <a href="" class="underline">
+                            <a href="" class="underline" data-focus-offset="{{ $focus->globalSortOrder() }}">
                                 <span>{{ $focus->label }}</span>
                             </a>
                         </li>

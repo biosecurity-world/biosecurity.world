@@ -47,6 +47,15 @@ function setupEntryTooltips() {
     elEntryWrapper.querySelectorAll<HTMLElement>("[data-tooltip-text]").forEach((el) => {
         attachTooltip(el, el.dataset.tooltipText!)
     })
+    elEntryWrapper.querySelectorAll<HTMLElement>("[data-focus-offset]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault()
+            const offset = parseInt(el.dataset.focusOffset!, 10)
+            filtersStore.setState("showNoFocus", false)
+            filtersStore.setState("focuses", 1 << offset)
+            closeEntry()
+        })
+    })
 }
 
 /* Position the entry panel as a fixed overlay aligned with the map */
