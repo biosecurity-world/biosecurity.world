@@ -1,4 +1,4 @@
-<div class="entry flex h-full flex-col justify-between rounded-r-3xl border-t-0 border-r border-gray-200 bg-white">
+<div class="entry flex min-h-full flex-col justify-between rounded-r-3xl border-t-0 border-r border-gray-200 bg-white">
     <div>
         <div
             class="flex items-center justify-between rounded-tr-3xl border-r border-b border-gray-200 bg-gray-50 py-4 pr-6 pl-4"

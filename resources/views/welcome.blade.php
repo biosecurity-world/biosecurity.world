@@ -350,12 +350,9 @@
                 </div>
             </section>
             <section data-state="success" class="app-state state-inactive" aria-hidden="true">
+                <div class="left-0 z-20 w-full max-w-md border-r border-gray-200 bg-white" id="entry-wrapper"></div>
                 <div
-                    class="absolute inset-y-0 left-0 z-20 h-full w-full max-w-md border-r border-gray-200 bg-white"
-                    id="entry-wrapper"
-                ></div>
-                <div
-                    class="pointer-events-none absolute inset-y-0 left-0 z-20 flex h-full w-full max-w-md justify-center border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity"
+                    class="pointer-events-none left-0 z-20 flex w-full max-w-md justify-center border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity"
                     id="entry-loader"
                 >
                     <svg
