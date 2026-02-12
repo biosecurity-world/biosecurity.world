@@ -188,7 +188,10 @@
                 />
             </svg>
         </a>
-        <a class="inline-flex text-sm text-gray-700 underline" href="{{ route("give-feedback") }}">
+        <a
+            class="inline-flex text-sm text-gray-700 underline"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
+        >
             <span class="mr-0.5">Report a problem</span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"

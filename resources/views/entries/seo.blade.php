@@ -156,7 +156,7 @@
 
                 <a
                     class="inline-flex items-center text-sm text-gray-700 underline"
-                    href="{{ route("give-feedback") }}"
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
                     target="_blank"
                     rel="noopener noreferrer"
                 >

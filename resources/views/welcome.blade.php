@@ -540,7 +540,7 @@
                             <p>
                                 This map provides a comprehensive overview of organizations working in the biosecurity
                                 field according to a specific set of criteria (see
-                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="{{ route("inclusion-criteria") }}" rel="noopener noreferrer">Inclusion criteria</a>),
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/document/d/12JhGqx5PaA_jD0UKPDfWX4dfDp1gBoxdVM5tDTykPCA/edit?tab=t.0" rel="noopener noreferrer">Inclusion criteria</a>),
                                 allowing users to explore and understand the global biosecurity ecosystem.
                             </p>
                         </x-faq-item>
@@ -577,7 +577,7 @@
                                 We strive to keep the database as current as possible. Updates are made on a regular
                                 basis as we receive new information or as organizations change. If you notice something
                                 is outdated, please reach out via our
-                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="{{ route("give-feedback") }}" rel="noopener noreferrer">contact form</a>.
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" rel="noopener noreferrer">contact form</a>.
                             </p>
                         </x-faq-item>
 
@@ -585,7 +585,7 @@
                             <!-- prettier-ignore -->
                             <p>
                                 You can contribute by using the
-                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="{{ route("give-feedback") }}" rel="noopener noreferrer">contact form</a>
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" rel="noopener noreferrer">contact form</a>
                                 at the top of the page. We welcome feedback, suggestions, and information about
                                 organizations that should be included (or excluded).
                             </p>
@@ -595,7 +595,7 @@
                             <!-- prettier-ignore -->
                             <p>
                                 We have a specific
-                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="{{ route("inclusion-criteria") }}" rel="noopener noreferrer">set of criteria</a>
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/document/d/12JhGqx5PaA_jD0UKPDfWX4dfDp1gBoxdVM5tDTykPCA/edit?tab=t.0" rel="noopener noreferrer">set of criteria</a>
                                 that determine whether an organization is included in our database.
                             </p>
                         </x-faq-item>

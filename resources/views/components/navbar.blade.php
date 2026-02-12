@@ -29,7 +29,7 @@
             </li>
             <li class="inline">
                 <a
-                    href="{{ route("inclusion-criteria") }}"
+                    href="https://docs.google.com/document/d/12JhGqx5PaA_jD0UKPDfWX4dfDp1gBoxdVM5tDTykPCA/edit?tab=t.0"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
@@ -39,7 +39,7 @@
             </li>
             <li class="inline">
                 <a
-                    href="{{ route("give-feedback") }}"
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
