@@ -9,6 +9,7 @@ use App\Services\NotionData\Models\Category;
 use App\Services\NotionData\Models\Entry;
 use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\Models\InterventionFocus;
+use App\Services\NotionData\Models\LocationHint;
 use App\Support\IdMap;
 use Exception;
 use Illuminate\Support\Arr;
@@ -55,6 +56,15 @@ class Tree
     {
         return $this->entries()
             ->flatMap(fn (Entry $e) => $e->interventionFocuses)
+            ->unique('id')
+            ->values();
+    }
+
+    /** @return Collection<int, LocationHint> */
+    public function locationHints(): Collection
+    {
+        return $this->entries()
+            ->flatMap(fn (Entry $e) => $e->locationHints)
             ->unique('id')
             ->values();
     }

@@ -1,5 +1,6 @@
 @php
     use App\Services\NotionData\Enums\FocusCategory;
+    use App\Services\NotionData\Enums\LocationRegion;
     /** @var \App\Services\NotionData\Tree\Tree $tree */
 @endphp
 
@@ -214,7 +215,87 @@
                         </fieldset>
                     </div>
 
-                    <!-- Row 2: Intervention focuses -->
+                    <!-- Row 2: Location hints -->
+                    @if ($categorizedLocations->isNotEmpty())
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                            <div class="mb-3 flex items-center gap-3">
+                                <h4 class="text-sm font-semibold text-gray-700">Locations</h4>
+                                @foreach ($topLevelLocations as $location)
+                                    <x-checkbox-as-pill
+                                        name="location_{{ $location->id }}"
+                                        value="{{ $location->id }}"
+                                        kind="location-checkbox"
+                                        data-global-offset="{{ $location->globalSortOrder() }}"
+                                        data-top-level="true"
+                                        class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
+                                    >
+                                        <span class="leading-none select-none">
+                                            {{ $location->label }}
+                                        </span>
+                                    </x-checkbox-as-pill>
+                                @endforeach
+                            </div>
+                            <div class="columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3">
+                                @foreach ($categorizedLocations as $regionValue => $locations)
+                                    @php($region = LocationRegion::from($regionValue))
+                                    @php($headerLocation = $locations->first(fn ($l) => $l->isRegionHeader()))
+                                    @php($children = $locations->filter(fn ($l) => ! $l->isRegionHeader()))
+                                    <div
+                                        class="break-inside-avoid"
+                                        id="locations_wrapper_{{ Str::slug($region->value) }}"
+                                    >
+                                        <div class="mb-2 flex w-full items-center gap-2">
+                                            <x-checkbox
+                                                name="locations_master_checkbox_{{ Str::slug($region->value) }}"
+                                                checked
+                                                class="locations-master-checkbox"
+                                            />
+                                            <label
+                                                title="Toggle all in {{ $region->label() }}"
+                                                class="cursor-pointer text-sm font-semibold text-gray-800"
+                                                for="locations_master_checkbox_{{ Str::slug($region->value) }}"
+                                            >
+                                                {{ $region->label() }}
+                                            </label>
+                                            @if ($headerLocation)
+                                                <input
+                                                    type="checkbox"
+                                                    checked
+                                                    name="location_{{ $headerLocation->id }}"
+                                                    id="location_{{ $headerLocation->id }}"
+                                                    value="{{ $headerLocation->id }}"
+                                                    class="location-checkbox sr-only"
+                                                    data-global-offset="{{ $headerLocation->globalSortOrder() }}"
+                                                    data-is-region-header="true"
+                                                />
+                                            @endif
+                                        </div>
+                                        @if ($children->isNotEmpty())
+                                            <ul class="flex cursor-pointer flex-wrap gap-1.5">
+                                                @foreach ($children as $location)
+                                                    <li>
+                                                        <x-checkbox-as-pill
+                                                            name="location_{{ $location->id }}"
+                                                            value="{{ $location->id }}"
+                                                            kind="location-checkbox"
+                                                            data-global-offset="{{ $location->globalSortOrder() }}"
+                                                            class="{{ $location->isCountry() ? 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-600 rounded-md! uppercase' : 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-600' }}"
+                                                        >
+                                                            <span class="leading-none select-none">
+                                                                {{ $location->label }}
+                                                            </span>
+                                                        </x-checkbox-as-pill>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Row 3: Intervention focuses -->
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="mb-3 flex items-center justify-between">
                             <div class="flex items-center gap-3">

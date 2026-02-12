@@ -71,6 +71,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
                         focuses: filterData[1],
                         domains: filterData[2],
                         gcbrFocus: filterData[3],
+                        locations: BigInt(filterData[4]),
                     },
                     metadata,
                 )

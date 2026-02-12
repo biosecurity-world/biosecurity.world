@@ -2,6 +2,7 @@ export type Filters = {
     activities: number
     domains: number
     focuses: number
+    locations: bigint
     gcbrFocus: boolean
     showNoFocus: boolean
 }
@@ -32,6 +33,10 @@ export function shouldFilterEntry(state: Filters, entry: Filters, meta: FilterMe
         return true
     }
 
+    if (state.locations !== 0n && entry.locations !== 0n && (state.locations & entry.locations) === 0n) {
+        return true
+    }
+
     // Entries without any focuses (e.g. newsletters) are controlled by showNoFocus toggle
     if (entry.focuses === 0) {
         return !state.showNoFocus
@@ -47,7 +52,7 @@ export default class FiltersState<
     // If you add a new type for a filter's value, you need to update
     // the getQueryParam and setQueryParam methods which handle
     // the serialization and deserialization of the filters.
-    S extends Record<string, number | boolean | string>,
+    S extends Record<string, number | boolean | string | bigint>,
 > {
     private getters: {[K in keyof S]: () => S[K]}
     private setters: {[K in keyof S]: (v: S[K]) => void}
@@ -159,6 +164,12 @@ export default class FiltersState<
             return parseInt(value, 10) as any
         } else if (type === "boolean") {
             return (value === "true") as any
+        } else if (type === "bigint") {
+            try {
+                return BigInt(value) as any
+            } catch {
+                return null
+            }
         } else {
             throw new Error(`Could not deserialize key [${key.toString()}]`)
         }
