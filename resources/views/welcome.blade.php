@@ -221,18 +221,20 @@
                             <div class="mb-3 flex items-center gap-3">
                                 <h4 class="text-sm font-semibold text-gray-700">Locations</h4>
                                 @foreach ($topLevelLocations as $location)
-                                    <x-checkbox-as-pill
-                                        name="location_{{ $location->id }}"
-                                        value="{{ $location->id }}"
-                                        kind="location-checkbox"
-                                        data-global-offset="{{ $location->globalSortOrder() }}"
-                                        data-top-level="true"
-                                        class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
-                                    >
-                                        <span class="leading-none select-none">
-                                            {{ $location->label }}
-                                        </span>
-                                    </x-checkbox-as-pill>
+                                    <div>
+                                        <x-checkbox-as-pill
+                                            name="location_{{ $location->id }}"
+                                            value="{{ $location->id }}"
+                                            kind="location-checkbox"
+                                            data-global-offset="{{ $location->globalSortOrder() }}"
+                                            data-top-level="true"
+                                            class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
+                                        >
+                                            <span class="leading-none select-none">
+                                                {{ $location->label }}
+                                            </span>
+                                        </x-checkbox-as-pill>
+                                    </div>
                                 @endforeach
                             </div>
                             <div class="columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3">
