@@ -386,22 +386,17 @@ for (const [wrapper, locs] of groupedLocations) {
     })
 }
 
-// Region locations = all except top-level (Global, Remote) and hidden region-headers
-let regionLocationInputs = Array.from(locationInputs).filter(
-    (l) => l.dataset.topLevel !== "true" && l.dataset.isRegionHeader !== "true",
-)
+// All visible location inputs (excludes hidden region-headers)
+let visibleLocationInputs = Array.from(locationInputs).filter((l) => l.dataset.isRegionHeader !== "true")
 
-function allRegionLocationsChecked(): boolean {
-    return regionLocationInputs.every((l) => l.checked)
+function allVisibleLocationsChecked(): boolean {
+    return visibleLocationInputs.every((l) => l.checked)
 }
-function setAllRegionLocations(checked: boolean) {
-    // Set all non-top-level locations (including region-headers, to keep them in sync)
-    locationInputs.forEach((l) => {
-        if (l.dataset.topLevel !== "true") l.checked = checked
-    })
+function setAllLocationsChecked(checked: boolean) {
+    locationInputs.forEach((l) => (l.checked = checked))
 }
 
-// Location pill click behavior:
+// Location pill click behavior (same for top-level and region pills):
 // - All checked → exclusive (keep only this one)
 // - Only this one checked → re-enable all
 // - Otherwise → toggle this one (additive)
@@ -412,28 +407,18 @@ for (const loc of locationInputs) {
     const locLabel = document.querySelector(`label[for="${loc.id}"]`) as HTMLLabelElement
     if (!locLabel) continue
 
-    // Top-level pills (Global, Remote) use simple toggle
-    if (loc.dataset.topLevel === "true") {
-        locLabel.addEventListener("click", (e) => {
-            e.preventDefault()
-            loc.checked = !loc.checked
-            filtersStore.syncFilter("locations")
-        })
-        continue
-    }
-
     locLabel.addEventListener("click", (e) => {
         e.preventDefault()
 
-        if (allRegionLocationsChecked()) {
+        if (allVisibleLocationsChecked()) {
             // All checked → exclusive: keep only this one
-            setAllRegionLocations(false)
+            setAllLocationsChecked(false)
             loc.checked = true
         } else {
-            const currentlyChecked = regionLocationInputs.filter((l) => l.checked)
+            const currentlyChecked = visibleLocationInputs.filter((l) => l.checked)
             if (currentlyChecked.length === 1 && currentlyChecked[0] === loc) {
                 // Only this one → re-enable all
-                setAllRegionLocations(true)
+                setAllLocationsChecked(true)
             } else {
                 // Some checked → toggle this one
                 loc.checked = !loc.checked
@@ -454,18 +439,16 @@ for (const [wrapper, locs] of groupedLocations) {
         e.stopPropagation()
 
         // Check if only this region is active
-        const otherLocs = Array.from(locationInputs).filter(
-            (l) => !locs.includes(l) && l.dataset.topLevel !== "true" && l.dataset.isRegionHeader !== "true",
-        )
+        const otherLocs = visibleLocationInputs.filter((l) => !locs.includes(l))
         const thisAllChecked = allLocationsChecked(locs)
         const othersAllUnchecked = otherLocs.every((l) => !l.checked)
 
         if (thisAllChecked && othersAllUnchecked) {
             // Already exclusive → re-enable all
-            setAllRegionLocations(true)
+            setAllLocationsChecked(true)
         } else {
             // Keep only this region
-            setAllRegionLocations(false)
+            setAllLocationsChecked(false)
             setAllLocations(locs, true)
         }
 
