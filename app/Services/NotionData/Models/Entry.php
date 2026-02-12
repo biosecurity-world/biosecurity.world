@@ -89,6 +89,34 @@ class Entry
         }, 0);
     }
 
+    /**
+     * Returns the location hints bitmask as a string since the number of
+     * locations (80+) exceeds the 64-bit PHP integer limit.
+     */
+    public function getLocationHintsBitmask(): string
+    {
+        if (! function_exists('gmp_init')) {
+            // Fallback: return comma-separated offsets
+            $offsets = [];
+            foreach (LocationHint::all() as $offset => $id) {
+                if ($this->locationHints->contains('id', $id)) {
+                    $offsets[] = $offset;
+                }
+            }
+
+            return implode(',', $offsets);
+        }
+
+        $mask = gmp_init(0);
+        foreach (LocationHint::all() as $offset => $id) {
+            if ($this->locationHints->contains('id', $id)) {
+                $mask = gmp_or($mask, gmp_pow(2, $offset));
+            }
+        }
+
+        return gmp_strval($mask);
+    }
+
     public function getDomainBitmask(): int
     {
         return $this->domains->reduce(function ($mask, DomainEnum $domain, $offset) {

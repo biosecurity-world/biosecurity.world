@@ -2,9 +2,95 @@
 
 namespace App\Services\NotionData\Models;
 
+use App\Services\NotionData\Enums\LocationRegion;
 use App\Services\NotionData\Models\Concerns\BelongsToMultiselect;
 
 class LocationHint
 {
     use BelongsToMultiselect;
+
+    public function region(): ?LocationRegion
+    {
+        if ($this->isTopLevel()) {
+            return null;
+        }
+
+        // Check if this location IS a region header
+        foreach (LocationRegion::cases() as $region) {
+            if ($region->headerLocationLabel() === $this->label) {
+                return $region;
+            }
+        }
+
+        // Otherwise find which region this location belongs to
+        return LocationRegion::fromLocationLabel($this->label);
+    }
+
+    public function isTopLevel(): bool
+    {
+        return in_array($this->label, LocationRegion::TOP_LEVEL_LABELS, true);
+    }
+
+    public function isRegionHeader(): bool
+    {
+        foreach (LocationRegion::cases() as $region) {
+            if ($region->headerLocationLabel() === $this->label) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private const array COUNTRIES = [
+        'Australia', 'Austria', 'Belgium', 'Canada', 'Colombia',
+        'France', 'Germany', 'India', 'Israel', 'Italy',
+        'Mexico', 'Netherlands', 'Norway', 'Singapore', 'Spain',
+        'Sweden', 'Switzerland',
+    ];
+
+    /** Maps city labels to their parent country label. */
+    private const array CITY_TO_COUNTRY = [
+        // Europe
+        'Vienna' => 'Austria',
+        'Brussels' => 'Belgium',
+        'Paris' => 'France',
+        'Grenoble' => 'France',
+        'Berlin' => 'Germany',
+        'Frankfurt' => 'Germany',
+        'Hamburg' => 'Germany',
+        'Heidelgerg' => 'Germany',
+        'Munich' => 'Germany',
+        'Rome' => 'Italy',
+        'Trieste' => 'Italy',
+        'Amsterdam' => 'Netherlands',
+        'Rotterdam' => 'Netherlands',
+        'Oslo' => 'Norway',
+        'Barcelona' => 'Spain',
+        'Madrid' => 'Spain',
+        'Stockholm' => 'Sweden',
+        'Basel' => 'Switzerland',
+        'Bern' => 'Switzerland',
+        'Geneva' => 'Switzerland',
+        'Zug' => 'Switzerland',
+        // East Asia & Pacific
+        'Canberra' => 'Australia',
+        // South Asia
+        'Hyderabad' => 'India',
+    ];
+
+    public function isCountry(): bool
+    {
+        return in_array($this->label, self::COUNTRIES, true);
+    }
+
+    public function parentCountryLabel(): ?string
+    {
+        return self::CITY_TO_COUNTRY[$this->label] ?? null;
+    }
+
+    public function globalSortOrder(): int
+    {
+        return self::all()->search(fn (int $id) => $id === $this->id);
+    }
 }
