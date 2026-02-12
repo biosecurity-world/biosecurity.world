@@ -221,11 +221,30 @@ for (const el of domainInputs) {
 }
 gcbrFocus.addEventListener("change", () => filtersStore.syncFilter("gcbrFocus"))
 
-// The no-focus checkbox label uses exclusive click like other pills
+const allFocusesMask = Array.from(focusInputs).reduce((mask, el) => {
+    const offset = parseInt(el.dataset.globalOffset!, 10)
+    return mask | (1 << offset)
+}, 0)
+
+// "No specific focus" uses the same exclusive-click pattern as focus pills
 const noFocusLabel = document.querySelector(`label[for="${noFocusCheckbox.id}"]`) as HTMLLabelElement
 noFocusLabel.addEventListener("click", (e) => {
     e.preventDefault()
-    filtersStore.setState("showNoFocus", !filtersStore.getState("showNoFocus"))
+    const currentFocuses = filtersStore.getState("focuses")
+    const showNoFocus = filtersStore.getState("showNoFocus")
+
+    if (currentFocuses === allFocusesMask && showNoFocus) {
+        // All checked → exclusive: keep only "No specific focus"
+        filtersStore.setState("focuses", 0)
+        filtersStore.setState("showNoFocus", true)
+    } else if (currentFocuses === 0 && showNoFocus) {
+        // Only this one → re-enable all
+        filtersStore.setState("focuses", allFocusesMask)
+        filtersStore.setState("showNoFocus", true)
+    } else {
+        // Some checked → toggle this one
+        filtersStore.setState("showNoFocus", !showNoFocus)
+    }
 })
 
 let groupedFocuses: Map<HTMLElement, NodeListOf<HTMLInputElement>> = new Map()
@@ -274,10 +293,6 @@ function getGroupOffsets(focuses: NodeListOf<HTMLInputElement>): number[] {
 // - All checked → exclusive (keep only this one)
 // - Only this one checked → re-enable all
 // - Otherwise → toggle this one (additive)
-const allFocusesMask = Array.from(focusInputs).reduce((mask, el) => {
-    const offset = parseInt(el.dataset.globalOffset!, 10)
-    return mask | (1 << offset)
-}, 0)
 
 for (const focus of focusInputs) {
     const focusLabel = document.querySelector(`label[for="${focus.id}"]`) as HTMLLabelElement
