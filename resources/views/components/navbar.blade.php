@@ -29,7 +29,9 @@
             </li>
             <li class="inline">
                 <a
-                    href="{{ route("inclusion-criteria", absolute: false) }}"
+                    href="{{ route("inclusion-criteria") }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
                 >
                     Inclusion criteria
@@ -37,7 +39,9 @@
             </li>
             <li class="inline">
                 <a
-                    href="{{ route("give-feedback", absolute: false) }}"
+                    href="{{ route("give-feedback") }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
                 >
                     Give feedback

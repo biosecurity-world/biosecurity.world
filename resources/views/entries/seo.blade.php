@@ -156,7 +156,9 @@
 
                 <a
                     class="inline-flex items-center text-sm text-gray-700 underline"
-                    href="{{ route("give-feedback", absolute: false) }}"
+                    href="{{ route("give-feedback") }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     <span class="mr-0.5">Report a problem</span>
                     <svg
