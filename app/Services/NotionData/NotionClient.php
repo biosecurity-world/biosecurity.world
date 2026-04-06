@@ -42,7 +42,20 @@ class NotionClient
         $pages = cache()->rememberForever('pages', fn () => $this->client->databases()->queryAllPages($database));
 
         return (new Hydrator($database))->hydrate(
-            array_filter($pages, fn (Page $page) => ! $page->archived)
+            array_filter($pages, function (Page $page) {
+                if ($page->archived) {
+                    return false;
+                }
+
+                try {
+                    $status = $page->properties()->getStatus('Status');
+
+                    return $status->option->name !== 'Pending';
+                } catch (\Exception) {
+                    // Pages without a Status property are included (backwards compatibility)
+                    return true;
+                }
+            })
         );
     }
 

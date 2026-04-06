@@ -39,12 +39,22 @@
             </li>
             <li class="inline">
                 <a
+                    href="https://biosecurityworld.notion.site/33a4061a75b7806fad1dee0fcd2e921a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
+                >
+                    Suggest an organization
+                </a>
+            </li>
+            <li class="inline">
+                <a
                     href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="lg:hover:bg-primary-50 lg:focus:bg-primary-50 mr-4 rounded-xl underline focus:outline-hidden lg:mr-0 lg:px-2 lg:no-underline lg:hover:underline"
                 >
-                    Give feedback
+                    Contact form
                 </a>
             </li>
         </ul>
