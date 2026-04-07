@@ -42,7 +42,24 @@ class NotionClient
         $pages = cache()->rememberForever('pages', fn () => $this->client->databases()->queryAllPages($database));
 
         return (new Hydrator($database))->hydrate(
-            array_filter($pages, fn (Page $page) => ! $page->archived)
+            array_filter($pages, function (Page $page) {
+                if ($page->archived) {
+                    return false;
+                }
+
+                try {
+                    $isCategory = $page->properties()->getCheckboxById(Hydrator::SCHEMA['isCategory'])->checked;
+                    if ($isCategory) {
+                        return true;
+                    }
+
+                    $status = $page->properties()->getStatus('Status');
+
+                    return $status->option?->name !== 'Pending';
+                } catch (\Throwable) {
+                    return true;
+                }
+            })
         );
     }
 

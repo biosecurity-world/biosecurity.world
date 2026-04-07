@@ -578,7 +578,9 @@
                             <p>
                                 We strive to keep the database as current as possible. Updates are made on a regular
                                 basis as we receive new information or as organizations change. If you notice something
-                                is outdated, please reach out via our
+                                is outdated or missing, you can suggest an addition via our
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://biosecurityworld.notion.site/33a4061a75b7806fad1dee0fcd2e921a" rel="noopener noreferrer">suggestion form</a>,
+                                or reach out via our
                                 <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" rel="noopener noreferrer">contact form</a>.
                             </p>
                         </x-faq-item>
@@ -586,9 +588,11 @@
                         <x-faq-item title="How can I contribute to the map?">
                             <!-- prettier-ignore -->
                             <p>
-                                You can contribute by using the
-                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" rel="noopener noreferrer">contact form</a>
-                                at the top of the page. We welcome feedback, suggestions, and information about
+                                You can suggest an organization via the
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://biosecurityworld.notion.site/33a4061a75b7806fad1dee0fcd2e921a" rel="noopener noreferrer">suggestion form</a>,
+                                or reach out via our
+                                <a class="text-primary-700 hover:text-primary-900 underline" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" rel="noopener noreferrer">contact form</a>.
+                                We welcome feedback, suggestions, and information about
                                 organizations that should be included (or excluded).
                             </p>
                         </x-faq-item>
