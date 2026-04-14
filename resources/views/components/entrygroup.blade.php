@@ -26,7 +26,7 @@
                             // Extract short name from parenthesis anywhere in the name
                             // Matches acronyms and short names: (PRIF), (NTI.bio), (ARPA-H), (Esvelt Lab), etc.
                             // Limited to 20 chars to avoid matching long descriptions
-                            if (preg_match("/\(([A-Z][A-Za-z0-9.\- ]{1,18})\)/", $displayLabel, $matches)) {
+                            if (preg_match("/\(([A-Za-z][A-Za-z0-9.\- ]{1,18})\)/", $displayLabel, $matches)) {
                                 $displayLabel = trim($matches[1]);
                             }
                         @endphp

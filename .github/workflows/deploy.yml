@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v2
@@ -22,16 +22,17 @@ jobs:
       - uses: cachix/install-nix-action@v27
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.24"
+          cache: false
 
       - name: Set pnpm cache store
         run: nix develop --ignore-environment --command pnpm config set store-dir ~/.pnpm-store
 
       - name: Cache node modules
         id: cache-npm
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-node-modules
         with:
@@ -46,7 +47,7 @@ jobs:
 
       - name: Cache composer packages
         id: cache-composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-composer-packages
         with:
