@@ -265,14 +265,68 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
 
     // Hide all the original SVG foreignObjects (categories and entrygroups)
     hideOriginalElements()
+
+    // After layout is in the DOM, shrink each pill to the actual rendered
+    // width of its (possibly wrapped) label, so the background doesn't extend
+    // past the end of the longest line. Reading getClientRects() forces a
+    // synchronous layout, so this works without waiting for a frame (and
+    // without depending on the tab being visible).
+    shrinkPillsToWrappedText(wrapper)
 }
 
-// Count total entries in children recursively
-function countEntriesInChildren(children: PreparedNode[]): number {
+function shrinkPillsToWrappedText(root: HTMLElement) {
+    const labels = root.querySelectorAll<HTMLElement>(".nested-entry-label")
+    labels.forEach((label) => {
+        if (!label.firstChild) return
+        const range = document.createRange()
+        range.selectNodeContents(label)
+        const rects = range.getClientRects()
+        if (rects.length <= 1) return // not wrapped → nothing to shrink
+
+        let maxLineWidth = 0
+        for (const rect of Array.from(rects)) {
+            if (rect.width > maxLineWidth) maxLineWidth = rect.width
+        }
+        // +1px to avoid sub-pixel re-wrapping when we re-apply the constraint
+        label.style.width = `${Math.ceil(maxLineWidth) + 1}px`
+        label.style.flexShrink = "0"
+    })
+}
+
+// Sum displayed label lengths of all matching entries within a node.
+// Each entry also contributes a fixed base (BASE_PER_ENTRY) to account for
+// the logo + padding that every pill takes regardless of its label length.
+const BASE_PER_ENTRY = 6
+function countLabelChars(node: PreparedNode): number {
+    if (node.od === 0) {
+        const entryIds = node.entries || []
+        let total = 0
+        for (const entryId of entryIds) {
+            const entryLink = document.querySelector(
+                `a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`,
+            ) as HTMLElement
+            if (entryLink?.classList.contains("matches-filters")) {
+                const labelEl = entryLink.querySelector("span.max-w-40")
+                const text = labelEl?.textContent?.trim() || ""
+                total += text.length + BASE_PER_ENTRY
+            }
+        }
+        return total
+    }
+    let total = 0
+    for (const child of node.children || []) {
+        if (!child.filtered) {
+            total += countLabelChars(child)
+        }
+    }
+    return total
+}
+
+function countLabelCharsInChildren(children: PreparedNode[]): number {
     let total = 0
     for (const child of children) {
         if (child.filtered) continue
-        total += countEntries(child)
+        total += countLabelChars(child)
     }
     return total
 }
@@ -284,9 +338,10 @@ function createHighLevelBox(
     idToNode: Record<number, PreparedNode>,
     fullWidth = false,
 ): HTMLElement {
-    // Count entries to determine flex-grow (more content = more width = similar height)
-    const totalEntries = countEntriesInChildren(children)
-    const flexGrow = Math.max(1, totalEntries)
+    // Width allocation based on total displayed label characters (letters + spaces)
+    // of all organisations within the box, so wider boxes can fit longer names.
+    const totalChars = countLabelCharsInChildren(children)
+    const flexGrow = Math.max(1, totalChars)
 
     const box = document.createElement("div")
     box.className = "high-level-box"
@@ -389,32 +444,6 @@ function createHighLevelBox(
     return box
 }
 
-// Count total entries in a node (recursively)
-function countEntries(node: PreparedNode): number {
-    if (node.od === 0) {
-        // Entrygroup - count matching entries
-        const entryIds = node.entries || []
-        let count = 0
-        for (const entryId of entryIds) {
-            const entryLink = document.querySelector(
-                `a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`,
-            ) as HTMLElement
-            if (entryLink?.classList.contains("matches-filters")) {
-                count++
-            }
-        }
-        return count
-    }
-    // Category - sum children
-    let total = 0
-    for (const child of node.children || []) {
-        if (!child.filtered) {
-            total += countEntries(child)
-        }
-    }
-    return total
-}
-
 function createSubcategoryBox(
     node: PreparedNode,
     parentCategory: string,
@@ -423,9 +452,10 @@ function createSubcategoryBox(
     // Get colors from parent category
     const categoryColors = SUBCATEGORY_COLORS[parentCategory] || SUBCATEGORY_COLORS["Transversal"]
 
-    // Count entries to determine flex-grow (width proportional to org count)
-    const entryCount = countEntries(node)
-    const flexGrow = Math.max(1, entryCount) // More entries = proportionally wider
+    // Width proportional to the total displayed label characters of the
+    // organisations inside this subcategory.
+    const totalChars = countLabelChars(node)
+    const flexGrow = Math.max(1, totalChars)
 
     const box = document.createElement("div")
     box.className = "subcategory-box"
@@ -434,7 +464,7 @@ function createSubcategoryBox(
         border: 1px solid ${categoryColors.border};
         border-radius: 6px;
         padding: 8px;
-        min-width: 100px;
+        min-width: 130px;
         display: flex;
         flex-direction: column;
         flex: ${flexGrow} 1 0%;
@@ -454,7 +484,7 @@ function createSubcategoryBox(
     const header = document.createElement("div")
     header.className = "subbox-header"
     header.style.cssText = `
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 600;
         color: #374151;
         margin-bottom: 5px;
@@ -541,8 +571,9 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
         const labelSpan = entryLink.querySelector("span.text-sm")
         if (labelSpan && labelSpan.textContent?.trim()) {
             const labelClone = document.createElement("span")
+            labelClone.className = "nested-entry-label"
             labelClone.style.cssText =
-                "font-size: 10px; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"
+                "font-size: 12px; line-height: 1.2; color: #374151; white-space: normal; overflow-wrap: break-word; min-width: 0;"
             labelClone.textContent = labelSpan.textContent.trim()
             entryClone.appendChild(labelClone)
         }
