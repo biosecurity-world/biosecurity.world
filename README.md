@@ -4,6 +4,8 @@ An interactive, filterable map of organizations working on biosecurity — resea
 
 **Live site:** [biosecurity.world](https://biosecurity.world)
 
+[![Screenshot of the biosecurity.world map](docs/landscape.jpg)](https://biosecurity.world)
+
 ## Data
 
 The underlying database is curated in Notion and refreshed on every deploy (and weekly via a scheduled rebuild). It is openly available in two forms:
