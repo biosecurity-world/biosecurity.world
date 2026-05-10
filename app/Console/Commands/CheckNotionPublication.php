@@ -25,12 +25,15 @@ class CheckNotionPublication extends Command
         $publishedPages = $this->publishedPages($rawPages);
         $hydratedPages = $notion->pages();
         $tree = Tree::buildFromPages($hydratedPages);
+        $displayedEntriesCount = $tree->entries()->count();
+        $displayedCategoriesCount = $tree->categories()->count();
 
         $this->line(sprintf(
-            'Notion publication audit: %d raw pages, %d publishable pages, %d displayed entries.',
+            'Notion publication audit: %d raw pages, %d publishable pages, %d displayed categories, %d displayed entries.',
             $rawPages->count(),
             $publishedPages->count(),
-            $tree->entries()->count()
+            $displayedCategoriesCount,
+            $displayedEntriesCount
         ));
 
         $this->reportPendingEntries($rawPages);
