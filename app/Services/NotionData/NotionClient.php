@@ -35,14 +35,16 @@ class NotionClient
         return cache()->rememberForever('database', fn () => $this->client->databases()->find($this->databaseId));
     }
 
+    /** @return Page[] */
+    public function rawPages(): array
+    {
+        return cache()->rememberForever('pages', fn () => $this->client->databases()->queryAllPages($this->database()));
+    }
+
     public function pages(): HydratedPages
     {
-        $database = $this->database();
-
-        $pages = cache()->rememberForever('pages', fn () => $this->client->databases()->queryAllPages($database));
-
-        return (new Hydrator($database))->hydrate(
-            array_filter($pages, function (Page $page) {
+        return (new Hydrator($this->database()))->hydrate(
+            array_filter($this->rawPages(), function (Page $page) {
                 if ($page->archived) {
                     return false;
                 }

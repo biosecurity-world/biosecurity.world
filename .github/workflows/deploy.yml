@@ -74,6 +74,9 @@ jobs:
       - name: Export entries CSV
         run: nix develop --ignore-environment --command php artisan app:export-data
 
+      - name: Check Notion publication integrity
+        run: nix develop --ignore-environment --command php artisan app:check-notion-publication
+
       - name: Check location region mapping
         run: nix develop --ignore-environment --command php artisan app:check-location-regions
 
