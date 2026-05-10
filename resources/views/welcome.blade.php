@@ -239,7 +239,8 @@
                             </div>
                             <div class="columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3">
                                 @foreach ($categorizedLocations as $regionValue => $locations)
-                                    @php($region = LocationRegion::from($regionValue))
+                                    @php($region = LocationRegion::tryFrom($regionValue))
+                                    @continue(! $region)
                                     @php($headerLocation = $locations->first(fn ($l) => $l->isRegionHeader()))
                                     @php($children = $locations->filter(fn ($l) => ! $l->isRegionHeader()))
                                     <div
