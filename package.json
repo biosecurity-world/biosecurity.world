@@ -18,7 +18,8 @@
     },
     "pnpm": {
         "overrides": {
-            "picomatch": ">=4.0.4"
+            "picomatch": ">=4.0.4",
+            "postcss": "8.5.10"
         }
     },
     "dependencies": {
