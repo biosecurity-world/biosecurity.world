@@ -39,7 +39,7 @@ enum LocationRegion: string
                 'Bethesda MD', 'Boston MA', 'Boulder CO', 'Cambridge MA',
                 'Cavendish VT', 'Chicago IL', 'College Station', 'Gaithersburg MD',
                 'Lexington MA', 'Livermore CA', 'Los Alamos NM', 'Minneapolis MN',
-                'Monterey CA', 'New York City', 'Pittsburgh PA', 'Providence RI',
+                'Monterey CA', 'New York City', 'Omaha NE', 'Pittsburgh PA', 'Providence RI',
                 'San Francisco CA', 'Santa Monica CA', 'Seattle WA', 'Stanford CA',
                 'Washington DC',
             ],

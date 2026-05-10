@@ -74,6 +74,9 @@ jobs:
       - name: Export entries CSV
         run: nix develop --ignore-environment --command php artisan app:export-data
 
+      - name: Check location region mapping
+        run: nix develop --ignore-environment --command php artisan app:check-location-regions
+
       - name: Install bare
         run: go install github.com/felixdorn/bare@v0.2.0
 
