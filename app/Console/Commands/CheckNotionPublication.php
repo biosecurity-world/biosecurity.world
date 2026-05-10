@@ -35,6 +35,7 @@ class CheckNotionPublication extends Command
 
         $this->reportPendingEntries($rawPages);
         $this->reportArchivedEntries($rawPages);
+        $this->reportEntriesWithUnreadableStatus($rawPages);
 
         if ($tree->errors === []) {
             $this->info('No hydration/tree errors found.');
@@ -105,6 +106,34 @@ class CheckNotionPublication extends Command
 
         $this->warn(sprintf('%d entries are hidden because they are archived in Notion:', $archivedEntries->count()));
         $archivedEntries->each(fn (Page $page) => $this->line('- '.$this->pageLabel($page).' '.$this->pageUrl($page)));
+    }
+
+    /** @param  Collection<int, Page>  $rawPages */
+    private function reportEntriesWithUnreadableStatus(Collection $rawPages): void
+    {
+        $entriesWithUnreadableStatus = $rawPages->filter(function (Page $page): bool {
+            if ($page->archived || $this->isCategory($page)) {
+                return false;
+            }
+
+            try {
+                $page->properties()->getStatus('Status');
+
+                return false;
+            } catch (\Throwable) {
+                return true;
+            }
+        });
+
+        if ($entriesWithUnreadableStatus->isEmpty()) {
+            return;
+        }
+
+        $this->warn(sprintf(
+            '%d entries have an unreadable Status property and are treated as publishable:',
+            $entriesWithUnreadableStatus->count()
+        ));
+        $entriesWithUnreadableStatus->each(fn (Page $page) => $this->line('- '.$this->pageLabel($page).' '.$this->pageUrl($page)));
     }
 
     /** @param  HydrationError[]  $errors */
