@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\NotionData\Models\Entry;
+use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
 use Illuminate\Contracts\View\View;
 
@@ -11,11 +13,19 @@ class ShowEntryPartialController
     {
         $tree = $notion->tree();
 
-        abort_if(! isset($tree->lookup[$entryGroup]) || ! isset($tree->lookup[$entryId]), 404);
+        $group = $tree->lookup[$entryGroup] ?? null;
+        $entry = $tree->lookup[$entryId] ?? null;
+
+        abort_unless(
+            $group instanceof Entrygroup
+            && $entry instanceof Entry
+            && in_array($entryId, $group->entries, true),
+            404
+        );
 
         return view('partials.entry', [
-            'entrygroup' => $tree->lookup[$entryGroup],
-            'entry' => $tree->lookup[$entryId],
+            'entrygroup' => $group,
+            'entry' => $entry,
             'breadcrumbs' => collect($tree->nodes)->where('id', $entryGroup)->sole()->breadcrumbs($tree),
         ]);
     }

@@ -507,10 +507,10 @@ filtersStore.onChange(
         // Parse the HTML response and extract only the zoom-wrapper element
         let tempDiv = document.createElement("div")
         tempDiv.innerHTML = mapContent
-        let zoomWrapper = tempDiv.querySelector("#zoom-wrapper")
+        const extractedZoomWrapper = tempDiv.querySelector("#zoom-wrapper")
 
-        if (zoomWrapper) {
-            $map.html(zoomWrapper.outerHTML)
+        if (extractedZoomWrapper) {
+            $map.html(extractedZoomWrapper.outerHTML)
         } else {
             // Fallback to original content if zoom-wrapper not found
             $map.html(mapContent)
@@ -521,10 +521,12 @@ filtersStore.onChange(
         let lastFocusedEntry = getRememberedOpenEntry()
         if (lastFocusedEntry !== null) {
             let [entrygroup, entry] = lastFocusedEntry
-            let el = document.querySelector(
-                `a[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`,
-            ) as HTMLButtonElement
-            openEntry(el)
+            const el = document.querySelector<HTMLElement>(`a[data-entrygroup="${entrygroup}"][data-entry="${entry}"]`)
+            if (el) {
+                openEntry(el)
+            } else {
+                setLastFocusedEntry(null)
+            }
         }
 
         let elsEntryButtons = document.querySelectorAll("a[data-entry]") as NodeListOf<HTMLButtonElement>
@@ -547,10 +549,11 @@ filtersStore.onChange(
         })
 
         let $centerWrapper = select<SVGGElement, any>("#center-wrapper")
-        let zoomWrapperEl = document.getElementById("zoom-wrapper") as SVGGElement
-
-        let mapWidth = $map.node()!.clientWidth
-        let mapHeight = $map.node()!.clientHeight
+        const zoomWrapperEl = document.querySelector<SVGGElement>("#zoom-wrapper")
+        if (!zoomWrapperEl) {
+            throw new Error("Zoom wrapper is missing from the map")
+        }
+        const zoomWrapper = zoomWrapperEl
 
         // No centering needed for horizontal cladistic layout
         $centerWrapper.attr("transform", "")
@@ -581,7 +584,7 @@ filtersStore.onChange(
 
         // Initialize Panzoom on the zoom wrapper
         // On mobile, use noBind to prevent internal handlers that call preventDefault()
-        const panzoom = Panzoom(zoomWrapperEl, {
+        const panzoom = Panzoom(zoomWrapper, {
             maxScale: 2,
             minScale: 0.3, // Will be updated dynamically
             startScale: 1,
@@ -612,7 +615,7 @@ filtersStore.onChange(
         }
 
         // Listen for zoom changes to enforce limits and auto-center on zoom out
-        zoomWrapperEl.addEventListener("panzoomchange", (e: any) => {
+        zoomWrapper.addEventListener("panzoomchange", (e: any) => {
             const scale = e.detail.scale
             const minScale = calculateFitScale()
 
@@ -633,7 +636,7 @@ filtersStore.onChange(
                 panzoom.bind()
                 parent.addEventListener("pointerdown", panzoom.handleDown)
                 panzoom.setOptions({disablePan: false, disableZoom: false, touchAction: "none"})
-                zoomWrapperEl.style.pointerEvents = "all"
+                zoomWrapper.style.pointerEvents = "all"
             } else {
                 panzoom.destroy()
                 parent.removeEventListener("pointerdown", panzoom.handleDown)
@@ -641,7 +644,7 @@ filtersStore.onChange(
                 panzoom.setOptions({disablePan: true, disableZoom: true, touchAction: "auto"})
                 panzoom.zoom(1, {animate: false})
                 panzoom.pan(0, 0, {animate: false})
-                zoomWrapperEl.style.pointerEvents = "none"
+                zoomWrapper.style.pointerEvents = "none"
             }
         }
 
@@ -700,9 +703,6 @@ filtersStore.onChange(
             entrygroupsGroup.remove()
         }
 
-        // Track if this is the initial load
-        let isInitialLoad = true
-
         filtersStore.onChange(
             "*",
             (state) => {
@@ -747,8 +747,6 @@ filtersStore.onChange(
                             if (sectionEl) sectionEl.style.height = ""
                             if (mainEl) mainEl.style.height = ""
                         }
-
-                        isInitialLoad = false
                     })
                 })
             },

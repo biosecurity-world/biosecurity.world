@@ -92,6 +92,12 @@ class LocationHint
 
     public function globalSortOrder(): int
     {
-        return self::all()->search(fn (int $id) => $id === $this->id);
+        $offset = self::all()->search(fn (int $id) => $id === $this->id);
+
+        if ($offset === false) {
+            throw new \LogicException('Location hint is missing from its own registry.');
+        }
+
+        return $offset;
     }
 }

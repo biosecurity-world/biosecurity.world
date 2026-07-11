@@ -12,10 +12,12 @@ export type FilterMetadata = {
     focusesCount: number
 }
 
+export type EntryFilterData = Omit<Filters, "showNoFocus">
+
 const TECHNICAL_DOMAIN = 1 << 0 // 1
 const GOVERNANCE_DOMAIN = 1 << 1 // 2
 
-export function shouldFilterEntry(state: Filters, entry: Filters, meta: FilterMetadata): boolean {
+export function shouldFilterEntry(state: Filters, entry: EntryFilterData, meta: FilterMetadata): boolean {
     if (state.gcbrFocus && !entry.gcbrFocus) {
         return true
     }

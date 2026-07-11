@@ -75,10 +75,12 @@ trait BelongsToMultiselect
 
         self::$countById[$id]++;
 
+        $color = $opt->color?->value;
+
         return new self(
             $id,
             $opt->name,
-            NotionColor::from($opt->color?->value ?? NotionColor::Default->value)
+            NotionColor::from($color ?? NotionColor::Default->value)
         );
     }
 

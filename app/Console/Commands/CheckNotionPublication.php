@@ -69,7 +69,7 @@ class CheckNotionPublication extends Command
                     return true;
                 }
 
-                return ! in_array($page->properties()->getStatus('Status')->option?->name, NotionClient::HIDDEN_STATUSES, true);
+                return ! in_array($page->properties()->getStatus('Status')->option->name, NotionClient::HIDDEN_STATUSES, true);
             } catch (\Throwable) {
                 return true;
             }
@@ -85,7 +85,7 @@ class CheckNotionPublication extends Command
             }
 
             try {
-                return $page->properties()->getStatus('Status')->option?->name === 'Pending';
+                return $page->properties()->getStatus('Status')->option->name === 'Pending';
             } catch (\Throwable) {
                 return false;
             }

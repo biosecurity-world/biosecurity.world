@@ -60,7 +60,7 @@ export function updateMap(state: Filters, metadata: FilterMetadata) {
         // Filter leaf nodes (entrygroups)
         if (node.od === 0) {
             const entryIds = node.entries!
-            let matchingEntries = []
+            const matchingEntries: number[] = []
 
             for (const entryId of entryIds) {
                 const filterData = window.filterData[entryId]

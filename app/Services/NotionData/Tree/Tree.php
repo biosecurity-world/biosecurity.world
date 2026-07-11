@@ -92,13 +92,18 @@ class Tree
             return $tree;
         }
 
-        /** @phpstan-ignore-next-line  */
-        $tree->nodes = collect($tree->nodes)
+        /** @var array<Node> $groupedNodes */
+        $groupedNodes = collect($tree->nodes)
             ->groupBy('parentId')
             ->flatMap(
                 /** @return Collection<Node> */
                 function (Collection $children, int $parentId) use ($tree): Collection {
-                    [$entries, $rest] = $children->partition(fn (Node $node) => $tree->lookup[$node->id] instanceof Entry);
+                    $entries = $children
+                        ->filter(fn (Node $node) => $tree->lookup[$node->id] instanceof Entry)
+                        ->values();
+                    $rest = $children
+                        ->reject(fn (Node $node) => $tree->lookup[$node->id] instanceof Entry)
+                        ->values();
 
                     if ($entries->isEmpty()) {
                         return $rest;
@@ -107,9 +112,16 @@ class Tree
                     /** @var array<int> $entryIds */
                     $entryIds = Arr::pluck($entries->toArray(), 'id');
 
-                    // fixme: see below
-                    /** @phpstan-ignore-next-line */
-                    usort($entryIds, fn (int $a, int $b) => $tree->lookup[$a]->createdAt <=> $tree->lookup[$b]->createdAt);
+                    usort($entryIds, function (int $a, int $b) use ($tree): int {
+                        $left = $tree->lookup[$a];
+                        $right = $tree->lookup[$b];
+
+                        if (! $left instanceof Entry || ! $right instanceof Entry) {
+                            throw new \LogicException('Only entries can be grouped into an entry group.');
+                        }
+
+                        return $left->createdAt <=> $right->createdAt;
+                    });
 
                     $id = sha1($parentId.'-'.implode('-', $entryIds));
                     $reducedId = IdMap::hash($id);
@@ -120,6 +132,7 @@ class Tree
                     return $rest;
                 })
             ->toArray();
+        $tree->nodes = $groupedNodes;
 
         /** @var Collection<int, Collection<int, Node>> $parentToChildrenMap */
         $parentToChildrenMap = collect($tree->nodes)->groupBy('parentId');
@@ -130,7 +143,7 @@ class Tree
             if (! $parentToChildrenMap->has($id) && $tree->lookup[$id] instanceof Category) {
                 $tree->errors[] = new HydrationError($tree->lookup[$id], 'Category is empty.');
 
-                return [];
+                return;
             }
 
             $node->trail = $trail;
@@ -139,7 +152,7 @@ class Tree
             $trail[] = $node->id;
 
             $od = 0;
-            foreach ($parentToChildrenMap->get($id, []) as $child) {
+            foreach ($parentToChildrenMap->get($id, collect()) as $child) {
                 foreach ($buildTree($child->id, $node->id, $trail, $node->depth + 1) as $childNode) {
                     if ($childNode->depth === $node->depth + 1) {
                         $od++;
@@ -183,6 +196,10 @@ class Tree
                 $ancestor = $tree->lookup[$ancestorId] ?? null;
                 if (! $ancestor instanceof Category) {
                     continue;
+                }
+
+                if (! isset($categoryCounts[$ancestorId])) {
+                    throw new \LogicException('Category counts were not initialized.');
                 }
 
                 $categoryCounts[$ancestorId]['tech'] += $counts['tech'];

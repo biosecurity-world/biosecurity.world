@@ -63,7 +63,7 @@ class NotionClient
 
                     $status = $page->properties()->getStatus('Status');
 
-                    return ! in_array($status->option?->name, self::HIDDEN_STATUSES, true);
+                    return ! in_array($status->option->name, self::HIDDEN_STATUSES, true);
                 } catch (\Throwable) {
                     return true;
                 }
@@ -77,11 +77,20 @@ class NotionClient
      */
     public function tree(): Tree
     {
+        /**
+         * @var array{
+         *     tree: Tree,
+         *     idMap: array<string|int, int>,
+         *     activityState: array{seen: array<int>, countById: array<int>},
+         *     focusState: array{seen: array<int>, countById: array<int>},
+         *     locationState: array{seen: array<int>, countById: array<int>}
+         * }|null $cached
+         */
         $cached = cache()->get('tree_with_state');
 
         if ($cached !== null) {
             // Restore all static state from cache
-            IdMap::$idMap = $cached['idMap'];
+            IdMap::restore($cached['idMap']);
             Activity::restoreState($cached['activityState']);
             InterventionFocus::restoreState($cached['focusState']);
             LocationHint::restoreState($cached['locationState']);

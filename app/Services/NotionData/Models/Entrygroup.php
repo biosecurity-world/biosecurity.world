@@ -13,7 +13,7 @@ class Entrygroup
     /**
      * Count technical and governance entries within this group.
      *
-     * @param  array  $lookup  Map of id => model, containing Entry instances for $this->entries
+     * @param  array<int, Category|Entry|Entrygroup|\App\Services\NotionData\Tree\Root>  $lookup  Map of id => model
      * @return array{tech:int,gov:int}
      */
     public function countDomains(array $lookup): array
@@ -41,6 +41,8 @@ class Entrygroup
 
     /**
      * Number of entries in Technical domain.
+     *
+     * @param  array<int, Category|Entry|Entrygroup|\App\Services\NotionData\Tree\Root>  $lookup
      */
     public function countTechnical(array $lookup): int
     {
@@ -49,6 +51,8 @@ class Entrygroup
 
     /**
      * Number of entries in Governance domain.
+     *
+     * @param  array<int, Category|Entry|Entrygroup|\App\Services\NotionData\Tree\Root>  $lookup
      */
     public function countGovernance(array $lookup): int
     {

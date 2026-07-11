@@ -4,3 +4,6 @@ storage/
 !resources/css/**/*.css
 !*.json
 !*.js
+pnpm-lock.yaml
+AGENTS.md
+.agents/

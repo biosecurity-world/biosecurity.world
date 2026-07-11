@@ -34,6 +34,13 @@ class IdMap
         return self::$idMap[$id];
     }
 
+    /** @param array<string|int, int> $idMap */
+    public static function restore(array $idMap): void
+    {
+        self::$idMap = $idMap;
+        self::$counter = $idMap === [] ? 0 : max($idMap) + 1;
+    }
+
     public static function find(int|string $id): string
     {
         if (is_string($id)) {

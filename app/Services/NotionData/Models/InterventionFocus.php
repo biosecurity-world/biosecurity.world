@@ -10,7 +10,7 @@ class InterventionFocus
 {
     use BelongsToMultiselect;
 
-    public function category(): ?FocusCategory
+    public function category(): FocusCategory
     {
         // First check by name for specific overrides
         return match ($this->label) {
@@ -32,6 +32,12 @@ class InterventionFocus
 
     public function globalSortOrder(): int
     {
-        return self::all()->search(fn (int $id) => $id === $this->id);
+        $offset = self::all()->search(fn (int $id) => $id === $this->id);
+
+        if ($offset === false) {
+            throw new \LogicException('Intervention focus is missing from its own registry.');
+        }
+
+        return $offset;
     }
 }

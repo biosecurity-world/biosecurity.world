@@ -20,7 +20,7 @@ export type Node = {
     trail: number[]
     entries?: number[]
 
-    filtered: boolean
+    filtered?: boolean
 }
 
 export type ProcessedNode = {

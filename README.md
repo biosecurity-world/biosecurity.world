@@ -31,8 +31,8 @@ cp .env.example .env      # fill NOTION_DATABASE, NOTION_TOKEN, LOGO_DEV_TOKEN
 pnpm dev                  # Vite, in one terminal
 php artisan serve         # Laravel, in another
 
-composer test             # PHPStan level 9 + Pint
-pnpm run test:lint        # Prettier
+composer test             # Pint + PHPStan level 9 + PHPUnit
+pnpm test                 # Prettier + TypeScript + Vitest
 ```
 
 Pushes to `master` (and the Monday cron) run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which builds, exports, deploys, and commits the refreshed CSV back to the repo.

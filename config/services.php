@@ -40,6 +40,10 @@ return [
         'token' => env('NOTION_TOKEN'),
     ],
 
+    'logo_dev' => [
+        'token' => env('LOGO_DEV_TOKEN'),
+    ],
+
     'differ' => [
         'node_binary' => env('NODE_BINARY', 'node'),
         'chrome_binary' => env('CHROMIUM_BINARY', 'chromium'),

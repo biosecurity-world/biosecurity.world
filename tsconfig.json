@@ -3,6 +3,7 @@
         "baseUrl": ".",
         "target": "esnext",
         "module": "esnext",
+        "moduleResolution": "bundler",
         "strict": true,
         "isolatedModules": true,
         "noImplicitAny": true,

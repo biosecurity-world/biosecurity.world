@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\ShowEntryController;
 use App\Http\Controllers\ShowEntryPartialController;
 use App\Http\Controllers\ShowWelcomeController;
+use App\Services\NotionData\Models\Entry;
 use App\Services\NotionData\Models\Entrygroup;
 use App\Services\NotionData\NotionClient;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +16,8 @@ Route::redirect('/inclusion-criteria', 'https://docs.google.com/document/d/12JhG
 Route::get('/entry/{id}/{slug}', ShowEntryController::class)->name('entries.show');
 Route::get('/entry/{id}', function (NotionClient $notion, int $id) {
     $tree = $notion->tree();
-    abort_if(! isset($tree->lookup[$id]), 404);
+    abort_unless(($tree->lookup[$id] ?? null) instanceof Entry, 404);
+    /** @var Entry $entry */
     $entry = $tree->lookup[$id];
 
     return redirect()->route('entries.show', ['id' => $id, 'slug' => $entry->slug()]);

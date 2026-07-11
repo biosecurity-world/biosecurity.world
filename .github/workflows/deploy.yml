@@ -43,6 +43,9 @@ jobs:
       - name: Install node dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check frontend
+        run: pnpm test
+
       - name: Build assets
         run: pnpm build
 
@@ -56,9 +59,12 @@ jobs:
           key: build-${{ env.cache-name }}-${{ hashFiles('composer.lock') }}
 
       - name: Install PHP dependencies
-        run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install --no-dev -o
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer install -o
         env:
           COMPOSER_HOME: ~/.composer-store
+
+      - name: Check PHP
+        run: nix develop --ignore-environment --command composer test
 
       - name: Copy .env
         run: cp .env.example .env

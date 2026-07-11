@@ -36,7 +36,10 @@ class ShowWelcomeController
 
         return view('welcome', [
             'tree' => $tree,
-            'categorizedFocuses' => $tree->interventionFocuses()->groupBy(fn (InterventionFocus $f) => $f->category())->sortKeys()->map->sortBy('name'),
+            'categorizedFocuses' => $tree->interventionFocuses()
+                ->groupBy(fn (InterventionFocus $focus) => $focus->category()->value)
+                ->sortKeys()
+                ->map->sortBy('label'),
             'filterData' => $tree->entries()->mapWithKeys(function (Entry $entry) {
                 return [$entry->id => [
                     $entry->getActivitiesBitmask(),
@@ -48,8 +51,16 @@ class ShowWelcomeController
             }),
             'topLevelLocations' => $tree->locationHints()->filter(fn (LocationHint $l) => $l->isTopLevel())->sortBy('label'),
             'categorizedLocations' => $tree->locationHints()
-                ->filter(fn (LocationHint $l) => ! $l->isTopLevel())
-                ->groupBy(fn (LocationHint $l) => $l->region())
+                ->filter(fn (LocationHint $location) => ! $location->isTopLevel() && $location->region() !== null)
+                ->groupBy(function (LocationHint $location): string {
+                    $region = $location->region();
+
+                    if ($region === null) {
+                        throw new \LogicException('Only mapped locations can be grouped by region.');
+                    }
+
+                    return $region->value;
+                })
                 ->sortKeys()
                 ->map(fn ($locs) => $locs->sortBy(function (LocationHint $l) {
                     if ($l->isRegionHeader()) {

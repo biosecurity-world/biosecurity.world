@@ -159,12 +159,13 @@ class Hydrator
     {
         $props = $page->properties();
 
-        $link = str_replace('‧', '.', $props->getUrlById(self::SCHEMA['link'])->url);
+        $rawLink = $props->getUrlById(self::SCHEMA['link'])->url;
+        $link = is_string($rawLink) ? str_replace('‧', '.', $rawLink) : null;
 
         $interventionFocuses = $props->getMultiSelectById(self::SCHEMA['interventionFocuses'])->options;
         $domains = [];
         $interventionFocuses = array_filter($interventionFocuses, function (SelectOption $opt) use (&$domains) {
-            if ($domain = DomainEnum::tryFrom($opt->id)) {
+            if ($opt->id !== null && ($domain = DomainEnum::tryFrom($opt->id))) {
                 $domains[] = $domain;
 
                 return false;
@@ -176,7 +177,7 @@ class Hydrator
         $rawPage = [
             'id' => IdMap::hash($page->id),
             'link' => self::$strict ? $link : (
-                ! str_starts_with($link ?? '', 'http') ? 'https://'.$link : $link
+                is_string($link) && ! str_starts_with($link, 'http') ? 'https://'.$link : $link
             ),
             'label' => $page->title()?->toString(),
             'description' => $props->getRichTextById(self::SCHEMA['description']),
@@ -238,7 +239,8 @@ class Hydrator
         /** @phpstan-ignore-next-line  */
         $data['locationHints'] = collect($data['locationHints']);
         $domain = parse_url($data['link'], PHP_URL_HOST);
-        $token = env('LOGO_DEV_TOKEN');
+        $configuredToken = config('services.logo_dev.token');
+        $token = is_string($configuredToken) ? $configuredToken : '';
         $data['logo'] = new Logo("https://img.logo.dev/{$domain}?token={$token}&size=128&format=png");
 
         return new Entry(...$data);
