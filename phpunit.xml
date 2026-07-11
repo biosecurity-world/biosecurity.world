@@ -16,6 +16,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>
         <env name="CACHE_STORE" value="array" force="true"/>
         <env name="SESSION_DRIVER" value="array" force="true"/>
     </php>
