@@ -15,6 +15,12 @@ use Notion\Pages\Page;
 
 class NotionClient
 {
+    /**
+     * Notion Status values that keep a non-category page from being published on the site.
+     * "Pending" entries are not yet reviewed; "Rejected" entries were reviewed and turned down.
+     */
+    public const HIDDEN_STATUSES = ['Pending', 'Rejected'];
+
     protected NotionWrapper $client;
 
     private string $databaseId;
@@ -57,7 +63,7 @@ class NotionClient
 
                     $status = $page->properties()->getStatus('Status');
 
-                    return $status->option?->name !== 'Pending';
+                    return ! in_array($status->option?->name, self::HIDDEN_STATUSES, true);
                 } catch (\Throwable) {
                     return true;
                 }

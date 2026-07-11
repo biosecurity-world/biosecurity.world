@@ -37,6 +37,7 @@ class CheckNotionPublication extends Command
         ));
 
         $this->reportPendingEntries($rawPages);
+        $this->reportRejectedEntries($rawPages);
         $this->reportArchivedEntries($rawPages);
         $this->reportEntriesWithUnreadableStatus($rawPages);
 
@@ -68,7 +69,7 @@ class CheckNotionPublication extends Command
                     return true;
                 }
 
-                return $page->properties()->getStatus('Status')->option?->name !== 'Pending';
+                return ! in_array($page->properties()->getStatus('Status')->option?->name, NotionClient::HIDDEN_STATUSES, true);
             } catch (\Throwable) {
                 return true;
             }
@@ -96,6 +97,29 @@ class CheckNotionPublication extends Command
 
         $this->warn(sprintf('%d non-archived entries are intentionally hidden because Status is Pending:', $pending->count()));
         $pending->each(fn (Page $page) => $this->line('- '.$this->pageLabel($page).' '.$this->pageUrl($page)));
+    }
+
+    /** @param  Collection<int, Page>  $rawPages */
+    private function reportRejectedEntries(Collection $rawPages): void
+    {
+        $rejected = $rawPages->filter(function (Page $page): bool {
+            if ($page->archived || $this->isCategory($page)) {
+                return false;
+            }
+
+            try {
+                return $page->properties()->getStatus('Status')->option->name === 'Rejected';
+            } catch (\Throwable) {
+                return false;
+            }
+        });
+
+        if ($rejected->isEmpty()) {
+            return;
+        }
+
+        $this->warn(sprintf('%d non-archived entries are intentionally hidden because Status is Rejected:', $rejected->count()));
+        $rejected->each(fn (Page $page) => $this->line('- '.$this->pageLabel($page).' '.$this->pageUrl($page)));
     }
 
     /** @param  Collection<int, Page>  $rawPages */
