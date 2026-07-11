@@ -76,6 +76,7 @@ class LocationHint
         // East Asia & Pacific
         'Canberra' => 'Australia',
         // South Asia
+        'Bengaluru' => 'India',
         'Hyderabad' => 'India',
     ];
 

@@ -58,7 +58,7 @@ enum LocationRegion: string
                 'Australia', 'Canberra', 'Singapore',
             ],
             self::SouthAsia => [
-                'India', 'Hyderabad',
+                'India', 'Bengaluru', 'Hyderabad',
             ],
             self::CentralAsia => [],
             self::MiddleEast => ['Israel'],
