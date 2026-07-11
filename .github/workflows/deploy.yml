@@ -64,7 +64,9 @@ jobs:
           COMPOSER_HOME: ~/.composer-store
 
       - name: Check PHP
-        run: nix develop --ignore-environment --command composer test
+        run: nix develop --ignore-environment --keep COMPOSER_HOME --command composer test
+        env:
+          COMPOSER_HOME: ~/.composer-store
 
       - name: Copy .env
         run: cp .env.example .env
