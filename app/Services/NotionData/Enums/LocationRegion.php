@@ -49,7 +49,7 @@ enum LocationRegion: string
             self::Europe => [
                 'Amsterdam', 'Austria', 'Barcelona', 'Basel', 'Belgium',
                 'Berlin', 'Bern', 'Brussels', 'France', 'Frankfurt',
-                'Geneva', 'Germany', 'Grenoble', 'Hamburg', 'Heidelgerg',
+                'Geneva', 'Germany', 'Grenoble', 'Hamburg', 'Heidelberg',
                 'Italy', 'Madrid', 'Munich', 'Netherlands', 'Norway',
                 'Oslo', 'Paris', 'Rome', 'Rotterdam', 'Spain',
                 'Stockholm', 'Sweden', 'Switzerland', 'Trieste', 'Vienna', 'Zug',
