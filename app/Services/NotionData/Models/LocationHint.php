@@ -59,7 +59,7 @@ class LocationHint
         'Berlin' => 'Germany',
         'Frankfurt' => 'Germany',
         'Hamburg' => 'Germany',
-        'Heidelgerg' => 'Germany',
+        'Heidelberg' => 'Germany',
         'Munich' => 'Germany',
         'Rome' => 'Italy',
         'Trieste' => 'Italy',
