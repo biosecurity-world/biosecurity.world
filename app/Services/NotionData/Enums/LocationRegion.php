@@ -36,7 +36,7 @@ enum LocationRegion: string
         return match ($this) {
             self::USA => [
                 'Albuquerque NM', 'Arlington VA', 'Atlanta GA', 'Baltimore',
-                'Bethesda MD', 'Boston MA', 'Boulder CO', 'Cambridge MA',
+                'Bethesda MD', 'Boston MA', 'Boulder CO', 'Broomfield CO', 'Cambridge MA',
                 'Cavendish VT', 'Chicago IL', 'College Station', 'Gaithersburg MD',
                 'Lexington MA', 'Livermore CA', 'Los Alamos NM', 'Minneapolis MN',
                 'Monterey CA', 'New York City', 'Omaha NE', 'Pittsburgh PA', 'Providence RI',
@@ -44,7 +44,7 @@ enum LocationRegion: string
                 'Washington DC',
             ],
             self::UnitedKingdom => [
-                'Cambridge', 'Essex', 'London', 'Oxford',
+                'Cambridge', 'Essex', 'Liverpool', 'London', 'Oxford',
             ],
             self::Europe => [
                 'Amsterdam', 'Austria', 'Barcelona', 'Basel', 'Belgium',
@@ -55,7 +55,7 @@ enum LocationRegion: string
                 'Stockholm', 'Sweden', 'Switzerland', 'Trieste', 'Vienna', 'Zug',
             ],
             self::EastAsiaPacific => [
-                'Australia', 'Canberra', 'Singapore',
+                'Australia', 'Beijing', 'Canberra', 'China', 'Singapore',
             ],
             self::SouthAsia => [
                 'India', 'Bengaluru', 'Hyderabad',

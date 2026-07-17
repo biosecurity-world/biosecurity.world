@@ -10,7 +10,7 @@ enum OrganizationType: string
     case ForProfit = 'For-profit company';
     case ThinkTank = 'Think tank';
     case Government = 'Government';
-    case Intergovernmental = 'Intergovernmental agency';
+    case Intergovernmental = 'Intergovernmental entity';
     case NationalNgo = 'National non-profit organization';
     case InternationalNgo = 'International non-profit organization';
     case Media = 'Media';

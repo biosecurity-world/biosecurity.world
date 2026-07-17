@@ -43,7 +43,7 @@ class LocationHint
     }
 
     private const array COUNTRIES = [
-        'Australia', 'Austria', 'Belgium', 'Canada', 'Colombia',
+        'Australia', 'Austria', 'Belgium', 'Canada', 'China', 'Colombia',
         'France', 'Germany', 'India', 'Israel', 'Italy',
         'Mexico', 'Netherlands', 'Norway', 'Singapore', 'Spain',
         'Sweden', 'Switzerland',
@@ -74,6 +74,7 @@ class LocationHint
         'Geneva' => 'Switzerland',
         'Zug' => 'Switzerland',
         // East Asia & Pacific
+        'Beijing' => 'China',
         'Canberra' => 'Australia',
         // South Asia
         'Bengaluru' => 'India',

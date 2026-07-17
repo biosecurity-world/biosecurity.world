@@ -45,7 +45,7 @@ class Entry
             'For-profit company' => 'company',
             'Think tank' => 'think tank',
             'Government' => 'governmental organization',
-            'Intergovernmental agency' => 'intergovernmental agency',
+            'Intergovernmental entity' => 'intergovernmental entity',
             'National non-profit organization' => 'national NGO',
             'International non-profit organization' => 'international NGO',
             'Media' => 'media organization',
