@@ -115,10 +115,22 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/entries.csv
-          if git diff --staged --quiet; then
-            echo "No CSV changes — skipping commit."
-          else
+          # A concurrent deploy can advance master between checkout and push.
+          # Retry: re-sync to origin/master and re-commit the freshly exported CSV.
+          for attempt in 1 2 3 4 5; do
+            git add public/data/entries.csv
+            if git diff --staged --quiet; then
+              echo "No CSV changes to push (already up to date)."
+              exit 0
+            fi
             git commit -m "data: refresh entries.csv"
-            git push
-          fi
+            if git push; then
+              echo "Pushed refreshed CSV."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — syncing to origin/master and retrying."
+            git fetch origin master
+            git reset --mixed origin/master
+          done
+          echo "Could not push refreshed CSV after 5 attempts." >&2
+          exit 1
