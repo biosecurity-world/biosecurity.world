@@ -78,6 +78,12 @@ class ShowWelcomeController
                 })->values()),
             'databaseUrl' => $notion->databaseUrl(),
             'lastEditedAt' => Carbon::instance($notion->lastEditedAt()),
+            // When the static site was last built & deployed. On the GitHub Pages
+            // deploy, the welcome page is rendered by `bare export` during the run,
+            // so now() equals the deployment time and gets frozen into the static
+            // HTML. An optional DEPLOYED_AT env var can override it with an explicit
+            // timestamp. Locally it simply shows the current time.
+            'deployedAt' => is_string($deployedAt = config('deploy.deployed_at')) ? Carbon::parse($deployedAt) : Carbon::now(),
             'nodes' => $nodes,
         ]);
     }

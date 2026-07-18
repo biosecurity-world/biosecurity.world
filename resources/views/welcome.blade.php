@@ -53,7 +53,26 @@
             class="mx-auto mt-6 mb-8 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
         >
             <li>
-                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Up-to-date</h2>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Up-to-date</h2>
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600"
+                        title="The map is rebuilt and redeployed from the live Notion database on every update."
+                    >
+                        <span class="relative flex h-2 w-2" aria-hidden="true">
+                            <span
+                                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"
+                            ></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                        </span>
+                        <time
+                            datetime="{{ $deployedAt->toIso8601String() }}"
+                            title="{{ $deployedAt->diffForHumans() }}"
+                        >
+                            Updated {{ $deployedAt->format("M j, Y") }}
+                        </time>
+                    </span>
+                </div>
                 <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
 
                 <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
