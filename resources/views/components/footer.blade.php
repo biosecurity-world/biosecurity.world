@@ -171,7 +171,7 @@
             >
                 Jérémy Andréoletti
             </a>
-            <sup class="text-xs">1</sup>
+            <sup class="text-xs">1,3</sup>
             <span>,&nbsp;</span>
             <a
                 href="https://www.linkedin.com/in/linbowkerlonnecker/"
@@ -202,12 +202,24 @@
                 Félix Dorn
             </a>
             <sup class="text-xs">2</sup>
+            <span>,&nbsp;</span>
+            <a
+                href="https://www.linkedin.com/in/till-funke-05648290/"
+                class="underline"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+            >
+                Till Funke
+            </a>
+            <sup class="text-xs">2</sup>
         </p>
         <p class="mt-1 text-sm text-gray-500">
             <sup>1</sup>
             Team,
             <sup>2</sup>
-            Support
+            Support,
+            <sup>3</sup>
+            Maintainer
         </p>
     </div>
 </footer>
