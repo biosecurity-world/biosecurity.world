@@ -155,18 +155,18 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
         display: flex;
         justify-content: center;
         width: 100%;
-        padding: 20px;
+        padding: 10px;
         box-sizing: border-box;
     `
 
-    const layoutWidth = Math.min(Math.max(containerWidth - 40, 300), 1800)
+    const layoutWidth = Math.min(Math.max(containerWidth - 20, 300), 1800)
     const container = document.createElement("div")
     container.id = "nested-layout-container"
     container.className = "nested-layout"
     container.style.cssText = `
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 10px;
         width: ${layoutWidth}px;
         max-width: 100%;
     `
@@ -176,7 +176,7 @@ function renderNestedBoxes(root: PreparedNode, idToNode: Record<number, Prepared
     topRow.className = "top-row"
     topRow.style.cssText = `
         display: flex;
-        gap: 12px;
+        gap: 8px;
         align-items: stretch;
     `
 
@@ -378,11 +378,11 @@ function createHighLevelBox(
         border: 1px solid #e7e3da;
         border-top: 3px solid ${color};
         border-radius: 0 0 14px 14px;
-        padding: 16px 14px 14px;
+        padding: 12px 12px 12px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        min-width: 0;
+        min-width: min-content;
         ${fullWidth ? "width: 100%;" : `flex: ${flexGrow} 1 0%;`}
     `
 
@@ -393,7 +393,7 @@ function createHighLevelBox(
         display: flex;
         align-items: baseline;
         gap: 9px;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     `
 
     const dot = document.createElement("span")
@@ -429,7 +429,7 @@ function createHighLevelBox(
     content.className = "box-content"
     content.style.cssText = `
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: stretch;
         overflow: hidden;
         flex: 1;
@@ -483,9 +483,9 @@ function createHighLevelBox(
         directEntriesRow.style.cssText = `
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-            padding-top: 8px;
+            gap: 5px 4px;
+            margin-top: 8px;
+            padding-top: 6px;
             border-top: 1px solid ${SUBCATEGORY_BORDER};
         `
         for (const eg of directEntrygroups) {
@@ -513,8 +513,8 @@ function createSubcategoryBox(
         background: ${SUBCATEGORY_BG};
         border: 1px solid ${SUBCATEGORY_BORDER};
         border-radius: 11px;
-        padding: 10px 11px;
-        min-width: 130px;
+        padding: 8px 9px;
+        min-width: min-content;
         display: flex;
         flex-direction: column;
         flex: ${flexGrow} 1 0%;
@@ -540,7 +540,7 @@ function createSubcategoryBox(
         letter-spacing: 0.03em;
         text-transform: uppercase;
         color: #5c5a52;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     `
     header.textContent = `${label} · ${countMatchingEntries(node)}`
     box.appendChild(header)
@@ -551,7 +551,7 @@ function createSubcategoryBox(
     content.style.cssText = `
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 4.5px 3px;
         align-items: flex-start;
         align-content: flex-start;
         flex: 1;
@@ -593,11 +593,11 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
         entryClone.style.cssText = `
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 9px 3px 3px;
+            gap: 5px;
+            padding: 2px 8px 2px 2px;
             background: #ffffff;
             border: 1px solid #e6e4de;
-            border-radius: 8px;
+            border-radius: 7px;
             cursor: pointer;
             transition: background 0.15s, border-color 0.15s;
             max-width: 100%;
@@ -617,7 +617,7 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
         if (logoSpan) {
             const logoClone = logoSpan.cloneNode(true) as HTMLElement
             logoClone.style.cssText =
-                "display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; min-width: 18px; border-radius: 5px; background: #f4f2ec; overflow: hidden; flex-shrink: 0;"
+                "display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; min-width: 16px; border-radius: 4px; background: #f4f2ec; overflow: hidden; flex-shrink: 0;"
             const imgInClone = logoClone.querySelector("img")
             if (imgInClone) {
                 imgInClone.style.cssText = "width: 100%; height: 100%; object-fit: contain;"
@@ -631,7 +631,7 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
             const labelClone = document.createElement("span")
             labelClone.className = "nested-entry-label"
             labelClone.style.cssText =
-                "font-size: 12px; line-height: 1.2; font-weight: 500; color: #3f3d38; white-space: normal; overflow-wrap: break-word; min-width: 0;"
+                "font-size: 12px; line-height: 1.2; font-weight: 500; color: #3f3d38; white-space: normal; overflow-wrap: normal; word-break: keep-all; hyphens: none; min-width: 0;"
             labelClone.textContent = labelSpan.textContent.trim()
             entryClone.appendChild(labelClone)
         }
