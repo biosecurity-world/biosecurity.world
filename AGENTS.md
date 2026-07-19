@@ -13,11 +13,15 @@ php artisan serve    # Laravel dev server
 
 ### Testing & Linting
 ```bash
-composer test        # Run all checks (lint + types)
+composer test        # Pint --test + PHPStan + PHPUnit
 composer test:types  # PHPStan level 9
 composer test:lint   # Check PHP formatting
+composer test:unit   # PHPUnit
 
+npm run test         # Prettier --check + tsc --noEmit + Vitest
 npm run test:lint    # Check Prettier formatting
+npm run test:types   # TypeScript, strict mode
+npm run test:unit    # Vitest
 ```
 
 ### Formatting
@@ -53,6 +57,14 @@ Logos are fetched from `logo.dev` API using the domain from entry URLs. Requires
 - `Activity`, `InterventionFocus`, `LocationHint` - Entry metadata
 - `Logo` - Simple URL wrapper for logo.dev images
 
+### Design system (`resources/css/main.css`)
+
+The site uses a warm "paper" palette rather than Tailwind's cold grays. Custom `@theme` tokens: `paper` (page background), `card`, `sand-100…400` (borders and muted fills), `ink` / `ink-muted` (text), `band` / `band-light` (dark green filter and FAQ bands), `hero` (h1 green), `mint-border`. Prefer these over `gray-*` for surfaces, borders and body text; `gray-400` is still used for small decorative icons.
+
+`--font-display` is **Space Grotesk**, self-hosted from `public/fonts/` as a variable woff2 (one file per unicode subset, covering weights 300–700) with `@font-face` declared in `main.css`. There is no Google Fonts request. `bare` does not copy arbitrary `public/` files into the static export, so `deploy.yml` has an explicit step copying `public/fonts/*.woff2` into `dist/fonts/` — mirroring the CSV step. Adding a font file means updating that step too.
+
+Map colors live in `layout.ts` (`HIGH_LEVEL_CATEGORIES`), not in CSS: each zone renders as a white surface with a 3px colored top rule and a colored dot, while subcategories share one neutral treatment (`SUBCATEGORY_BG` / `SUBCATEGORY_BORDER`).
+
 ### Frontend (`resources/js/`)
 
 - `map.ts` - Main entry point: loads the map partial, initializes Panzoom, sets up filter store, handles entry open/close
@@ -77,8 +89,11 @@ Filters use bitmasks for fast matching. Each activity and intervention focus is 
 - **Region/category label click**: Clicking a region label (Locations) or category label (Intervention focuses) keeps only that group active; clicking again re-enables all. This is distinct from the master checkbox which toggles the group on/off.
 - **Top-level location pills** (Global, Remote): Simple independent toggles, not affected by exclusive click behavior on region locations. Marked with `data-top-level="true"`.
 - **Country vs city display**: Within each region, locations are sorted country-first (each country followed by its cities). Countries are styled with `uppercase` text and `rounded-md` shape; cities use the default pill style. The `LocationHint` model has `isCountry()`, `parentCountryLabel()`, and `CITY_TO_COUNTRY` mapping.
-- **Location region layout**: Uses a 4-column CSS grid with explicit column assignments defined in `ShowWelcomeController` (`$locationColumns`). USA and Europe get dedicated columns (3 and 4) due to their size (25 and 31 locations respectively).
+- **Location region layout**: Regions flow through a CSS multi-column container (`columns-1 sm:columns-2 md:columns-3`), each wrapper using `break-inside-avoid` so a region is never split across columns.
+- **Collapsed location pills**: A region with more than 8 locations renders only its first 6; the rest get `.location-overflow hidden` and a `.location-more-toggle` button labelled `+ N…` reveals them (toggling to `− less`). The handler lives in the `welcome.blade.php` inline JS. Hidden pills stay checked and keep their `data-global-offset`, so collapsing never changes the filter bitmask.
+- **Proportional focus columns**: The intervention-focus grid does not use equal thirds. `ShowWelcomeController` computes `$focusColumns` — one `fr` value per category, weighted by the total label length of its pills plus `PILL_BASE_WIDTH` per pill — and the view feeds it through `style="--focus-columns: …"` + `md:grid-cols-(--focus-columns)`. This keeps a short category (Detection, 4 pills) from reserving a full third. `fr` keeps min-content as its floor, so headings never get crushed, and the ratio adapts on its own when focuses are added in Notion.
 - **Entry detail panel**: Left-side overlay loaded via AJAX from `/partials/entries/{entrygroup}/{entry}`. Closes on cross button or clicking outside
+- **Result counter**: The filter band shows `X / total organizations`. `map.ts` recomputes `X` on every filter change by counting distinct `data-entry` values carrying `.matches-filters` — an entry listed under several categories counts once, so this number is lower than the number of pills drawn on the map.
 - **Prettier compatibility**: Inline links in `<p>` tags use `<!-- prettier-ignore -->` to prevent Prettier from adding whitespace around `<a>` tags
 
 ### Routes (`routes/web.php`)
@@ -95,12 +110,18 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`) deploys to Cloudflare P
 3. Starts Laravel dev server, then exports static site with `bare`
 4. Deploys to Cloudflare Pages via `wrangler`
 
-The workflow triggers on push but **pushing to `master` alone does not update the production site**. To deploy to `biosecurity-world.pages.dev`, you must manually trigger the workflow:
+**Pushing code to `master` does deploy to production.** The push trigger matches every path except `.github/**` and `public/data/**`, so any change under `app/`, `resources/`, `public/` (outside `data/`) etc. ships as soon as it lands on master. There is also a weekly run (Mondays 06:00 UTC) that refreshes the data.
+
+Trigger the workflow by hand only when the push trigger will not fire — a workflow-only change, or re-running a deploy without a new commit:
 ```bash
 gh workflow run deploy.yml --ref master
 ```
+Beware that pushing and dispatching together starts two concurrent runs, both of which deploy.
 
-The workflow path filter excludes `.github/**`, so workflow-only changes also need `workflow_dispatch` to trigger.
+**Verifying a deploy — use the right URL.** The live site is `https://biosecurity.world`, and the Pages project's own subdomain is `https://biosecurity-world-966.pages.dev` (note the suffix; wrangler prints it at the end of the deploy step). `biosecurity-world.pages.dev` is a *different* project serving a stale copy — and it answers `200` with fallback HTML even for paths that do not exist, so checking it will silently mislead you. When verifying an asset, assert on the content type and size, not just the status code:
+```bash
+curl -s -o /dev/null -w '%{http_code} %{content_type} %{size_download}\n' https://biosecurity.world/fonts/space-grotesk-latin.woff2
+```
 
 ## Environment Setup
 
