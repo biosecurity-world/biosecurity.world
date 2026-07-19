@@ -4,7 +4,7 @@
     /** @var \App\Services\NotionData\Tree\Tree $tree */
 @endphp
 
-<x-layouts.default class="w-full bg-white antialiased" title="Understand the biosecurity landscape.">
+<x-layouts.default class="bg-paper text-ink w-full antialiased" title="Understand the biosecurity landscape.">
     <x-slot:head>
         <script>
             ;{{-- format-ignore-start --}}
@@ -35,16 +35,30 @@
 
                 setupToggle('filters-toggle', 'filters-content', 'filters-chevron', 'filters-hint')
                 setupToggle('faq-toggle', 'faq-content', 'faq-chevron', 'faq-hint')
+
+                // Collapsed location pills: "+ N…" reveals the rest of a region's locations
+                document.querySelectorAll('.location-more-toggle').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const expanded = btn.getAttribute('aria-expanded') === 'true'
+                        btn.closest('ul')
+                            .querySelectorAll('.location-overflow')
+                            .forEach(function (li) {
+                                li.classList.toggle('hidden', expanded)
+                            })
+                        btn.setAttribute('aria-expanded', String(!expanded))
+                        btn.textContent = expanded ? btn.dataset.moreLabel : '− less'
+                    })
+                })
             })
         </script>
 
         @vite("resources/js/map.ts")
     </x-slot>
-    <header class="w-full bg-white pt-4 pb-8 lg:pt-8">
+    <header class="bg-paper w-full pt-4 pb-8 lg:pt-8">
         <x-navbar class="mt-4" />
 
         <h1
-            class="font-display text-primary-900 mx-auto mt-6 max-w-3xl px-6 text-3xl font-bold tracking-tight sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
+            class="font-display text-hero mx-auto mt-6 max-w-3xl px-6 text-3xl font-bold tracking-tight text-balance sm:mt-16 md:text-center lg:mt-24 lg:text-center lg:text-6xl"
         >
             Understand the biosecurity landscape.
         </h1>
@@ -53,10 +67,10 @@
             class="mx-auto mt-6 mb-8 max-w-7xl space-y-6 px-6 md:mt-16 md:grid md:grid-cols-3 md:space-y-0 md:gap-x-8 lg:mt-20 xl:gap-x-12 xl:px-0"
         >
             <li>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Up-to-date</h2>
+                <div class="border-sand-400 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b pb-2 lg:pb-2.5">
+                    <h2 class="font-display text-ink font-semibold lg:text-lg xl:text-2xl">Up-to-date</h2>
                     <span
-                        class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600"
+                        class="border-sand-300 text-ink-muted inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-xs font-medium"
                         title="The map is rebuilt and redeployed from the live Notion database on every update."
                     >
                         <span class="relative flex h-2 w-2" aria-hidden="true">
@@ -73,36 +87,35 @@
                         </time>
                     </span>
                 </div>
-                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
 
-                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
-                    Humans regularly update the map and our team monitors privileged channels for announcements about
-                    new organizations.
+                <p class="text-ink-muted mt-2 max-w-[65ch] lg:mt-3 xl:text-lg">
+                    We regularly update the map and monitor announcements about new organizations.
                 </p>
             </li>
             <li>
-                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Crowd-sourced</h2>
-                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
+                <div class="border-sand-400 border-b pb-2 lg:pb-2.5">
+                    <h2 class="font-display text-ink font-semibold lg:text-lg xl:text-2xl">Crowd-sourced</h2>
+                </div>
 
                 <!-- prettier-ignore -->
-                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
-                    We encourage submissions and corrections, which are individually reviewed by researchers from
-                    <a href="https://www.ens.psl.eu" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">ENS</a>
+                <p class="text-ink-muted mt-2 max-w-[65ch] lg:mt-3 xl:text-lg">
+                    We encourage
+                    <a href="https://biosecurityworld.notion.site/33a4061a75b7806fad1dee0fcd2e921a" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">submissions</a>
                     and
-                    <a href="https://ox.ac.uk" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">Oxford University</a>.
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">corrections</a>.
                 </p>
             </li>
             <li>
-                <h2 class="font-display text-gray-900 lg:text-lg xl:text-2xl">Transparent</h2>
-                <hr class="mt-1.5 hidden w-8 border-gray-300 lg:block" />
+                <div class="border-sand-400 border-b pb-2 lg:pb-2.5">
+                    <h2 class="font-display text-ink font-semibold lg:text-lg xl:text-2xl">Transparent</h2>
+                </div>
 
                 <!-- prettier-ignore -->
-                <p class="mt-1 max-w-[65ch] text-gray-600 lg:mt-2 xl:text-lg">
-                    As an
+                <p class="text-ink-muted mt-2 max-w-[65ch] lg:mt-3 xl:text-lg">
+                    This is an
                     <a href="https://github.com/biosecurity-world/biosecurity.world" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">open-source</a>
                     and
-                    <a href="{{ $databaseUrl }}" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">open-data</a>
-                    scientific project, we keep a record of our inclusion decisions for people to challenge.
+                    <a href="{{ $databaseUrl }}" target="_blank" rel="noopener noreferrer" class="text-primary-700 hover:text-primary-500 underline">open-data</a>&nbsp;project.
                 </p>
             </li>
         </ul>
@@ -110,11 +123,14 @@
 
     <div class="mx-auto flex w-full flex-col" id="map-wrapper">
         <!-- Filters section - collapsible, above map -->
-        <aside id="filters-sidebar" class="w-full border border-gray-200 bg-white">
+        <aside
+            id="filters-sidebar"
+            class="border-sand-300 mx-4 overflow-hidden rounded-2xl border bg-white shadow-sm lg:mx-6"
+        >
             <button
                 type="button"
                 id="filters-toggle"
-                class="bg-primary-900 hover:bg-primary-800 flex w-full cursor-pointer items-center justify-between px-6 py-3 text-left transition"
+                class="bg-band hover:bg-band-light flex w-full cursor-pointer items-center justify-between px-6 py-3 text-left transition"
                 aria-expanded="true"
                 aria-controls="filters-content"
             >
@@ -134,31 +150,37 @@
                     <span class="font-display text-base font-semibold text-white">Filter organizations</span>
                     <span id="filters-hint" class="text-sm text-white/70">(click to collapse)</span>
                 </div>
-                <svg
-                    id="filters-chevron"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    class="size-5 text-white/70 transition-transform duration-200"
-                    style="transform: rotate(180deg)"
-                >
-                    <path
-                        fill-rule="evenodd"
-                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                        clip-rule="evenodd"
-                    />
-                </svg>
+                <div class="flex items-center gap-4">
+                    <!-- prettier-ignore -->
+                    <span class="text-primary-200 hidden text-sm sm:inline">
+                        <span id="filter-count-current" class="font-semibold text-white">{{ count($filterData) }}</span> / {{ count($filterData) }} organizations
+                    </span>
+                    <svg
+                        id="filters-chevron"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        class="size-5 text-white/70 transition-transform duration-200"
+                        style="transform: rotate(180deg)"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </div>
             </button>
 
-            <div id="filters-content" class="overflow-hidden border-t border-gray-200 bg-gray-50 px-6 py-5">
-                <div class="mx-auto max-w-7xl space-y-5">
+            <div id="filters-content" class="border-sand-300 overflow-hidden border-t bg-white px-6 py-4">
+                <div class="mx-auto max-w-7xl space-y-3.5">
                     <!-- Row 1: High-level focus + GCBR toggle + Activities -->
-                    <div class="flex flex-wrap items-center gap-x-10 gap-y-4">
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-3">
                         <!-- High-level focus -->
                         <fieldset class="flex items-center gap-3">
                             <legend class="sr-only">High-level focus</legend>
                             <span class="text-sm font-semibold text-gray-700">Focus</span>
-                            <div class="flex rounded-xl bg-white shadow-sm">
+                            <div class="bg-sand-100 border-sand-300 flex gap-1 rounded-xl border p-1">
                                 <div>
                                     <input
                                         type="checkbox"
@@ -169,10 +191,9 @@
                                     />
                                     <label
                                         for="domain_technical"
-                                        class="peer-checked:border-technical peer-checked:bg-technical peer-focus:border-technical peer-focus:ring-technical hover:peer-checked:bg-technical/80 flex cursor-pointer items-center rounded-l-xl border border-gray-200 px-4 py-1.5 transition peer-focus:ring-2 hover:peer-not-checked:bg-gray-50"
+                                        class="peer-focus:ring-technical flex cursor-pointer items-center rounded-lg px-4 py-1.5 transition peer-checked:bg-white peer-checked:shadow-sm peer-focus:ring-2 hover:peer-not-checked:bg-white/60"
                                     >
                                         <x-at-technical class="grow" />
-                                        <x-heroicon-m-check class="check size-5 text-white" />
                                     </label>
                                 </div>
                                 <div>
@@ -185,10 +206,9 @@
                                     />
                                     <label
                                         for="domain_governance"
-                                        class="peer-checked:border-governance peer-checked:bg-governance peer-focus:border-governance peer-focus:ring-governance hover:peer-checked:bg-governance/80 flex cursor-pointer items-center rounded-r-xl border border-l-0! border-gray-200 px-4 py-1.5 transition peer-focus:ring-2 hover:peer-not-checked:bg-gray-50"
+                                        class="peer-focus:ring-governance flex cursor-pointer items-center rounded-lg px-4 py-1.5 transition peer-checked:bg-white peer-checked:shadow-sm peer-focus:ring-2 hover:peer-not-checked:bg-white/60"
                                     >
                                         <x-at-governance class="grow" />
-                                        <x-heroicon-m-check class="check size-5 text-white" />
                                     </label>
                                 </div>
                             </div>
@@ -216,7 +236,7 @@
                                             value="{{ $activity->id }}"
                                             kind="activity-checkbox"
                                             style="--fg: {{ $fg }}; --bg: {{ $bg }}; --border: {{ $border}}"
-                                            class="hover:border-primary-700 peer-checked:border-opacity-20 border bg-white text-gray-700 shadow-sm transition peer-checked:border-(--border) peer-checked:bg-(--bg) peer-checked:text-(--fg) hover:bg-white hover:text-(--fg)"
+                                            class="border-sand-300 hover:border-primary-700 border bg-white text-gray-500 transition peer-checked:border-(--border) peer-checked:bg-(--bg) peer-checked:text-(--fg) hover:bg-white hover:text-(--fg)"
                                         >
                                             <span class="sr-only">Toggle activity</span>
                                             <x-activity-icon
@@ -236,9 +256,9 @@
 
                     <!-- Row 2: Location hints -->
                     @if ($categorizedLocations->isNotEmpty())
-                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                            <div class="mb-3 flex items-center gap-3">
-                                <h4 class="text-sm font-semibold text-gray-700">Locations</h4>
+                        <div class="bg-card border-sand-300 rounded-xl border p-3.5">
+                            <div class="mb-2.5 flex items-center gap-3">
+                                <h4 class="font-display text-ink text-base font-semibold">Locations</h4>
                                 @foreach ($topLevelLocations as $location)
                                     <div>
                                         <x-checkbox-as-pill
@@ -247,7 +267,7 @@
                                             kind="location-checkbox"
                                             data-global-offset="{{ $location->globalSortOrder() }}"
                                             data-top-level="true"
-                                            class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
+                                            class="peer-checked:bg-primary-50 peer-checked:border-mint-border peer-checked:text-primary-700 bg-sand-100 border-sand-300 border text-sm text-gray-400"
                                         >
                                             <span class="leading-none select-none">
                                                 {{ $location->label }}
@@ -256,7 +276,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <div class="columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3">
+                            <div class="columns-1 gap-5 space-y-3 sm:columns-2 md:columns-3">
                                 @foreach ($categorizedLocations as $regionValue => $locations)
                                     @php($region = LocationRegion::tryFrom($regionValue))
                                     @continue(! $region)
@@ -266,7 +286,7 @@
                                         class="break-inside-avoid"
                                         id="locations_wrapper_{{ Str::slug($region->value) }}"
                                     >
-                                        <div class="mb-2 flex w-full items-center gap-2">
+                                        <div class="mb-1.5 flex w-full items-center gap-2">
                                             <x-checkbox
                                                 name="locations_master_checkbox_{{ Str::slug($region->value) }}"
                                                 checked
@@ -293,15 +313,19 @@
                                             @endif
                                         </div>
                                         @if ($children->isNotEmpty())
+                                            @php($visibleLocationCount = 6)
+                                            @php($collapsible = $children->count() > $visibleLocationCount + 2)
                                             <ul class="flex cursor-pointer flex-wrap gap-1.5">
                                                 @foreach ($children as $location)
-                                                    <li>
+                                                    <li
+                                                        @class(["location-overflow hidden" => $collapsible && $loop->index >= $visibleLocationCount])
+                                                    >
                                                         <x-checkbox-as-pill
                                                             name="location_{{ $location->id }}"
                                                             value="{{ $location->id }}"
                                                             kind="location-checkbox"
                                                             data-global-offset="{{ $location->globalSortOrder() }}"
-                                                            class="{{ $location->isCountry() ? 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-600 rounded-md! uppercase' : 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-600' }}"
+                                                            class="{{ $location->isCountry() ? 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-mint-border peer-checked:text-primary-700 bg-sand-100 border-sand-300 border text-sm text-gray-500 rounded-md! uppercase' : 'hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-mint-border peer-checked:text-primary-700 bg-sand-100 border-sand-300 border text-sm text-gray-500' }}"
                                                         >
                                                             <span class="leading-none select-none">
                                                                 {{ $location->label }}
@@ -309,6 +333,19 @@
                                                         </x-checkbox-as-pill>
                                                     </li>
                                                 @endforeach
+
+                                                @if ($collapsible)
+                                                    <li>
+                                                        <button
+                                                            type="button"
+                                                            class="location-more-toggle bg-sand-100 border-sand-300 cursor-pointer rounded-full border px-2.5 py-1 text-sm font-semibold text-gray-500 hover:border-gray-400 hover:text-gray-700"
+                                                            aria-expanded="false"
+                                                            data-more-label="+ {{ $children->count() - $visibleLocationCount }}…"
+                                                        >
+                                                            + {{ $children->count() - $visibleLocationCount }}…
+                                                        </button>
+                                                    </li>
+                                                @endif
                                             </ul>
                                         @endif
                                     </div>
@@ -318,21 +355,21 @@
                     @endif
 
                     <!-- Row 3: Intervention focuses -->
-                    <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div class="mb-3 flex items-center justify-between">
+                    <div class="bg-card border-sand-300 rounded-xl border p-3.5">
+                        <div class="mb-2.5 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <h4 class="text-sm font-semibold text-gray-700">Intervention focuses</h4>
+                                <h4 class="font-display text-ink text-base font-semibold">Intervention focuses</h4>
                                 <x-checkbox-as-pill
                                     name="show_no_focus"
                                     value="1"
                                     kind="no-focus-checkbox"
-                                    class="peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-400"
+                                    class="peer-checked:bg-primary-50 peer-checked:border-mint-border peer-checked:text-primary-700 bg-sand-100 border-sand-300 border text-sm text-gray-400"
                                 >
                                     <span class="leading-none select-none">No specific focus</span>
                                 </x-checkbox-as-pill>
                             </div>
                             <button
-                                class="resets-filters focusable flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                class="resets-filters focusable border-sand-300 hover:bg-sand-100 flex items-center gap-1.5 rounded-lg border bg-white px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -349,10 +386,13 @@
                                 <span>Reset all</span>
                             </button>
                         </div>
-                        <div class="grid gap-4 md:grid-cols-3">
+                        <div
+                            class="grid gap-x-6 gap-y-3 md:grid-cols-(--focus-columns)"
+                            style="--focus-columns: {{ $focusColumns }}"
+                        >
                             @foreach ($categorizedFocuses as $category => $focuses)
                                 <div id="focuses_wrapper_{{ $category }}">
-                                    <div class="mb-2 flex items-center gap-2">
+                                    <div class="mb-1.5 flex items-center gap-2">
                                         <x-checkbox
                                             name="focuses_master_checkbox_{{ $category }}"
                                             checked
@@ -374,7 +414,7 @@
                                                     value="{{ $focus->id }}"
                                                     kind="focus-checkbox"
                                                     data-global-offset="{{ $focus->globalSortOrder() }}"
-                                                    class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-primary-200 peer-checked:text-primary-800 border border-gray-200 bg-gray-50 text-sm text-gray-600"
+                                                    class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-mint-border bg-sand-100 border-sand-300 border text-sm text-gray-500 peer-checked:text-[#3f6152]"
                                                 >
                                                     <span class="leading-none select-none">
                                                         {{ $focus->label }}
@@ -393,7 +433,7 @@
 
         <!-- Map section - full width -->
         <main
-            class="relative w-full overflow-hidden border-x border-b border-gray-200 bg-gray-100"
+            class="border-sand-300 bg-paper relative mx-4 mt-4 mb-6 overflow-hidden rounded-2xl border lg:mx-6"
             style="min-height: 300px"
         >
             <section data-state="error" aria-hidden="true" class="app-state state-inactive">
@@ -408,7 +448,7 @@
                     </p>
                     <a
                         href="javascript:window.location.reload();"
-                        class="focusable mt-4 inline-flex items-center space-x-2 rounded-md border border-gray-200 bg-white px-4 py-1"
+                        class="focusable border-sand-300 hover:bg-sand-100 mt-4 inline-flex items-center space-x-2 rounded-md border bg-white px-4 py-1"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
                             <path
@@ -446,16 +486,16 @@
                 <div class="flex flex-col items-center justify-center text-center">
                     <h3 class="font-display text-xl">There are no entries matching your filters.</h3>
                     <button
-                        class="resets-filters focusable mt-4 flex items-center space-x-2 rounded-md border border-gray-200 bg-white px-4 py-1 hover:bg-gray-50"
+                        class="resets-filters focusable border-sand-300 hover:bg-sand-100 mt-4 flex items-center space-x-2 rounded-md border bg-white px-4 py-1"
                     >
                         Reset the filters
                     </button>
                 </div>
             </section>
             <section data-state="success" class="app-state state-inactive" aria-hidden="true">
-                <div class="left-0 z-20 w-full max-w-md border-r border-gray-200 bg-white" id="entry-wrapper"></div>
+                <div class="border-sand-300 left-0 z-20 w-full max-w-md border-r bg-white" id="entry-wrapper"></div>
                 <div
-                    class="pointer-events-none left-0 z-20 flex w-full max-w-md justify-center border-r border-gray-200 bg-gray-50 pt-16 opacity-0 transition-opacity"
+                    class="border-sand-300 bg-card pointer-events-none left-0 z-20 flex w-full max-w-md justify-center border-r pt-16 opacity-0 transition-opacity"
                     id="entry-loader"
                 >
                     <svg
@@ -482,7 +522,7 @@
                 <div id="zoom-controls" class="absolute top-3 right-3 z-10 flex flex-col gap-1">
                     <button
                         id="zoom-in"
-                        class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50"
+                        class="border-sand-300 text-ink-muted hover:bg-sand-100 flex h-8 w-8 items-center justify-center rounded-md border bg-white shadow-sm"
                         title="Zoom in"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
@@ -493,7 +533,7 @@
                     </button>
                     <button
                         id="zoom-out"
-                        class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50"
+                        class="border-sand-300 text-ink-muted hover:bg-sand-100 flex h-8 w-8 items-center justify-center rounded-md border bg-white shadow-sm"
                         title="Zoom out"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
@@ -518,7 +558,7 @@
         <button
             type="button"
             id="faq-toggle"
-            class="bg-primary-900 hover:bg-primary-800 flex w-full cursor-pointer items-center justify-between px-6 py-3 text-left transition"
+            class="bg-band hover:bg-band-light flex w-full cursor-pointer items-center justify-between px-6 py-3 text-left transition"
             aria-expanded="false"
             aria-controls="faq-content"
         >
@@ -552,10 +592,10 @@
                 />
             </svg>
         </button>
-        <div id="faq-content" class="hidden overflow-hidden border-t border-gray-200 bg-gray-50 px-6 py-8">
+        <div id="faq-content" class="border-sand-300 bg-paper hidden overflow-hidden border-t px-6 py-8">
             <div class="mx-auto max-w-3xl space-y-8">
                 <div>
-                    <h3 class="font-display mb-4 text-lg font-semibold text-gray-900">Goals</h3>
+                    <h3 class="font-display text-ink mb-4 text-lg font-semibold">Goals</h3>
                     <div class="space-y-3">
                         <x-faq-item title="What is the purpose of this biosecurity landscape map?">
                             <!-- prettier-ignore -->
@@ -591,7 +631,7 @@
                 </div>
 
                 <div>
-                    <h3 class="font-display mb-4 text-lg font-semibold text-gray-900">Content</h3>
+                    <h3 class="font-display text-ink mb-4 text-lg font-semibold">Content</h3>
                     <div class="space-y-3">
                         <x-faq-item title="How often is the database updated?">
                             <!-- prettier-ignore -->
@@ -636,7 +676,7 @@
                 </div>
 
                 <div>
-                    <h3 class="font-display mb-4 text-lg font-semibold text-gray-900">Properties & Filters</h3>
+                    <h3 class="font-display text-ink mb-4 text-lg font-semibold">Properties & Filters</h3>
                     <div class="space-y-3">
                         <x-faq-item title="What do the different 'Organization Types' mean?">
                             <p>

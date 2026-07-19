@@ -1,15 +1,15 @@
-<x-layouts.default :title="$entry->label" class="bg-white text-gray-900">
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur">
+<x-layouts.default :title="$entry->label" class="bg-paper text-ink">
+    <header class="bg-paper/80 sticky top-0 z-40 backdrop-blur">
         <x-navbar class="mt-4" />
     </header>
 
     <main class="mx-auto mt-8 w-full max-w-5xl px-6 xl:px-0">
         <section class="mx-auto mt-8 max-w-5xl">
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 py-5">
+            <div class="border-sand-300 rounded-2xl border bg-white px-6 py-5">
                 <div class="items-center justify-between gap-6 md:flex">
                     <div>
-                        <h2 class="font-display text-lg font-bold text-gray-900">Explore the biosecurity landscape</h2>
-                        <p class="mt-1 text-sm text-gray-700">
+                        <h2 class="font-display text-ink text-lg font-bold">Explore the biosecurity landscape</h2>
+                        <p class="text-ink-muted mt-1 text-sm">
                             See where this organization fits within the broader map of biosecurity work around the
                             world.
                         </p>
@@ -36,19 +36,19 @@
                 </div>
             </div>
         </section>
-        <article class="mt-8 rounded-3xl border border-gray-200 bg-white shadow-xs">
+        <article class="border-sand-300 mt-8 rounded-3xl border bg-white shadow-xs">
             <header
-                class="flex flex-col items-start justify-between gap-4 rounded-t-3xl border-b border-gray-200 bg-gray-50 px-6 py-5 md:flex-row md:items-center"
+                class="border-sand-300 bg-card flex flex-col items-start justify-between gap-4 rounded-t-3xl border-b px-6 py-5 md:flex-row md:items-center"
             >
                 <div class="flex items-center gap-3">
                     <x-entry-logo
                         :logo="$entry->logo"
                         :organizationType="$entry->organizationType"
-                        class="size-12 rounded-lg border border-gray-200 bg-white"
+                        class="border-sand-300 size-12 rounded-lg border bg-white"
                         alt="{{ $entry->label }}'s logo"
                     />
                     <div>
-                        <h1 class="font-display text-2xl leading-tight font-bold text-gray-900">
+                        <h1 class="font-display text-ink text-2xl leading-tight font-bold">
                             <a
                                 class="text-primary-700 hover:text-primary-800 inline-flex items-center underline"
                                 target="_blank"
@@ -72,7 +72,7 @@
                                 </svg>
                             </a>
                         </h1>
-                        <p class="mt-0.5 text-sm text-gray-600">
+                        <p class="text-ink-muted mt-0.5 text-sm">
                             {{ ucfirst($entry->nounForOrganizationType()) }} • {{ $entry->host() }}
                         </p>
                     </div>
@@ -110,14 +110,14 @@
                     @endforeach
                 </div>
 
-                <div class="mt-5 text-justify text-gray-800">
+                <div class="text-ink-muted mt-5 text-justify">
                     <x-notion-rich-text :text="$entry->description" />
                 </div>
 
                 @if ($entry->interventionFocuses->isNotEmpty())
                     <div class="mt-6">
-                        <p class="text-gray-900">This {{ $entry->nounForOrganizationType() }} works on</p>
-                        <ul class="mt-2 list-inside list-disc text-gray-800">
+                        <p class="text-ink">This {{ $entry->nounForOrganizationType() }} works on</p>
+                        <ul class="text-ink-muted mt-2 list-inside list-disc">
                             @foreach ($entry->interventionFocuses as $focus)
                                 <li>
                                     <span>{{ $focus->label }}</span>
@@ -128,9 +128,9 @@
                 @endif
             </section>
 
-            <footer class="flex flex-wrap items-center gap-4 border-t border-gray-200 bg-gray-50 px-6 py-3">
+            <footer class="border-sand-300 bg-card flex flex-wrap items-center gap-4 border-t px-6 py-3">
                 <a
-                    class="inline-flex items-center text-sm text-gray-700 underline"
+                    class="text-ink-muted inline-flex items-center text-sm underline"
                     href="{{ $entry->notionUrl() }}"
                     target="_blank"
                     rel="noopener"
@@ -152,10 +152,10 @@
                     </svg>
                 </a>
 
-                <span aria-hidden="true" class="hidden h-4 w-px bg-gray-300 md:inline-block"></span>
+                <span aria-hidden="true" class="bg-sand-400 hidden h-4 w-px md:inline-block"></span>
 
                 <a
-                    class="inline-flex items-center text-sm text-gray-700 underline"
+                    class="text-ink-muted inline-flex items-center text-sm underline"
                     href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
                     target="_blank"
                     rel="noopener noreferrer"

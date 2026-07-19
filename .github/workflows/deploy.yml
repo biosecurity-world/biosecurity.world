@@ -103,6 +103,11 @@ jobs:
           mkdir -p dist/data
           cp public/data/entries.csv dist/data/entries.csv
 
+      - name: Copy self-hosted fonts into dist
+        run: |
+          mkdir -p dist/fonts
+          cp public/fonts/*.woff2 dist/fonts/
+
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --keep BRANCH_NAME --command wrangler pages deploy ./dist --project-name biosecurity-world --branch ${BRANCH_NAME}
         env:

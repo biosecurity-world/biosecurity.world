@@ -703,6 +703,8 @@ filtersStore.onChange(
             entrygroupsGroup.remove()
         }
 
+        const filterCountEl = document.getElementById("filter-count-current")
+
         filtersStore.onChange(
             "*",
             (state) => {
@@ -712,6 +714,14 @@ filtersStore.onChange(
                     activityCount: activityInputs.length,
                     focusesCount: Object.keys(focusesLabels).length,
                 })
+
+                if (filterCountEl) {
+                    const matching = new Set<string>()
+                    document.querySelectorAll<HTMLElement>("a[data-entry].matches-filters").forEach((el) => {
+                        matching.add(el.dataset.entry!)
+                    })
+                    filterCountEl.textContent = String(matching.size)
+                }
 
                 debug().flush($centerWrapper)
 

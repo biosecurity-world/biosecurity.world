@@ -10,9 +10,16 @@ use App\Services\NotionData\NotionClient;
 use App\Services\NotionData\Tree\Node;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 
 class ShowWelcomeController
 {
+    /**
+     * Characters' worth of padding, border and gap that every pill costs on top
+     * of its label, used when weighting how wide a column of pills should be.
+     */
+    private const PILL_BASE_WIDTH = 6;
+
     public function __invoke(NotionClient $notion): View
     {
         $tree = $notion->tree();
@@ -34,12 +41,24 @@ class ShowWelcomeController
             return $exportedNode;
         });
 
+        /** @var \Illuminate\Support\Collection<string, \Illuminate\Support\Collection<int, InterventionFocus>> $categorizedFocuses */
+        $categorizedFocuses = $tree->interventionFocuses()
+            ->groupBy(fn (InterventionFocus $focus) => $focus->category()->value)
+            ->sortKeys()
+            ->map->sortBy('label');
+
         return view('welcome', [
             'tree' => $tree,
-            'categorizedFocuses' => $tree->interventionFocuses()
-                ->groupBy(fn (InterventionFocus $focus) => $focus->category()->value)
-                ->sortKeys()
-                ->map->sortBy('label'),
+            'categorizedFocuses' => $categorizedFocuses,
+            // Width share for each intervention-focus column, proportional to the
+            // text it holds, so a short category (Detection) stops reserving a full
+            // third of the row. `fr` keeps min-content as its floor, so category
+            // headings never get crushed.
+            'focusColumns' => $categorizedFocuses
+                ->map(fn (Collection $focuses): string => $focuses->sum(
+                    fn (InterventionFocus $focus): int => mb_strlen($focus->label) + self::PILL_BASE_WIDTH
+                ).'fr')
+                ->implode(' '),
             'filterData' => $tree->entries()->mapWithKeys(function (Entry $entry) {
                 return [$entry->id => [
                     $entry->getActivitiesBitmask(),

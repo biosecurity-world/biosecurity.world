@@ -17,19 +17,16 @@ export type LayoutMode = "nested" | "branching"
 
 // High-level category mapping (using actual category labels from data)
 const HIGH_LEVEL_CATEGORIES: Record<string, {order: number; label: string; color: string; fullWidth?: boolean}> = {
-    Prevention: {order: 0, label: "Prevention", color: "#10b981"},
-    Detection: {order: 1, label: "Detection", color: "#3b82f6"},
-    Response: {order: 2, label: "Response", color: "#8b5cf6"},
-    Transversal: {order: 3, label: "Transversal", color: "#f59e0b", fullWidth: true},
+    Prevention: {order: 0, label: "Prevention", color: "#059669"},
+    Detection: {order: 1, label: "Detection", color: "#2563eb"},
+    Response: {order: 2, label: "Response", color: "#7c3aed"},
+    Transversal: {order: 3, label: "Transversal", color: "#d97706", fullWidth: true},
 }
 
-// Darker shades for subcategory backgrounds (matching HIGH_LEVEL_CATEGORIES)
-const SUBCATEGORY_COLORS: Record<string, {bg: string; border: string}> = {
-    Prevention: {bg: "#10b98125", border: "#10b98150"},
-    Detection: {bg: "#3b82f625", border: "#3b82f650"},
-    Response: {bg: "#8b5cf625", border: "#8b5cf650"},
-    Transversal: {bg: "#f59e0b25", border: "#f59e0b50"},
-}
+// Zones are unified white surfaces; subcategories share one neutral warm-gray treatment,
+// the zone color only appears as a top rule and a dot next to the title.
+const SUBCATEGORY_BG = "#faf9f6"
+const SUBCATEGORY_BORDER = "#efece5"
 
 type PreparedNode = (typeof window.nodes)[number] & {el: SVGElement} & Partial<ProcessedNode> & {
         children?: PreparedNode[]
@@ -322,11 +319,42 @@ function countLabelChars(node: PreparedNode): number {
     return total
 }
 
+// Number of matching entry pills displayed inside a node (used for the "· n" counters)
+function countMatchingEntries(node: PreparedNode): number {
+    if (node.od === 0) {
+        const entryIds = node.entries || []
+        let count = 0
+        for (const entryId of entryIds) {
+            const entryLink = document.querySelector(`a[data-entrygroup="${node.id}"][data-entry="${entryId}"]`)
+            if (entryLink?.classList.contains("matches-filters")) {
+                count++
+            }
+        }
+        return count
+    }
+    let total = 0
+    for (const child of node.children || []) {
+        if (!child.filtered) {
+            total += countMatchingEntries(child)
+        }
+    }
+    return total
+}
+
 function countLabelCharsInChildren(children: PreparedNode[]): number {
     let total = 0
     for (const child of children) {
         if (child.filtered) continue
         total += countLabelChars(child)
+    }
+    return total
+}
+
+function countMatchingEntriesInChildren(children: PreparedNode[]): number {
+    let total = 0
+    for (const child of children) {
+        if (child.filtered) continue
+        total += countMatchingEntries(child)
     }
     return total
 }
@@ -346,10 +374,11 @@ function createHighLevelBox(
     const box = document.createElement("div")
     box.className = "high-level-box"
     box.style.cssText = `
-        background: linear-gradient(135deg, ${color}15 0%, ${color}08 100%);
-        border: 2px solid ${color};
-        border-radius: 12px;
-        padding: 12px;
+        background: #ffffff;
+        border: 1px solid #e7e3da;
+        border-top: 3px solid ${color};
+        border-radius: 0 0 14px 14px;
+        padding: 16px 14px 14px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -357,18 +386,42 @@ function createHighLevelBox(
         ${fullWidth ? "width: 100%;" : `flex: ${flexGrow} 1 0%;`}
     `
 
-    // Header
+    // Header: colored dot + dark title + matching-entry count
     const header = document.createElement("div")
     header.className = "box-header"
     header.style.cssText = `
-        font-size: 15px;
-        font-weight: 700;
-        color: ${color};
-        margin-bottom: 10px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid ${color}40;
+        display: flex;
+        align-items: baseline;
+        gap: 9px;
+        margin-bottom: 12px;
     `
-    header.textContent = label
+
+    const dot = document.createElement("span")
+    dot.style.cssText = `width: 8px; height: 8px; border-radius: 50%; background: ${color}; flex: none;`
+    header.appendChild(dot)
+
+    const title = document.createElement("span")
+    title.style.cssText = `
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+        color: #14231b;
+        letter-spacing: -0.01em;
+    `
+    title.textContent = label
+    header.appendChild(title)
+
+    const count = document.createElement("span")
+    count.style.cssText = `
+        margin-left: auto;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: #9a978e;
+    `
+    count.textContent = String(countMatchingEntriesInChildren(children))
+    header.appendChild(count)
+
     box.appendChild(header)
 
     // Content area for subcategories - single row flexbox, equal heights, width proportional to org count
@@ -433,7 +486,7 @@ function createHighLevelBox(
             gap: 5px;
             margin-top: 10px;
             padding-top: 8px;
-            border-top: 1px dashed ${color}40;
+            border-top: 1px solid ${SUBCATEGORY_BORDER};
         `
         for (const eg of directEntrygroups) {
             renderEntriesInContainer(eg, directEntriesRow, true)
@@ -449,9 +502,6 @@ function createSubcategoryBox(
     parentCategory: string,
     idToNode: Record<number, PreparedNode>,
 ): HTMLElement {
-    // Get colors from parent category
-    const categoryColors = SUBCATEGORY_COLORS[parentCategory] || SUBCATEGORY_COLORS["Transversal"]
-
     // Width proportional to the total displayed label characters of the
     // organisations inside this subcategory.
     const totalChars = countLabelChars(node)
@@ -460,10 +510,10 @@ function createSubcategoryBox(
     const box = document.createElement("div")
     box.className = "subcategory-box"
     box.style.cssText = `
-        background: ${categoryColors.bg};
-        border: 1px solid ${categoryColors.border};
-        border-radius: 6px;
-        padding: 8px;
+        background: ${SUBCATEGORY_BG};
+        border: 1px solid ${SUBCATEGORY_BORDER};
+        border-radius: 11px;
+        padding: 10px 11px;
         min-width: 130px;
         display: flex;
         flex-direction: column;
@@ -480,18 +530,19 @@ function createSubcategoryBox(
         }
     }
 
-    // Header
+    // Header: uppercase small caps with matching-entry count
     const header = document.createElement("div")
     header.className = "subbox-header"
     header.style.cssText = `
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 5px;
-        border-bottom: 1px solid ${categoryColors.border};
-        padding-bottom: 3px;
+        font-size: 10.5px;
+        line-height: 1.3;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #5c5a52;
+        margin-bottom: 8px;
     `
-    header.textContent = label
+    header.textContent = `${label} · ${countMatchingEntries(node)}`
     box.appendChild(header)
 
     // Content - horizontal wrap for entries
@@ -542,24 +593,31 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
         entryClone.style.cssText = `
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 2px 5px;
-            background: #f9fafb;
-            border-radius: 4px;
+            gap: 6px;
+            padding: 3px 9px 3px 3px;
+            background: #ffffff;
+            border: 1px solid #e6e4de;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background 0.15s, border-color 0.15s;
             max-width: 100%;
             min-width: 0;
         `
-        entryClone.onmouseenter = () => (entryClone.style.background = "#e5e7eb")
-        entryClone.onmouseleave = () => (entryClone.style.background = "#f9fafb")
+        entryClone.onmouseenter = () => {
+            entryClone.style.background = "#faf9f6"
+            entryClone.style.borderColor = "#d6d2c7"
+        }
+        entryClone.onmouseleave = () => {
+            entryClone.style.background = "#ffffff"
+            entryClone.style.borderColor = "#e6e4de"
+        }
 
         // Copy logo if exists (it's in a span.entry-logo, may contain img or svg)
         const logoSpan = entryLink.querySelector(".entry-logo")
         if (logoSpan) {
             const logoClone = logoSpan.cloneNode(true) as HTMLElement
             logoClone.style.cssText =
-                "width: 16px; height: 16px; min-width: 16px; border-radius: 2px; overflow: hidden; flex-shrink: 0;"
+                "display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; min-width: 18px; border-radius: 5px; background: #f4f2ec; overflow: hidden; flex-shrink: 0;"
             const imgInClone = logoClone.querySelector("img")
             if (imgInClone) {
                 imgInClone.style.cssText = "width: 100%; height: 100%; object-fit: contain;"
@@ -573,7 +631,7 @@ function renderEntriesInContainer(entryNode: PreparedNode, container: HTMLElemen
             const labelClone = document.createElement("span")
             labelClone.className = "nested-entry-label"
             labelClone.style.cssText =
-                "font-size: 12px; line-height: 1.2; color: #374151; white-space: normal; overflow-wrap: break-word; min-width: 0;"
+                "font-size: 12px; line-height: 1.2; font-weight: 500; color: #3f3d38; white-space: normal; overflow-wrap: break-word; min-width: 0;"
             labelClone.textContent = labelSpan.textContent.trim()
             entryClone.appendChild(labelClone)
         }

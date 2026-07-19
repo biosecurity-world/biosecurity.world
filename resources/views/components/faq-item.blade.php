@@ -2,8 +2,8 @@
     "title",
 ])
 
-<details class="group rounded-xl border border-gray-200 bg-white shadow-xs">
-    <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-semibold text-gray-900">
+<details class="group border-sand-300 rounded-xl border bg-white shadow-xs">
+    <summary class="text-ink flex cursor-pointer list-none items-center justify-between p-4 font-semibold">
         {{ $title }}
         <div class="ml-2 flex-shrink-0">
             <!-- Down arrow - shown when closed -->
@@ -30,7 +30,7 @@
             </svg>
         </div>
     </summary>
-    <div class="px-4 pb-4 text-gray-700">
+    <div class="text-ink-muted px-4 pb-4">
         {{ $slot }}
     </div>
 </details>

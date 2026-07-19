@@ -1,19 +1,19 @@
 <footer aria-labelledby="footer-heading" class="mx-auto max-w-7xl px-6 xl:px-0">
-    <div class="mt-12 border-t border-gray-900/10 py-8">
+    <div class="border-sand-400 mt-12 border-t py-8">
         <h2 id="footer-heading" class="sr-only">Footer</h2>
 
         <div class="justify-between lg:flex">
             <p>
                 <a href="{{ route("welcome", absolute: false) }}" class="font-display">biosecurity.world</a>
 
-                <span class="text-gray-700">&mdash; Understand the biosecurity landscape.</span>
+                <span class="text-ink-muted">&mdash; Understand the biosecurity landscape.</span>
             </p>
 
             <ul class="mt-2 flex space-x-4 overflow-x-scroll lg:mt-0">
                 <li>
                     <a
                         href="https://foreview.org"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        class="text-ink-muted inline-flex text-sm whitespace-nowrap underline"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -37,7 +37,7 @@
                 <li>
                     <a
                         href="https://github.com/biosecurity-world/biosecurity.world"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        class="text-ink-muted inline-flex text-sm whitespace-nowrap underline"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -61,7 +61,7 @@
                 <li>
                     <a
                         href="/data/entries.csv"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        class="text-ink-muted inline-flex text-sm whitespace-nowrap underline"
                         download
                     >
                         <span class="mr-0.5">Download data (CSV)</span>
@@ -84,7 +84,7 @@
                 <li>
                     <a
                         href="https://notion.so/{{ config("services.notion.database") }}"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        class="text-ink-muted inline-flex text-sm whitespace-nowrap underline"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -108,7 +108,7 @@
                 <li>
                     <a
                         href="https://logo.dev"
-                        class="inline-flex text-sm whitespace-nowrap text-gray-700 underline"
+                        class="text-ink-muted inline-flex text-sm whitespace-nowrap underline"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -132,7 +132,7 @@
             </ul>
         </div>
 
-        <p class="mt-4 flex max-w-lg flex-wrap text-gray-700">
+        <p class="text-ink-muted mt-4 flex max-w-lg flex-wrap">
             <a
                 href="https://www.linkedin.com/in/alix-pham/"
                 class="underline"
@@ -213,7 +213,7 @@
             </a>
             <sup class="text-xs">2</sup>
         </p>
-        <p class="mt-1 text-sm text-gray-500">
+        <p class="text-ink-muted mt-1 text-sm opacity-80">
             <sup>1</sup>
             Team,
             <sup>2</sup>

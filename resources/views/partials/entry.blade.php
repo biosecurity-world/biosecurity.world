@@ -1,18 +1,18 @@
-<div class="entry flex min-h-full flex-col justify-between rounded-r-3xl border-t-0 border-r border-gray-200 bg-white">
+<div class="entry border-sand-300 flex min-h-full flex-col justify-between rounded-r-3xl border-t-0 border-r bg-white">
     <div>
         <div
-            class="flex items-center justify-between rounded-tr-3xl border-r border-b border-gray-200 bg-gray-50 py-4 pr-6 pl-4"
+            class="border-sand-300 bg-card flex items-center justify-between rounded-tr-3xl border-r border-b py-4 pr-6 pl-4"
         >
             <ol role="list" class="flex items-center space-x-1 overflow-x-scroll">
                 @foreach ($breadcrumbs as $breadcrumb)
                     <li class="flex items-center">
-                        <span class="mr-1 text-sm font-bold whitespace-nowrap text-gray-700">{{ $breadcrumb }}</span>
+                        <span class="text-ink-muted mr-1 text-sm font-bold whitespace-nowrap">{{ $breadcrumb }}</span>
 
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
                             fill="currentColor"
-                            class="size-5 shrink-0 text-gray-500"
+                            class="size-5 shrink-0 text-gray-400"
                         >
                             <path
                                 fill-rule="evenodd"
@@ -33,13 +33,13 @@
             </ol>
 
             <button
-                class="close-entry group -m-2 flex items-center rounded-full border border-transparent p-2 transition duration-300 hover:border-gray-200 hover:bg-white"
+                class="close-entry hover:border-sand-300 group -m-2 flex items-center rounded-full border border-transparent p-2 transition duration-300 hover:bg-white"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
-                    class="group-hover:text-primary-600 size-5 text-gray-700"
+                    class="group-hover:text-primary-600 text-ink-muted size-5"
                 >
                     <path
                         d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
@@ -160,7 +160,7 @@
                     </svg>
                     @foreach ($entry->locationHints as $location)
                         <span
-                            class="inline-block rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-600"
+                            class="border-sand-300 bg-sand-100 text-ink-muted inline-block rounded-full border px-2 py-0.5 text-xs"
                             data-location-offset="{{ $location->globalSortOrder() }}"
                         >
                             {{ $location->label }}
@@ -170,8 +170,8 @@
             @endif
         </div>
     </div>
-    <div class="space-x-2 rounded-br-3xl border-t border-gray-200 bg-gray-50 px-6 py-2">
-        <a class="inline-flex text-sm text-gray-700 underline" href="{{ $entry->notionUrl() }}">
+    <div class="border-sand-300 bg-card space-x-2 rounded-br-3xl border-t px-6 py-2">
+        <a class="text-ink-muted inline-flex text-sm underline" href="{{ $entry->notionUrl() }}">
             <span class="mr-0.5">Open in Notion</span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +189,7 @@
             </svg>
         </a>
         <a
-            class="inline-flex text-sm text-gray-700 underline"
+            class="text-ink-muted inline-flex text-sm underline"
             href="https://docs.google.com/forms/d/e/1FAIpQLSfJrpJ9o3xpIXOHgdOdkj_yrUt5LadIVbnzwKQk6tKWMuU5xw/viewform?usp=send_form"
         >
             <span class="mr-0.5">Report a problem</span>
