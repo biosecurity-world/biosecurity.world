@@ -13,12 +13,12 @@
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.11",
         "@types/d3": "^7.4.3",
-        "esbuild": "^0.28.1",
-        "laravel-vite-plugin": "^3.1.0",
-        "prettier": "^3.7.4",
-        "tailwindcss": "^4.3.1",
+        "esbuild": "^0.28.2",
+        "laravel-vite-plugin": "^3.2.0",
+        "prettier": "^3.9.6",
+        "tailwindcss": "^4.3.3",
         "typescript": "^5.9.3",
-        "vite": "^8.0.16",
+        "vite": "^8.2.1",
         "vitest": "^3.2.7"
     },
     "pnpm": {
@@ -29,8 +29,8 @@
         }
     },
     "dependencies": {
-        "@panzoom/panzoom": "^4.6.1",
-        "@tailwindcss/vite": "^4.3.1",
+        "@panzoom/panzoom": "^4.6.2",
+        "@tailwindcss/vite": "^4.3.3",
         "d3": "^7.9.0",
         "prettier-plugin-blade": "^2.1.21",
         "prettier-plugin-tailwindcss": "0.6.14"
