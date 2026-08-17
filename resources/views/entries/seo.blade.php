@@ -3,6 +3,7 @@
     :description="$entry->description->toString()"
     :canonical="route('entries.show', ['id' => $entry->id, 'slug' => $entry->slug()], absolute: false)"
     :image="$entry->logo->url"
+    :json-ld="$jsonLd"
     class="bg-paper text-ink"
 >
     <header class="bg-paper/80 sticky top-0 z-40 backdrop-blur">

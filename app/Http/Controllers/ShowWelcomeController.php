@@ -11,6 +11,7 @@ use App\Services\NotionData\Tree\Node;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 
 class ShowWelcomeController
 {
@@ -50,6 +51,15 @@ class ShowWelcomeController
         return view('welcome', [
             'tree' => $tree,
             'categorizedFocuses' => $categorizedFocuses,
+            // schema.org description of the site itself, so the map page is
+            // understood as a catalogue rather than a single article.
+            'jsonLd' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                'name' => Config::string('seo.site_name'),
+                'url' => rtrim(Config::string('seo.url'), '/').'/',
+                'description' => Config::string('seo.description'),
+            ],
             // Width share for each intervention-focus column, proportional to the
             // text it holds, so a short category (Detection) stops reserving a full
             // third of the row. `fr` keeps min-content as its floor, so category

@@ -8,6 +8,7 @@
     class="bg-paper text-ink w-full antialiased"
     title="Understand the biosecurity landscape."
     canonical="/"
+    :json-ld="$jsonLd"
 >
     <x-slot:head>
         <script>

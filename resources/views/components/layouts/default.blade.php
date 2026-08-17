@@ -3,6 +3,7 @@
     "description" => null,
     "canonical" => null,
     "image" => null,
+    "jsonLd" => null,
 ])
 @php
     $seoTitle = $title . " | " . config("seo.site_name");
@@ -44,6 +45,21 @@
     <meta name="twitter:description" content="{{ $seoDescription }}" />
     @if ($image)
         <meta name="twitter:image" content="{{ $image }}" />
+    @endif
+
+    @if ($jsonLd)
+        {{-- HEX flags keep a stray "</script>" or quote in Notion copy from breaking out of the tag. --}}
+        <script type="application/ld+json">
+            {!! json_encode(
+                $jsonLd,
+                JSON_UNESCAPED_SLASHES |
+                    JSON_UNESCAPED_UNICODE |
+                    JSON_HEX_TAG |
+                    JSON_HEX_AMP |
+                    JSON_HEX_APOS |
+                    JSON_HEX_QUOT,
+            ) !!}
+        </script>
     @endif
 
     <link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
