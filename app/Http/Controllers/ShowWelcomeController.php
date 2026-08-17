@@ -41,7 +41,7 @@ class ShowWelcomeController
             return $exportedNode;
         });
 
-        /** @var \Illuminate\Support\Collection<string, \Illuminate\Support\Collection<int, InterventionFocus>> $categorizedFocuses */
+        /** @var Collection<string, Collection<int, InterventionFocus>> $categorizedFocuses */
         $categorizedFocuses = $tree->interventionFocuses()
             ->groupBy(fn (InterventionFocus $focus) => $focus->category()->value)
             ->sortKeys()
