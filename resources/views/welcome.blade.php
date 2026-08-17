@@ -7,13 +7,11 @@
 <x-layouts.default class="bg-paper text-ink w-full antialiased" title="Understand the biosecurity landscape.">
     <x-slot:head>
         <script>
-            ;{{-- format-ignore-start --}}
+            {{-- format-ignore-start --}}
             window.nodes = @json($nodes);
             window.filterData = @json($filterData);
-            {{-- format-ignore-end --}}
-
-            // Collapsible band toggle functionality
-            document.addEventListener('DOMContentLoaded', function () {
+            {{-- format-ignore-end --}}// Collapsible band toggle functionality
+            document.addEventListener("DOMContentLoaded", function () {
                 function setupToggle(toggleId, contentId, chevronId, hintId) {
                     const toggle = document.getElementById(toggleId)
                     const content = document.getElementById(contentId)
@@ -21,39 +19,39 @@
                     const hint = document.getElementById(hintId)
 
                     if (toggle && content && chevron) {
-                        toggle.addEventListener('click', function () {
-                            const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
-                            toggle.setAttribute('aria-expanded', !isExpanded)
-                            content.classList.toggle('hidden')
-                            chevron.style.transform = isExpanded ? '' : 'rotate(180deg)'
+                        toggle.addEventListener("click", function () {
+                            const isExpanded = toggle.getAttribute("aria-expanded") === "true"
+                            toggle.setAttribute("aria-expanded", !isExpanded)
+                            content.classList.toggle("hidden")
+                            chevron.style.transform = isExpanded ? "" : "rotate(180deg)"
                             if (hint) {
-                                hint.textContent = isExpanded ? '(click to expand)' : '(click to collapse)'
+                                hint.textContent = isExpanded ? "(click to expand)" : "(click to collapse)"
                             }
                         })
                     }
                 }
 
-                setupToggle('filters-toggle', 'filters-content', 'filters-chevron', 'filters-hint')
-                setupToggle('faq-toggle', 'faq-content', 'faq-chevron', 'faq-hint')
+                setupToggle("filters-toggle", "filters-content", "filters-chevron", "filters-hint")
+                setupToggle("faq-toggle", "faq-content", "faq-chevron", "faq-hint")
 
                 // Collapsed location pills: "+ N…" reveals the rest of a region's locations
-                document.querySelectorAll('.location-more-toggle').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        const expanded = btn.getAttribute('aria-expanded') === 'true'
-                        btn.closest('ul')
-                            .querySelectorAll('.location-overflow')
+                document.querySelectorAll(".location-more-toggle").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        const expanded = btn.getAttribute("aria-expanded") === "true"
+                        btn.closest("ul")
+                            .querySelectorAll(".location-overflow")
                             .forEach(function (li) {
-                                li.classList.toggle('hidden', expanded)
+                                li.classList.toggle("hidden", expanded)
                             })
-                        btn.setAttribute('aria-expanded', String(!expanded))
-                        btn.textContent = expanded ? btn.dataset.moreLabel : '− less'
+                        btn.setAttribute("aria-expanded", String(!expanded))
+                        btn.textContent = expanded ? btn.dataset.moreLabel : "− less"
                     })
                 })
             })
         </script>
 
-        @vite("resources/js/map.ts")
-    </x-slot>
+        @vite ("resources/js/map.ts")
+    </x-slot:head>
     <header class="bg-paper w-full pt-4 pb-8 lg:pt-8">
         <x-navbar class="mt-4" />
 
@@ -88,9 +86,7 @@
                     </span>
                 </div>
 
-                <p class="text-ink-muted mt-2 max-w-[65ch] lg:mt-3 xl:text-lg">
-                    We regularly update the map and monitor announcements about new organizations.
-                </p>
+                <p class="text-ink-muted mt-2 max-w-[65ch] lg:mt-3 xl:text-lg">We regularly update the map and monitor announcements about new organizations.</p>
             </li>
             <li>
                 <div class="border-sand-400 border-b pb-2 lg:pb-2.5">
@@ -227,9 +223,9 @@
                             <span class="text-sm font-semibold text-gray-700">Activities</span>
                             <ul class="flex flex-wrap gap-2">
                                 @foreach ($tree->activities() as $activity)
-                                    @php($fg = $activity->color->foreground()->withAlpha(1)->toHsla())
-                                    @php($bg = $activity->color->background()->withAlpha(1)->toHsla())
-                                    @php($border = $activity->color->foreground()->withAlpha(0.2)->toHsla())
+                                    @php ($fg = $activity->color->foreground()->withAlpha(1)->toHsla())
+                                    @php ($bg = $activity->color->background()->withAlpha(1)->toHsla())
+                                    @php ($border = $activity->color->foreground()->withAlpha(0.2)->toHsla())
                                     <li>
                                         <x-checkbox-as-pill
                                             name="activity_{{ $activity->id }}"
@@ -269,19 +265,17 @@
                                             data-top-level="true"
                                             class="peer-checked:bg-primary-50 peer-checked:border-mint-border peer-checked:text-primary-700 bg-sand-100 border-sand-300 border text-sm text-gray-400"
                                         >
-                                            <span class="leading-none select-none">
-                                                {{ $location->label }}
-                                            </span>
+                                            <span class="leading-none select-none"> {{ $location->label }} </span>
                                         </x-checkbox-as-pill>
                                     </div>
                                 @endforeach
                             </div>
                             <div class="columns-1 gap-5 space-y-3 sm:columns-2 md:columns-3">
                                 @foreach ($categorizedLocations as $regionValue => $locations)
-                                    @php($region = LocationRegion::tryFrom($regionValue))
-                                    @continue(! $region)
-                                    @php($headerLocation = $locations->first(fn ($l) => $l->isRegionHeader()))
-                                    @php($children = $locations->filter(fn ($l) => ! $l->isRegionHeader()))
+                                    @php ($region = LocationRegion::tryFrom($regionValue))
+                                    @continue (! $region)
+                                    @php ($headerLocation = $locations->first(fn ($l) => $l->isRegionHeader()))
+                                    @php ($children = $locations->filter(fn ($l) => ! $l->isRegionHeader()))
                                     <div
                                         class="break-inside-avoid"
                                         id="locations_wrapper_{{ Str::slug($region->value) }}"
@@ -313,12 +307,12 @@
                                             @endif
                                         </div>
                                         @if ($children->isNotEmpty())
-                                            @php($visibleLocationCount = 6)
-                                            @php($collapsible = $children->count() > $visibleLocationCount + 2)
+                                            @php ($visibleLocationCount = 6)
+                                            @php ($collapsible = $children->count() > $visibleLocationCount + 2)
                                             <ul class="flex cursor-pointer flex-wrap gap-1.5">
                                                 @foreach ($children as $location)
                                                     <li
-                                                        @class(["location-overflow hidden" => $collapsible && $loop->index >= $visibleLocationCount])
+                                                        @class (["location-overflow hidden" => $collapsible && $loop->index >= $visibleLocationCount])
                                                     >
                                                         <x-checkbox-as-pill
                                                             name="location_{{ $location->id }}"
@@ -416,9 +410,7 @@
                                                     data-global-offset="{{ $focus->globalSortOrder() }}"
                                                     class="hover:border-primary-700 peer-checked:bg-primary-50 peer-checked:border-mint-border bg-sand-100 border-sand-300 border text-sm text-gray-500 peer-checked:text-[#3f6152]"
                                                 >
-                                                    <span class="leading-none select-none">
-                                                        {{ $focus->label }}
-                                                    </span>
+                                                    <span class="leading-none select-none"> {{ $focus->label }} </span>
                                                 </x-checkbox-as-pill>
                                             </li>
                                         @endforeach
@@ -618,14 +610,8 @@
                         </x-faq-item>
 
                         <x-faq-item title="How can I use this information?">
-                            <p>
-                                We want users to use this database to better understand the field, and learn about the
-                                different actors.
-                            </p>
-                            <p class="mt-2">
-                                This map can be used for research, networking, identifying potential collaborations, or
-                                simply understanding the scope and diversity of work being done in biosecurity.
-                            </p>
+                            <p>We want users to use this database to better understand the field, and learn about the different actors.</p>
+                            <p class="mt-2">This map can be used for research, networking, identifying potential collaborations, or simply understanding the scope and diversity of work being done in biosecurity.</p>
                         </x-faq-item>
                     </div>
                 </div>
@@ -667,10 +653,7 @@
                         </x-faq-item>
 
                         <x-faq-item title="Is this information publicly available?">
-                            <p>
-                                Yes, this database is publicly accessible. Please share with anyone that could find it
-                                useful, or help us make it better.
-                            </p>
+                            <p>Yes, this database is publicly accessible. Please share with anyone that could find it useful, or help us make it better.</p>
                         </x-faq-item>
                     </div>
                 </div>
@@ -679,38 +662,17 @@
                     <h3 class="font-display text-ink mb-4 text-lg font-semibold">Properties & Filters</h3>
                     <div class="space-y-3">
                         <x-faq-item title="What do the different 'Organization Types' mean?">
-                            <p>
-                                The organization types (such as Research institute, For-profit company, Think tank,
-                                etc.) categorize the primary nature of each entity. This helps users understand the
-                                diversity of organizations in the biosecurity landscape, and filter if they are looking
-                                for a specific type of organization. There is also a specific view where the
-                                organizations are sorted via this property.
-                            </p>
+                            <p>The organization types (such as Research institute, For-profit company, Think tank, etc.) categorize the primary nature of each entity. This helps users understand the diversity of organizations in the biosecurity landscape, and filter if they are looking for a specific type of organization. There is also a specific view where the organizations are sorted via this property.</p>
                         </x-faq-item>
 
                         <x-faq-item title="How is the 'Activity Type' determined for each organization?">
-                            <p>
-                                The Activity Type is based on the primary functions of each organization. An
-                                organization can have multiple activity types, reflecting the diverse nature of their
-                                work in biosecurity. Users can filter according to a specific type of activity. There is
-                                also a specific view where the organizations are sorted via this property.
-                            </p>
+                            <p>The Activity Type is based on the primary functions of each organization. An organization can have multiple activity types, reflecting the diverse nature of their work in biosecurity. Users can filter according to a specific type of activity. There is also a specific view where the organizations are sorted via this property.</p>
                         </x-faq-item>
 
                         <x-faq-item title="What is the 'Intervention Focus' category?">
-                            <p>
-                                The Intervention Focus category provides more specific information about the areas each
-                                organization works on, such as synthetic biology, lab biosafety, or crisis management.
-                            </p>
-                            <p class="mt-2">
-                                There is a higher-level focus type which is "Technical" or "Governance" which helps
-                                differentiate whether the organization is more focused on research ("Technical") or
-                                policymaking ("Governance").
-                            </p>
-                            <p class="mt-2">
-                                Sometimes an organization will not have any intervention focus: it usually means that
-                                they might touch on any of the topics, and their mission is more general.
-                            </p>
+                            <p>The Intervention Focus category provides more specific information about the areas each organization works on, such as synthetic biology, lab biosafety, or crisis management.</p>
+                            <p class="mt-2">There is a higher-level focus type which is "Technical" or "Governance" which helps differentiate whether the organization is more focused on research ("Technical") or policymaking ("Governance").</p>
+                            <p class="mt-2">Sometimes an organization will not have any intervention focus: it usually means that they might touch on any of the topics, and their mission is more general.</p>
                         </x-faq-item>
                     </div>
                 </div>

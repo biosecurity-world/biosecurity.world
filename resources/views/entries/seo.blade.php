@@ -9,10 +9,7 @@
                 <div class="items-center justify-between gap-6 md:flex">
                     <div>
                         <h2 class="font-display text-ink text-lg font-bold">Explore the biosecurity landscape</h2>
-                        <p class="text-ink-muted mt-1 text-sm">
-                            See where this organization fits within the broader map of biosecurity work around the
-                            world.
-                        </p>
+                        <p class="text-ink-muted mt-1 text-sm">See where this organization fits within the broader map of biosecurity work around the world.</p>
                     </div>
                     <a
                         href="{{ route("welcome", absolute: false) }}"

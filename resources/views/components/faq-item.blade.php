@@ -1,4 +1,4 @@
-@props([
+@props ([
     "title",
 ])
 
@@ -30,7 +30,5 @@
             </svg>
         </div>
     </summary>
-    <div class="text-ink-muted px-4 pb-4">
-        {{ $slot }}
-    </div>
+    <div class="text-ink-muted px-4 pb-4"> {{ $slot }} </div>
 </details>

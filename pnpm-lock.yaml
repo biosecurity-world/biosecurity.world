@@ -23,8 +23,8 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       prettier-plugin-blade:
-        specifier: ^2.1.21
-        version: 2.1.21(prettier@3.9.6)
+        specifier: ^3.2.2
+        version: 3.2.2(prettier-plugin-tailwindcss@0.6.14(prettier@3.9.6))(prettier@3.9.6)
       prettier-plugin-tailwindcss:
         specifier: 0.6.14
         version: 0.6.14(prettier@3.9.6)
@@ -236,6 +236,12 @@ packages:
 
   '@panzoom/panzoom@4.6.2':
     resolution: {integrity: sha512-Zn3B5/hwa6eYIPRSKX0xf2clv8nviTX8AnAU5kU/EugiTDhG41ya2wlBqYrZJYCWQROr/5XkWObZhIkepi89qw==}
+
+  '@prettier/html-tags@2.2.0':
+    resolution: {integrity: sha512-6qLjt8ncestmSfEOeVf/kX5VhkinUsppybvkwn1X7wu+BjQ/GBSZYu7cytxdCvi5BaljCGIAr4rmfL5zVqdgyQ==}
+
+  '@prettier/parse-srcset@3.1.0':
+    resolution: {integrity: sha512-FIRv2rZotO9NP/r66taYqD1zICpPiBbrECqjKV/xqNotqDxF7fLzzUeK+1RSRx9Tenk0DajR/GcRmTJ2qtHaKQ==}
 
   '@rolldown/binding-android-arm64@1.2.4':
     resolution: {integrity: sha512-jHC2cnyKz5xU2fhECtFl8OZ83cYNt13GZQD+0uMJ/X3o+ijmd56okHhTUwxVSHPx1IRVIJEZ1/1pPzeLCU6XKA==}
@@ -874,6 +880,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  html-element-attributes@3.5.0:
+    resolution: {integrity: sha512-rU2BFhp0kQla9sqPBI46C+zbP6PFOtD7z6XNAJ6as+cGecCDXLx0W3aIs6XdPLmBBG/Fy1meRi/n65Exofz4Qw==}
+
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
@@ -1075,11 +1084,18 @@ packages:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier-plugin-blade@2.1.21:
-    resolution: {integrity: sha512-+BPBPvla/Ppr0MVrqMAO+FTwxpXUYo8zhQPIGC7psNuMbB24y84cGrJ4Uc02GHTQN0q8txeG4Y4MxyJWgOujyQ==}
-    engines: {node: '>=12.0.0'}
+  prettier-plugin-blade@3.2.2:
+    resolution: {integrity: sha512-CPAlkLTAnvEZfvmRZ1CgdeePpfhxz/Bggei2lSAYcrsBFBhSZ04Ky0ttL4VB1u2q3iKh411vBi0T/Wx3GHWq/g==}
+    engines: {node: '>=18.0.0'}
     peerDependencies:
-      prettier: '>=3'
+      '@prettier/plugin-php': ^0.24.0
+      prettier: ^3.0.0
+      prettier-plugin-tailwindcss: ^0.7.0 || ^0.8.0
+    peerDependenciesMeta:
+      '@prettier/plugin-php':
+        optional: true
+      prettier-plugin-tailwindcss:
+        optional: true
 
   prettier-plugin-tailwindcss@0.6.14:
     resolution: {integrity: sha512-pi2e/+ZygeIqntN+vC573BcW5Cve8zUB0SSAGxqpB4f96boZF4M3phPVoOFCeypwkpRYdi7+jQ5YJJUwrkGUAg==}
@@ -1398,6 +1414,10 @@ snapshots:
   '@oxc-project/types@0.144.0': {}
 
   '@panzoom/panzoom@4.6.2': {}
+
+  '@prettier/html-tags@2.2.0': {}
+
+  '@prettier/parse-srcset@3.1.0': {}
 
   '@rolldown/binding-android-arm64@1.2.4':
     optional: true
@@ -1969,6 +1989,8 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
+  html-element-attributes@3.5.0: {}
+
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
@@ -2104,9 +2126,14 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier-plugin-blade@2.1.21(prettier@3.9.6):
+  prettier-plugin-blade@3.2.2(prettier-plugin-tailwindcss@0.6.14(prettier@3.9.6))(prettier@3.9.6):
     dependencies:
+      '@prettier/html-tags': 2.2.0
+      '@prettier/parse-srcset': 3.1.0
+      html-element-attributes: 3.5.0
       prettier: 3.9.6
+    optionalDependencies:
+      prettier-plugin-tailwindcss: 0.6.14(prettier@3.9.6)
 
   prettier-plugin-tailwindcss@0.6.14(prettier@3.9.6):
     dependencies:

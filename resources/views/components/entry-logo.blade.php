@@ -1,6 +1,6 @@
-@use(App\Services\NotionData\Enums\OrganizationType)
+@use (App\Services\NotionData\Enums\OrganizationType)
 
-@props([
+@props ([
     "logo",
     "organizationType" => null,
 ])

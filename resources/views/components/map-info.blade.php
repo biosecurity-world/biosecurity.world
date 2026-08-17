@@ -1,4 +1,4 @@
-@props([
+@props ([
     // \Carbon\CarbonInterface|null
     "lastEditedAt" => null,
     // Optional extra classes for the wrapper
@@ -11,12 +11,8 @@
     </div>
 
     @if ($lastEditedAt)
-        <p class="mt-1 text-gray-700">
-            Last updated on
-            <time datetime="{{ $lastEditedAt->toIso8601String() }}" title="{{ $lastEditedAt->diffForHumans() }}">
-                {{ $lastEditedAt->format("F j, Y") }}
-            </time>
-            .
-        </p>
+        <p class="mt-1 text-gray-700">Last updated on
+        <time datetime="{{ $lastEditedAt->toIso8601String() }}" title="{{ $lastEditedAt->diffForHumans() }}"> {{ $lastEditedAt->format("F j, Y") }} </time>
+        .</p>
     @endif
 </div>
