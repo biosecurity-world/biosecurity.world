@@ -6,7 +6,7 @@
         "blade-ui-kit/blade-icons": "^1.8",
         "felixdorn/php-color": "^1.0",
         "laravel/framework": "^12.22",
-        "laravel/tinker": "^2.10",
+        "laravel/tinker": "^3",
         "mariosimao/notion-sdk-php": "^1.14"
     },
     "require-dev": {
