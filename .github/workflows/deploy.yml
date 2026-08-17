@@ -108,6 +108,15 @@ jobs:
           mkdir -p dist/fonts
           cp public/fonts/*.woff2 dist/fonts/
 
+      - name: Copy robots.txt into dist
+        run: cp public/robots.txt dist/robots.txt
+
+      - name: Generate sitemap
+        run: nix develop --ignore-environment --command php artisan app:generate-sitemap dist/sitemap.xml
+        env:
+          NOTION_DATABASE: ${{ vars.NOTION_DATABASE }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+
       - name: Deploy website
         run: nix develop --ignore-environment --keep CLOUDFLARE_ACCOUNT_ID --keep CLOUDFLARE_API_TOKEN --keep BRANCH_NAME --command wrangler pages deploy ./dist --project-name biosecurity-world --branch ${BRANCH_NAME}
         env:
