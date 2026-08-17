@@ -4,7 +4,11 @@
     /** @var \App\Services\NotionData\Tree\Tree $tree */
 @endphp
 
-<x-layouts.default class="bg-paper text-ink w-full antialiased" title="Understand the biosecurity landscape.">
+<x-layouts.default
+    class="bg-paper text-ink w-full antialiased"
+    title="Understand the biosecurity landscape."
+    canonical="/"
+>
     <x-slot:head>
         <script>
             {{-- format-ignore-start --}}

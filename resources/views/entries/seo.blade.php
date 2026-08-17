@@ -1,4 +1,10 @@
-<x-layouts.default :title="$entry->label" class="bg-paper text-ink">
+<x-layouts.default
+    :title="$entry->label"
+    :description="$entry->description->toString()"
+    :canonical="route('entries.show', ['id' => $entry->id, 'slug' => $entry->slug()], absolute: false)"
+    :image="$entry->logo->url"
+    class="bg-paper text-ink"
+>
     <header class="bg-paper/80 sticky top-0 z-40 backdrop-blur">
         <x-navbar class="mt-4" />
     </header>
