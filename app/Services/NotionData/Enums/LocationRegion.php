@@ -53,6 +53,7 @@ enum LocationRegion: string
                 'Italy', 'Madrid', 'Munich', 'Netherlands', 'Norway',
                 'Oslo', 'Paris', 'Rome', 'Rotterdam', 'Spain',
                 'Stockholm', 'Sweden', 'Switzerland', 'Trieste', 'Vienna', 'Zug',
+                'Zurich',
             ],
             self::EastAsiaPacific => [
                 'Australia', 'Beijing', 'Canberra', 'China', 'Singapore',

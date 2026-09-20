@@ -73,6 +73,7 @@ class LocationHint
         'Bern' => 'Switzerland',
         'Geneva' => 'Switzerland',
         'Zug' => 'Switzerland',
+        'Zurich' => 'Switzerland',
         // East Asia & Pacific
         'Beijing' => 'China',
         'Canberra' => 'Australia',
