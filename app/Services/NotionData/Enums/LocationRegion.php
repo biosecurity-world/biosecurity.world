@@ -44,7 +44,7 @@ enum LocationRegion: string
                 'Washington DC',
             ],
             self::UnitedKingdom => [
-                'Cambridge', 'Essex', 'Liverpool', 'London', 'Oxford',
+                'Cambridge', 'Essex', 'Liverpool', 'London', 'Oxford', 'Sheffield',
             ],
             self::Europe => [
                 'Amsterdam', 'Austria', 'Barcelona', 'Basel', 'Belgium',
