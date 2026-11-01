@@ -35,7 +35,7 @@ enum LocationRegion: string
     {
         return match ($this) {
             self::USA => [
-                'Albuquerque NM', 'Arlington VA', 'Atlanta GA', 'Baltimore',
+                'Albuquerque NM', 'Arlington VA', 'Atlanta GA', 'Baltimore', 'Berkeley CA',
                 'Bethesda MD', 'Boston MA', 'Boulder CO', 'Broomfield CO', 'Cambridge MA',
                 'Cavendish VT', 'Chicago IL', 'College Station', 'Gaithersburg MD',
                 'Lexington MA', 'Livermore CA', 'Los Alamos NM', 'Minneapolis MN',
